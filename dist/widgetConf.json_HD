@@ -1,0 +1,185 @@
+{
+  "name": "CameraGISAPI",
+  "id": "CameraGISAPI",
+  "thumbnailURL": "",
+  "configs": {
+    "pubsub": {
+      "types": [
+        ""
+      ]
+    },
+    "providerConfig": {
+      "mapConfig": {
+        "configs": {
+          "type": "RDBMSBatchDataProvider",
+          "config": {
+            "datasourceName": "WSO2_DASHBOARD_DB",
+            "queryData": {
+              "queryFunction": "this.getQuery = function (username){return \"select id, vms_cam_id, name, address, `longitude`, `latitude`, url, username, password, 0 as LastIncidentTime, null as Events, type, null as Broken, 1 as CameraStatus, function_status, ai_status, status, category, level1, level2 from aicam\";}",
+              "customWidgetInputs": [],
+              "systemWidgetInputs": [
+                {
+                  "name": "username",
+                  "defaultValue": "admin"
+                }
+              ],
+              "query": "select id, vms_cam_id, name, address, `longitude`, `latitude`, url, username, password, 0 as LastIncidentTime, null as Events, type, null as Broken, 1 as CameraStatus, function_status, ai_status, status, category, level1, level2 from aicam"
+            },
+            "tableName": "aicam",
+            "incrementalColumn": "Id",
+            "timeColumns": "",
+            "publishingInterval": 600,
+            "purgingInterval": 600,
+
+            "publishingLimit": 1500,
+            "purgingLimit": 30,
+            "isPurgingEnable": false,
+            "columnMaps": {
+              "Id": "id",
+              "vms_cam_id": "vmsCamId",
+              "Name": "name",
+              "Address": "address",
+              "Long": "longitude",
+              "Lat": "latitude",
+              "Url": "url",
+              "Username": "username",
+              "Password": "password",
+              "LastIncidentTime": "lastIncidentTime",
+              "Events": "events",
+              "CameraType": "cameraType",
+              "Broken": "broken",
+              "CameraStatus": "cameraStatus",
+              "function_status": "functionStatus",
+              "ai_status": "aiStatus",
+              "status": "status",
+              "category": "layer",
+              "level1": "level1",
+              "level2": "level2"
+            }
+          },
+          "numberCamera": 3,
+          "latCenter": 20.932256,
+          "lngCenter": 106.3357423,
+          "northeastLat": 20.938033,
+          "northeastLng": 106.4671359,
+          "southwestLat": 20.948634,
+          "southwestLng": 108.0591179,
+          "zoomDefault": 14,
+          "defaultSearch": "",
+          "zoomMin": 2,
+          "zoomMax": 19,
+          "zoomScaleValues": [0.0018, 0.002, 0.004, 0.008, 0.016, 0.032, 0.064, 0.112, 0.224, 1.15, 2.0, 3.584],
+          "zoomScaleWidthValues":[],
+          "zoomScaleHeightValues":[]
+        }
+      },
+      "eventConfig": {
+        "configs": {
+          "type": "RDBMSBatchDataProvider",
+          "queryConfig": "CameraId = 1",
+          "config": {
+            "datasourceName": "WSO2_DASHBOARD_DB",
+            "queryData": {
+              "queryFunction": "this.getQuery = function (username){return \"SELECT Id, vms_cam_id, EventName, EventType, UNIX_TIMESTAMP(StartDate) as StartDate, UNIX_TIMESTAMP(EndTime) as EndTime, ObjectId, ImagePath, XYWH, ObjectName, ObjectNote FROM camera_sukien WHERE (StartDate!=EndTime or EventType=100) and StartDate >= now() - INTERVAL 30 DAY\";}",
+              "customWidgetInputs": [],
+              "systemWidgetInputs": [
+                {
+                  "name": "username",
+                  "defaultValue": "admin"
+                }
+              ],
+              "query": "SELECT Id, vms_cam_id, EventName, EventType, UNIX_TIMESTAMP(StartDate) as StartDate, UNIX_TIMESTAMP(EndTime) as EndTime, ObjectId, ImagePath, XYWH, ObjectName, ObjectNote FROM camera_sukien WHERE (StartDate!=EndTime or EventType=100) and StartDate >= now() - INTERVAL 30 DAY"
+            },
+            "tableName": "camera_sukien",
+            "incrementalColumn": "StartDate",
+            "timeColumns": "",
+            "publishingInterval": 10,
+            "purgingInterval": 60,
+            "publishingLimit": 300,
+            "purgingLimit": 30,
+            "isPurgingEnable": false,
+            "columnEvents": {
+              "Id": "id",
+              "vms_cam_id": "vmsCamId",
+              "EventName": "eventName",
+              "EventType": "eventType",
+              "StartDate": "startDate",
+              "EndTime": "endDate",
+              "ObjectId": "objectId",
+              "ImagePath": "imagePath",
+              "XYWH": "XYWH",
+              "ObjectName": "objectName",
+              "ObjectNote": "objectNote"
+            }
+          },
+          "imageServerPath": "http://113.160.119.22:8080/face-image/",
+          "turnOnCameraApi": "https://vmshaiduong.hcdt.vn:3443/vms/api/monitors/priority/{id}?Function=Monitor",
+          "getLiveCameraApi": "https://vmshaiduong.hcdt.vn:3443/vms/api/monitors/{id}?type=mjpeg&scale=100&width=1920&height=1080"
+        }
+      },
+      "apiConfig":{
+        "vms_protocol": "https",
+        "vms_domain": "vmshaiduong.hcdt.vn",
+        "vms_port": 3443,
+        "vms_username_default": null,
+        "vms_password_default": null,
+        "vms_login_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/host/login",
+        "vms_update_token_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/host/login",
+        "vms_monitors_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/monitors?mode=compact",
+        "vms_groups_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/groups",
+        "vms_monitors_groups_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/monitors_groups",
+        "vms_users_groups_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/users_groups",
+        "cameraUpdateIntervalValue": 300000,
+        "cms_protocol": "https",
+        "cms_domain": "vmshaiduong.hcdt.vn",
+        "cms_port": 3444,
+        "cms_camera_data_api_template": "{cms_protocol}://{cms_domain}:{cms_port}/cms/api/CameraInGroup/GetTreeData",
+        "cms_profile_api_template": "{cms_protocol}://{cms_domain}:{cms_port}/cms/api/Profile/AddIfNotExist",
+        "cms_profile_id": null,
+        "vms_token_api": null,
+        "va_protocol": "https",
+        "va_domain": "aihaiduong.hcdt.vn",
+        "va_port": 2443,
+        "va_token_api": "ZN9X+7W4ZOw60NyxV3UKCA==",
+        "va_vms_id": null,
+        "va_get_vms_api_template": "{va_protocol}://{va_domain}:{va_port}/api/vms",
+        "va_events_api_template": "{va_protocol}://{va_domain}:{va_port}/api/event-newest-vms",
+        "va_get_cameras_api_template": "{va_protocol}://{va_domain}:{va_port}/api/camera",
+        "va_get_event_image_template": "{va_protocol}://{va_domain}:{va_port}/api/event-image/{event_id}/snapshot.jpg",
+        "va_get_event_video_template": "{va_protocol}://{va_domain}:{va_port}/api/event-image/{event_id}/video.mp4",
+        "max_last_vms_event": 20,
+        "ai_cam_view_filter": "all",
+        "ai_cam_event_view_filter": "alert",
+        "eventUpdateIntervalValue": 60000,
+        "va_cameraUpdateIntervalValue": 600000,
+        "aievent_newest_get_type": "time",
+        "aievent_newest_minute_value": 30,
+        "aievent_get_day_mode": "start",
+        "va_event_view": {
+          "default": "Có sự kiện",
+          "fire": "Cháy nổ",
+          "access": "Xâm nhập",
+          "face": "Nhận diện",
+          "motion": "Chuyển động",
+          "administration": "Hành chính công"
+        },
+        "va_event_type_map": {
+          "default": 1,
+          "fire": 4,
+          "access": 2,
+          "face": 2,
+          "motion": 1
+        }
+      },
+      "viewConfig": {
+        "treeConfig": {
+          "alwaysShowRootNode": false,
+          "ignoreGroupOnlyHaveOneChild": false,
+          "ignoreCameraNotInGroup": false,
+          "ignoreGroupInvalid": false,
+          "addCameraChildInTree": false
+        }
+      }
+    }
+  }
+}

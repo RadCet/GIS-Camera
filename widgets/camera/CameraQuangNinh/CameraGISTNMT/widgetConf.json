@@ -1,0 +1,119 @@
+{
+  "name": "CameraGISTNMT",
+  "id": "CameraGISTNMT",
+  "thumbnailURL": "",
+  "configs": {
+    "pubsub": {
+      "types": [
+        ""
+      ]
+    },
+    "providerConfig": {
+      "mapConfig": {
+        "configs": {
+          "type": "RDBMSBatchDataProvider",
+          "config": {
+            "datasourceName": "WSO2_DASHBOARD_DB",
+            "queryData": {
+              "queryFunction": "this.getQuery = function (username){return \"select id, vms_cam_id, name, address, `longitude`, `latitude`, url, username, password, 0 as LastIncidentTime, null as Events, type, null as Broken, 1 as CameraStatus, function_status, ai_status, status, category, level1, level2 from aicam_quangninh.aicam where category = 'Tài Nguyên Môi Trường\";}",
+              "customWidgetInputs": [],
+              "systemWidgetInputs": [
+                {
+                  "name": "username",
+                  "defaultValue": "admin"
+                }
+              ],
+              "query": "select id, vms_cam_id, name, address, `longitude`, `latitude`, url, username, password, 0 as LastIncidentTime, null as Events, type, null as Broken, 1 as CameraStatus, function_status, ai_status, status, category, level1, level2 from aicam_quangninh.aicam where category = 'Tài Nguyên Môi Trường"
+            },
+            "tableName": "aicam",
+            "incrementalColumn": "Id",
+            "timeColumns": "",
+            "publishingInterval": 600,
+            "purgingInterval": 600,
+
+            "publishingLimit": 1500,
+            "purgingLimit": 30,
+            "isPurgingEnable": false,
+            "columnMaps": {
+              "id": "id",
+              "vms_cam_id": "vmsCamId",
+              "name": "name",
+              "address": "address",
+              "longitude": "longitude",
+              "latitude": "latitude",
+              "url": "url",
+              "username": "username",
+              "password": "password",
+              "LastIncidentTime": "lastIncidentTime",
+              "Events": "events",
+              "type": "cameraType",
+              "Broken": "broken",
+              "CameraStatus": "cameraStatus",
+              "function_status": "functionStatus",
+              "ai_status": "aiStatus",
+              "status": "status",
+              "category": "layer",
+              "level1": "level1",
+              "level2": "level2"
+            }
+          },
+          "numberCamera": 3,
+          "latCenter": 20.952256,
+          "lngCenter": 107.1257423,
+          "northeastLat": 20.738033,
+          "northeastLng": 106.4671359,
+          "southwestLat": 21.648634,
+          "southwestLng": 108.0591179,
+          "zoomDefault": 10,
+          "defaultSearch": "Quang Ninh"
+        }
+      },
+      "eventConfig": {
+        "configs": {
+          "type": "RDBMSBatchDataProvider",
+          "queryConfig": "CameraId = 1",
+          "config": {
+            "datasourceName": "WSO2_DASHBOARD_DB",
+            "queryData": {
+              "queryFunction": "this.getQuery = function (username){return \"SELECT Id, vms_cam_id, EventName, EventType, UNIX_TIMESTAMP(StartDate) as StartDate, UNIX_TIMESTAMP(EndTime) as EndTime, ObjectId, ImagePath, XYWH, ObjectName, ObjectNote FROM camera_sukien WHERE (StartDate!=EndTime or EventType=100) and StartDate >= now() - INTERVAL 30 DAY\";}",
+              "customWidgetInputs": [],
+              "systemWidgetInputs": [
+                {
+                  "name": "username",
+                  "defaultValue": "admin"
+                }
+              ],
+              "query": "SELECT Id, vms_cam_id, EventName, EventType, UNIX_TIMESTAMP(StartDate) as StartDate, UNIX_TIMESTAMP(EndTime) as EndTime, ObjectId, ImagePath, XYWH, ObjectName, ObjectNote FROM camera_sukien WHERE (StartDate!=EndTime or EventType=100) and StartDate >= now() - INTERVAL 30 DAY"
+            },
+            "tableName": "camera_sukien",
+            "incrementalColumn": "StartDate",
+            "timeColumns": "",
+            "publishingInterval": 10,
+            "purgingInterval": 60,
+            "publishingLimit": 300,
+            "purgingLimit": 30,
+            "isPurgingEnable": false,
+            "columnEvents": {
+              "Id": "id",
+              "vms_cam_id": "vmsCamId",
+              "EventName": "eventName",
+              "EventType": "eventType",
+              "StartDate": "startDate",
+              "EndTime": "endDate",
+              "ObjectId": "objectId",
+              "ImagePath": "imagePath",
+              "XYWH": "XYWH",
+              "ObjectName": "objectName",
+              "ObjectNote": "objectNote"
+            }
+          },
+          "imageServerPath": "http://113.160.119.22:8080/face-image/",
+          "getLiveCameraApi": "https://vmsqn.hcdt.vn:8443/Camera/index.php/video/monitor?token=NboZC8j8G6aNTY4uKQHd7Ci4z&mode=1&id={id}",
+          "getVideoEventApi": "https://vmsqn.hcdt.vn:8443/Camera/index.php/video/time?time={time}&id={id}",
+          "turnOnCameraApi": "https://vmsqn.hcdt.vn:8443/Camera/index.php/service/servicefunction?token=NboZC8j8G6aNTY4uKQHd7Ci4z&mode=1&function=on&mode=123&id={id}",
+          "turnOnCameraMoninorApi": "https://vmsqn.hcdt.vn:8443/Camera/index.php/service/servicefunction?token=NboZC8j8G6aNTY4uKQHd7Ci4z&mode=1&function=on&mode=124&id={id}"
+        }
+      }
+    }
+  }
+}

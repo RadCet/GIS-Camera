@@ -1,0 +1,58 @@
+{
+  "name": "CameraMonitoringYT",
+  "id": "CameraMonitoringYT",
+  "thumbnailURL": "",
+  "configs": {
+    "pubsub": {
+      "types": [
+        ""
+      ]
+    },
+    "providerConfig": {
+      "configs": {
+        "type": "RDBMSBatchDataProvider",
+        "config": {
+          "datasourceName": "WSO2_DASHBOARD_DB",
+          "queryData": {
+            "queryFunction": "this.getQuery = function (username){return \"select Id, vms_cam_id, Name, Address, function_status, ai_status, status, category, level1, level2 from aicam_quangninh.aicam where category = 'Y Tế'\";}",
+            "customWidgetInputs": [],
+            "systemWidgetInputs": [
+              {
+                "name": "username",
+                "defaultValue": "admin"
+              }
+            ],
+            "query": "select Id, vms_cam_id, Name, Address, function_status, ai_status, status, category, level1, level2 from aicam_quangninh.aicam where category = 'Y Tế'"
+          },
+          "tableName": "camera",
+          "incrementalColumn": "Id",
+          "timeColumns": "",
+          "publishingInterval": 6360,
+          "purgingInterval": 6360,
+
+          "publishingLimit": 1500,
+          "purgingLimit": 30,
+          "isPurgingEnable": false,
+          "columnMaps": {
+            "Id": "id",
+            "vms_cam_id": "vmsCamId",
+            "Name": "name",
+            "Address": "address",
+            "function_status": "functionStatus",
+            "ai_status": "aiStatus",
+            "status": "status",
+            "category": "layer",
+            "level1": "level1",
+            "level2": "level2"
+          }
+        },
+        "isMobile": false,
+        "numberCamera": 3,
+        "refreshInterval": 60,
+        "getLiveCameraApi": "https://vmsqn.hcdt.vn:8443/Camera/index.php/video/monitor?token=NboZC8j8G6aNTY4uKQHd7Ci4z&mode=1&id={id}",
+        "turnOnCameraApi": "https://vmsqn.hcdt.vn:8443/Camera/index.php/service/servicefunction?token=NboZC8j8G6aNTY4uKQHd7Ci4z&mode=1&function=on&mode=123&id={id}",
+        "turnOnCameraMoninorApi": "https://vmsqn.hcdt.vn:8443/Camera/index.php/service/servicefunction?token=NboZC8j8G6aNTY4uKQHd7Ci4z&mode=1&function=on&mode=124&id={id}"
+      }
+    }
+  }
+}

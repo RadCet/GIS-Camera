@@ -1,0 +1,117 @@
+/*******Popup tren ban do*******/
+/*MiniPopup*/
+.MiniPopup
+{
+    color: #333333;
+    line-height: 18px;
+    float: left;
+    width: 250px;
+}
+
+.MiniPopup p
+{
+    line-height: 15px;
+    float: left;
+    margin: 7px 0 0;
+    padding: 0 0 5px;
+    font-size: 12px;
+}
+
+.MiniPopup .Title
+{
+    font-size: 17px;
+    font-weight: bold;
+    float: left;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+}
+
+.MiniPopup .Content .address
+{
+    display: block;
+    margin-bottom: 6px;
+    background: url(./../resources/events/address.png) no-repeat 3px 1px;
+    padding-left: 18px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+}
+
+.MiniPopup .Content .phone
+{
+    background: url(./../resources/events/phone.png) no-repeat 3px 1px;
+    display: inline-block;
+    margin-bottom: 6px;
+    padding-left: 18px;
+}
+
+.MiniPopup .Content .event
+{
+    display: block;
+    margin-bottom: 1px;
+    margin-left: 10px;
+    background: url(./../resources/events/event.png) no-repeat 3px 1px;
+    padding-left: 18px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+}
+
+.MiniPopup .Content .username
+{
+    display: block;
+    margin-bottom: 6px;
+    /*background: url(../../resources/icons/username.png) no-repeat 3px 1px;*/
+    padding-left: 18px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+}
+
+.MiniPopup .Content .password
+{
+    display: block;
+    margin-bottom: 6px;
+    /*background: url(../../resources/icons/password.png) no-repeat 3px 1px;*/
+    padding-left: 18px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+}
+
+
+.MiniPopup .Content a.website
+{
+    background: url(./../resources/events/homepage.png) no-repeat 3px 1px;
+    display: block;
+    margin-bottom: 1px;
+    padding-left: 18px;
+    color: #0E774A;
+}
+
+#styleScroll::-webkit-scrollbar-track
+{
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+    border-radius: 10px;
+    background-color: #F5F5F5;
+}
+
+#styleScroll::-webkit-scrollbar
+{
+    width: 10px;
+    border-radius: 10px;
+    background-color: #F5F5F5;
+}
+
+#styleScroll::-webkit-scrollbar-thumb
+{
+    border-radius: 10px;
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+    background-color: #555;
+}
