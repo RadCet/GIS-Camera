@@ -446,6 +446,11 @@ export default class GeoChartCamera extends Widget {
                 camera => camera.id == clickedMarker.IDCAMERA
               )[0];
 
+              result.mapPoint.latitude = marker.latitude;
+              result.mapPoint.longitude = marker.longitude;
+
+              document.getElementById("arcgisMap").style.cursor = "pointer";
+
               view.popup.open({
                 // Set the popup's title to the coordinates of the location
                 title: marker.name,
@@ -457,6 +462,7 @@ export default class GeoChartCamera extends Widget {
               });
             });
           } else {
+            document.getElementById("arcgisMap").style.cursor = "default";
             view.popup.close();
           }
         });
@@ -1484,7 +1490,6 @@ export default class GeoChartCamera extends Widget {
   exportData() {
     const { currentLayer, cameraData, treeData } = this.state;
 
-    console.log(cameraData.length);
     CameraExportHelper.exportData(currentLayer, cameraData, treeData);
   }
 
@@ -1753,7 +1758,12 @@ export default class GeoChartCamera extends Widget {
               </div>
             </div>
             <div id={"vbdContainer"} style={{ display: "none" }} />
-            <div className="webmap" style={vbdStyle} ref={this.mapRef} />
+            <div
+              id={"arcgisMap"}
+              className="webmap"
+              style={vbdStyle}
+              ref={this.mapRef}
+            />
 
             {!this.state.isMobile && liveCamera.length > 0 && (
               <div

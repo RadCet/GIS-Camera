@@ -248,8 +248,10 @@ export default class CameraExportHelper {
       const cameraCategory = treeData.children.filter(
         item => item.name === nameCategory
       );
-      
-      if (nameCategory === "UBND Tỉnh") {
+
+      // console.log(cameraCategory);
+
+      if (cameraCategory[0].children.length <= 0) {
         wsCategory["A" + indexRowCategory].v = indexSTTCategory;
         indexSTTCategory++;
         wsCategory["B" + indexRowCategory].v = cameraCategory[0].name;

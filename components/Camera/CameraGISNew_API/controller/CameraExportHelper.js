@@ -249,7 +249,7 @@ export default class CameraExportHelper {
         item => item.name === nameCategory
       );
 
-      console.log(cameraCategory);
+      // console.log(cameraCategory);
 
       if (cameraCategory[0].children.length <= 0) {
         wsCategory["A" + indexRowCategory].v = indexSTTCategory;
