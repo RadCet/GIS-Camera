@@ -60,8 +60,9 @@ const cameraIcons = [
 ];
 
 let imageMarker = [];
-let dataCameraAI = [];
-let dataCameraG = [];
+let dataCameraAI3 = [];
+let dataCamerAI4 = [];
+let dataCamerAI5 = [];
 let dataCameraLevel0 = [];
 let dataCameraLevel1 = [];
 let dataCameraLevel2 = [];
@@ -69,8 +70,9 @@ let dataCamera = [
   dataCameraLevel0,
   dataCameraLevel1,
   dataCameraLevel2,
-  dataCameraAI,
-  dataCameraG
+  dataCameraAI3,
+  dataCamerAI4,
+  dataCamerAI5
 ]; // include IDCAMERA,LAT,LONG,ObjectID
 let listDisplayCamera = []; // same cameraData
 
@@ -1121,7 +1123,6 @@ export default class GeoChartCamera extends Widget {
     if (incidentMap == null) {
       return;
     }
-
     // Remove cac marker hien tai
     markers.map(marker => {
       incidentMap.removeMarker(marker);
@@ -1250,11 +1251,13 @@ export default class GeoChartCamera extends Widget {
     });
 
     //delete marker before adding
-    for (let i = 0; i < dataCamera.length; i++) {
-      if (imageMarker[i] && dataCamera[i].length > 0) {
+    for (let i = 0; i < imageMarker.length; i++) {
+      if (imageMarker[i]) {
         this.removeFeatures(imageMarker[i]);
       }
     }
+
+    console.log(displayCamera);
 
     //reset data before update
     for (let index = 0; index < dataCamera.length; index++) {
@@ -1270,19 +1273,23 @@ export default class GeoChartCamera extends Widget {
           LONGITUDE: camera.longitude
         };
 
-        if (camera.ailevel != null) {
+        if (camera.ailevel) {
+          if (camera.ailevel == 4) {
+            console.log(camera);
+          }
           dataCamera[camera.ailevel].push(objectCamera);
-        } else if (camera.glevel != null) {
+        } else if (camera.glevel) {
           dataCamera[camera.glevel].push(objectCamera);
         } else {
-          if (camera.level != null) {
+          if (camera.level) {
             dataCamera[camera.level].push(objectCamera);
           }
         }
       }
     });
     let map = this.state.map;
-    if (map) {
+    console.log(dataCamera[4]);
+    if (map && this.state.showLeftMenu) {
       for (let i = 0; i < dataCamera.length; i++) {
         if (imageMarker[i] && dataCamera[i].length > 0) {
           this.addFeatures(imageMarker[i], dataCamera[i]);
@@ -1595,7 +1602,7 @@ export default class GeoChartCamera extends Widget {
             }
           })
           .catch(function(error) {
-            console.log(error);
+            // console.log(error);
           });
       });
     }
@@ -1695,7 +1702,7 @@ export default class GeoChartCamera extends Widget {
       ? {
           position: "absolute",
           top: 0,
-          right: 202,
+          right: 252,
           zIndex: 100,
           color: "black"
         }
@@ -1738,24 +1745,6 @@ export default class GeoChartCamera extends Widget {
                 }}
                 onClick={this.resetMap}
               ></Button>
-              <div
-                style={{
-                  display: "inline-block",
-                  position: "absolute",
-                  top: "0",
-                  display: "none"
-                }}
-              >
-                <SearchBox
-                  defaultSearch={this.defaultSearch}
-                  isMobile={isMobile}
-                  handleFitBounds={this.handleFitBounds}
-                  northeastLat={this.northeastLat}
-                  northeastLng={this.northeastLng}
-                  southwestLat={this.southwestLat}
-                  southwestLng={this.southwestLng}
-                />
-              </div>
             </div>
             <div id={"vbdContainer"} style={{ display: "none" }} />
             <div
@@ -1792,7 +1781,7 @@ export default class GeoChartCamera extends Widget {
           <img
             src={nextIcon}
             // style={!isMobile ? showIconNext : { display: "none" }}
-            style={{ display: "none" }}
+            style={showIconNext}
             onClick={() => {
               this.setState({
                 showLeftMenu: !showLeftMenu
