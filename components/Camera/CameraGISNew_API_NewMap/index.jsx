@@ -1120,15 +1120,17 @@ export default class GeoChartCamera extends Widget {
   }
 
   addMarkerToMap() {
-    if (incidentMap == null) {
-      return;
+    // delete marker before adding
+    for (let i = 0; i < dataCamera.length; i++) {
+      if (imageMarker[i] && dataCamera[i].length > 0) {
+        this.removeFeatures(imageMarker[i]);
+      }
     }
-    // Remove cac marker hien tai
-    markers.map(marker => {
-      incidentMap.removeMarker(marker);
-    });
 
-    markers = [];
+    //reset data before update
+    for (let index = 0; index < dataCamera.length; index++) {
+      dataCamera[index] = [];
+    }
 
     let displayCamera = this.getCameraDataByLayer(this.state.currentLayer);
     listDisplayCamera = displayCamera;
@@ -1161,108 +1163,6 @@ export default class GeoChartCamera extends Widget {
           (currentFilter == StatisData.SOCIAL && item.glevel === 6))
       );
     });
-    displayCamera.map(marker => {
-      const markerLatLng = new vbd.LatLng(marker.latitude, marker.longitude);
-      const markerIcon =
-        marker.ailevel != null
-          ? cameraIcons[marker.ailevel]
-          : marker.glevel != null
-          ? cameraIcons[marker.glevel]
-          : cameraIcons[marker.level];
-      const vIcon = new vbd.Icon({
-        url: markerIcon,
-        size: new vbd.Size(32, 32)
-      });
-      const vMarker = new vbd.Marker({
-        position: markerLatLng,
-        icon: vIcon
-      });
-      vMarker.setMap(incidentMap);
-
-      var contentShow = renderInfoWindowContent({
-        id: marker.id,
-        vmsCamId: marker.vmsCamId,
-        title: marker.name,
-        address: marker.address,
-        description: marker.name,
-        events: marker.events,
-        username: marker.username,
-        password: marker.password,
-        numberChilds: marker.numberChilds
-      });
-
-      var vbdInfowindow = new vbd.InfoWindow({ content: contentShow });
-
-      var that = this;
-
-      vbd.event.addListener(vMarker, "click", function(event) {
-        that.handleClickCamera(marker);
-      });
-
-      vbd.event.addListener(vMarker, "mouseover", function(param) {
-        if (infoWindows) {
-          infoWindows.map(iw => {
-            iw.close();
-          });
-        }
-        infoWindows = [];
-        this.timer = setTimeout(function() {
-          vbdInfowindow.open(incidentMap, vMarker);
-          infoWindows.push(vbdInfowindow);
-
-          // Thêm sự kiện khi click vào một event
-          $(".aEvent").click(function(event) {
-            var title = "";
-            if ($(event.target).data("camname"))
-              title += $(event.target).data("camname");
-            if ($(event.target).data("type"))
-              title += " - " + $(event.target).data("type");
-            if ($(event.target).data("time"))
-              title += " - " + $(event.target).data("time");
-
-            const eventID = $(event.target).data("eventid");
-            const clusterdataid = $(event.target).data("clusterdataid");
-
-            let isSupportVideo = browser() !== "safari";
-            let apiUrl = isSupportVideo
-              ? that.cameraVAController.getEventVideoLink(
-                  eventID,
-                  clusterdataid
-                )
-              : that.cameraVAController.getEventImageLink(
-                  eventID,
-                  clusterdataid
-                );
-            that.setState({
-              videoEventSrc: apiUrl,
-              videoEventTitle: title,
-              videoEventDataType: isSupportVideo ? "video" : "image",
-              videoEventVisible: true
-            });
-          });
-        }, 500);
-      });
-
-      vbd.event.addListener(vMarker, "mouseout", function() {
-        clearTimeout(this.timer);
-      });
-
-      markers.push(vMarker);
-    });
-
-    //delete marker before adding
-    for (let i = 0; i < imageMarker.length; i++) {
-      if (imageMarker[i]) {
-        this.removeFeatures(imageMarker[i]);
-      }
-    }
-
-    console.log(displayCamera);
-
-    //reset data before update
-    for (let index = 0; index < dataCamera.length; index++) {
-      dataCamera[index] = [];
-    }
 
     displayCamera.map(camera => {
       if (camera.latitude && camera.longitude) {
@@ -1273,28 +1173,30 @@ export default class GeoChartCamera extends Widget {
           LONGITUDE: camera.longitude
         };
 
-        if (camera.ailevel) {
-          if (camera.ailevel == 4) {
-            console.log(camera);
-          }
+        if (camera.ailevel != null) {
           dataCamera[camera.ailevel].push(objectCamera);
-        } else if (camera.glevel) {
-          dataCamera[camera.glevel].push(objectCamera);
         } else {
-          if (camera.level) {
-            dataCamera[camera.level].push(objectCamera);
-          }
+          dataCamera[camera.level].push(objectCamera);
         }
       }
     });
-    let map = this.state.map;
-    console.log(dataCamera[4]);
-    if (map && this.state.showLeftMenu) {
+
+    if (this.state.map) {
       for (let i = 0; i < dataCamera.length; i++) {
         if (imageMarker[i] && dataCamera[i].length > 0) {
           this.addFeatures(imageMarker[i], dataCamera[i]);
         }
       }
+    } else {
+      setTimeout(() => {
+        if (this.state.map) {
+          for (let i = 0; i < dataCamera.length; i++) {
+            if (imageMarker[i] && dataCamera[i].length > 0) {
+              this.addFeatures(imageMarker[i], dataCamera[i]);
+            }
+          }
+        }
+      }, 5000);
     }
   }
 
@@ -1602,7 +1504,7 @@ export default class GeoChartCamera extends Widget {
             }
           })
           .catch(function(error) {
-            // console.log(error);
+            console.log(error);
           });
       });
     }
@@ -1781,7 +1683,7 @@ export default class GeoChartCamera extends Widget {
           <img
             src={nextIcon}
             // style={!isMobile ? showIconNext : { display: "none" }}
-            style={showIconNext}
+            style={{ display: "none" }}
             onClick={() => {
               this.setState({
                 showLeftMenu: !showLeftMenu

@@ -88,7 +88,7 @@ export default class CameraExportHelper {
     const _camAI24hEvent = cameraDataByLayer.filter(item => item.ailevel === 5)
       .length;
     const _camAI = _camAINoEvent + _camAI5pEvent + _camAI24hEvent;
-    const _camAll = _camBroken + _camUnbroken + _camAI;
+    const _camAll = _camBroken + _camUnbroken;
 
     var XLSX = require("xlsx");
     var dataXLSX = [];
