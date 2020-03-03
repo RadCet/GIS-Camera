@@ -902,10 +902,28 @@ export default class GeoChartCamera extends Widget {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    this.addMarkerToMap();
+    // if (
+    //   prevState.cameraData != this.state.cameraData ||
+    //   prevState.eventDetectData != this.state.eventDetectData ||
+    //   prevState.currentFilter != this.state.currentFilter ||
+    //   prevState.treeData != this.state.treeData ||
+    //   prevState.map != this.state.map ||
+    //   prevState.view != this.state.view ||
+    //   prevState.cameraDataByLayer != this.state.cameraDataByLayer ||
+    //   prevState.updateCameraData != this.state.updateCameraData
+    // ) {
+
+    // }
+    // console.log(this.state);
+
+    if(prevState.liveCamera == this.state.liveCamera){
+      this.addMarkerToMap();
+    }
+
     const prevLayer = prevState.currentLayer;
-    if (prevLayer != this.state.currentLayer)
+    if (prevLayer != this.state.currentLayer) {
       this.onChangeLayer(this.state.currentLayer);
+    }
   }
 
   componentWillUnmount() {
@@ -1120,13 +1138,6 @@ export default class GeoChartCamera extends Widget {
   }
 
   addMarkerToMap() {
-    // delete marker before adding
-    for (let i = 0; i < dataCamera.length; i++) {
-      if (imageMarker[i] && dataCamera[i].length > 0) {
-        this.removeFeatures(imageMarker[i]);
-      }
-    }
-
     //reset data before update
     for (let index = 0; index < dataCamera.length; index++) {
       dataCamera[index] = [];
@@ -1180,6 +1191,11 @@ export default class GeoChartCamera extends Widget {
         }
       }
     });
+
+    // delete marker before adding
+    for (let i = 0; i < imageMarker.length; i++) {
+      this.removeFeatures(imageMarker[i]);
+    }
 
     if (this.state.map) {
       for (let i = 0; i < dataCamera.length; i++) {
@@ -1504,7 +1520,7 @@ export default class GeoChartCamera extends Widget {
             }
           })
           .catch(function(error) {
-            console.log(error);
+            // console.log(error);
           });
       });
     }
