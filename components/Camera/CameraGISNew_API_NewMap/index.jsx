@@ -38,7 +38,6 @@ import { TextHelper } from "./controller/TextHelper";
 import "./styles/InfoWindow.css";
 import "./styles/Modal.css";
 import "./styles/ViewMap.css";
-
 import { loadModules } from "esri-loader";
 
 const { TreeNode } = TreeSelect;
@@ -61,8 +60,8 @@ const cameraIcons = [
 
 let imageMarker = [];
 let dataCameraAI3 = [];
-let dataCamerAI4 = [];
-let dataCamerAI5 = [];
+let dataCameraAI4 = [];
+let dataCameraAI5 = [];
 let dataCameraLevel0 = [];
 let dataCameraLevel1 = [];
 let dataCameraLevel2 = [];
@@ -71,8 +70,8 @@ let dataCamera = [
   dataCameraLevel1,
   dataCameraLevel2,
   dataCameraAI3,
-  dataCamerAI4,
-  dataCamerAI5
+  dataCameraAI4,
+  dataCameraAI5
 ]; // include IDCAMERA,LAT,LONG,ObjectID
 let listDisplayCamera = []; // same cameraData
 
@@ -157,6 +156,8 @@ export default class GeoChartCamera extends Widget {
     //API, Server Config
     this.defaultSearch = "";
     this.mapRef = React.createRef();
+
+    this.mapEsriRef = React.createRef();
   }
 
   componentDidMount() {
@@ -443,7 +444,7 @@ export default class GeoChartCamera extends Widget {
               ].filter(
                 marker => marker.ObjectID == graphicMarker.attributes.ObjectID
               )[0];
-              // console.log(clickedMarker);
+              console.log(clickedMarker);
               let marker = listDisplayCamera.filter(
                 camera => camera.id == clickedMarker.IDCAMERA
               )[0];
@@ -470,6 +471,15 @@ export default class GeoChartCamera extends Widget {
         });
       });
     });
+
+    var L = require("leaflet");
+    require("leaflet/dist/leaflet.css");
+    var esri = require("esri-leaflet");
+    var map1 = L.map(this.mapEsriRef.current).setView([45.528, -122.68], 13);
+
+    esri.basemapLayer("Streets").addTo(map1);
+
+    // console.log("ESRI::", L.esri);
   }
 
   filterByClusterIDHandler(item, clusterDataID = null) {
@@ -902,6 +912,19 @@ export default class GeoChartCamera extends Widget {
   }
 
   componentDidUpdate(prevProps, prevState) {
+    // console.log(prevState.cameraData);
+    console.log(this.state.map);
+    if (
+      prevState.currentFilter != this.state.currentFilter ||
+      prevState.cameraDataByLayer != this.state.cameraDataByLayer ||
+      prevState.cameraData != this.state.cameraData ||
+      prevState.map != this.state.map ||
+      prevState.view != this.state.view
+    ) {
+      this.addMarkerToMap();
+    } else {
+      // console.log("bo qua  updateddd");
+    }
     // if (
     //   prevState.cameraData != this.state.cameraData ||
     //   prevState.eventDetectData != this.state.eventDetectData ||
@@ -910,15 +933,11 @@ export default class GeoChartCamera extends Widget {
     //   prevState.map != this.state.map ||
     //   prevState.view != this.state.view ||
     //   prevState.cameraDataByLayer != this.state.cameraDataByLayer ||
-    //   prevState.updateCameraData != this.state.updateCameraData
+    //   prevState.updateCameraData != this.state.updateCameraData ||
+    //   prevState.liveCamera == this.state.liveCamera
     // ) {
-
+    //   this.addMarkerToMap();
     // }
-    // console.log(this.state);
-
-    if(prevState.liveCamera == this.state.liveCamera){
-      this.addMarkerToMap();
-    }
 
     const prevLayer = prevState.currentLayer;
     if (prevLayer != this.state.currentLayer) {
@@ -1138,6 +1157,7 @@ export default class GeoChartCamera extends Widget {
   }
 
   addMarkerToMap() {
+    // console.log("updateddd");
     //reset data before update
     for (let index = 0; index < dataCamera.length; index++) {
       dataCamera[index] = [];
@@ -1155,7 +1175,6 @@ export default class GeoChartCamera extends Widget {
     }
     displayCamera = cameraDataByLayer; //this.getCameraDataByLayer(this.state.currentLayer);
 
-    // Add cac marker vao map va khoi tao su kien cho marker
     const { currentFilter, currentClusterDataID } = this.state;
     displayCamera = displayCamera.filter(item => {
       return (
@@ -1204,13 +1223,14 @@ export default class GeoChartCamera extends Widget {
         }
       }
     } else {
-      setTimeout(() => {
+      let interval = setInterval(() => {
         if (this.state.map) {
           for (let i = 0; i < dataCamera.length; i++) {
             if (imageMarker[i] && dataCamera[i].length > 0) {
               this.addFeatures(imageMarker[i], dataCamera[i]);
             }
           }
+          clearInterval(interval);
         }
       }, 5000);
     }
@@ -1471,6 +1491,7 @@ export default class GeoChartCamera extends Widget {
   }
 
   addFeatures(monumentLayer, markerCamera) {
+    console.log("adddd feature");
     if (markerCamera.length > 0) {
       // create an array of graphics based on the data above
       var graphics = [];
@@ -1668,8 +1689,15 @@ export default class GeoChartCamera extends Widget {
             <div
               id={"arcgisMap"}
               className="webmap"
-              style={vbdStyle}
+              style={(vbdStyle, { display: "none" })}
               ref={this.mapRef}
+            />
+
+            <div
+              id={"esriMap"}
+              className="webmap"
+              style={(vbdStyle)}
+              ref={this.mapEsriRef}
             />
 
             {!this.state.isMobile && liveCamera.length > 0 && (
@@ -1770,7 +1798,7 @@ export default class GeoChartCamera extends Widget {
                   icon="download"
                   style={{
                     float: "right",
-                    marginRight: "10px",
+                    marginRight: "5px",
                     marginTop: "-5px"
                   }}
                   onClick={this.exportData}

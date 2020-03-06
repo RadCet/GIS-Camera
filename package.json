@@ -257,6 +257,7 @@
     "copy-webpack-plugin": "^4.6.0",
     "crypto": "^1.0.1",
     "date-fns": "^2.0.0-alpha.18",
+    "esri-leaflet": "^2.3.3",
     "esri-loader": "^2.13.0",
     "events": "3.0.0",
     "file-saver": "^2.0.2",
