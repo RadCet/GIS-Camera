@@ -1,3 +1,7 @@
+var indexSTTCategory;
+var indexRowCategory;
+var levelCategory = 0;
+var treeDataCategory;
 export default class CameraExportHelper {
   static exportData(currentLayer, cameraData, treeData) {
     CameraExportHelper.convertToCSV3(
@@ -53,7 +57,15 @@ export default class CameraExportHelper {
 
   static convertToCSV3(treeData, currentLayer, cameraData) {
     // const { currentLayer, cameraData} = this.state;
-    let listNameCategory = treeData.children.map(category => category.name);
+    treeDataCategory = treeData;
+    this.setLevelCategory(treeDataCategory.children, 0);
+    console.log(treeDataCategory);
+
+    //set level Category
+
+    let listNameCategory = treeDataCategory.children.map(
+      category => category.name
+    );
 
     let cameraDataByLayer = cameraData.filter(item => {
       return (
@@ -163,7 +175,7 @@ export default class CameraExportHelper {
     // count huyen co camera tiep dan, hanh chinh cong
     let countDistricTiepDan = 0;
     let countDistricHanhChinhCong = 0;
-    treeData.children
+    treeDataCategory.children
       .filter(category => {
         return (
           category.name === "Tiếp Dân" || category.name === "Hành Chính Công"
@@ -183,7 +195,7 @@ export default class CameraExportHelper {
       });
 
     // count xa co camera tiep dan, hanh chinh cong
-    treeData.children
+    treeDataCategory.children
       .filter(category => {
         return (
           category.name === "Tiếp Dân" || category.name === "Hành Chính Công"
@@ -206,7 +218,7 @@ export default class CameraExportHelper {
       });
 
     // count camera theo danh muc nhu du lich tiep dan...
-    treeData.children.map(categoty => {
+    treeDataCategory.children.map(categoty => {
       wsOverView["A" + indexRow].v = indexSTT;
       indexSTT++;
       wsOverView["B" + indexRow].v = "Tổng số camera " + categoty.name;
@@ -219,7 +231,12 @@ export default class CameraExportHelper {
     XLSX.utils.book_append_sheet(wb, wsOverView, "Báo cáo chung");
 
     //sheet category
-    listNameCategory.map(nameCategory => {
+    // listNameCategory.map(nameCategory => {
+    for (
+      let indexCategory = 0;
+      indexCategory < listNameCategory.length;
+      indexCategory++
+    ) {
       var wsCategory = XLSX.utils.json_to_sheet(dataXLSX);
       const mergeCategory = [
         { s: { r: 0, c: 0 }, e: { r: 0, c: 3 } }
@@ -236,51 +253,26 @@ export default class CameraExportHelper {
       wsCategory["!cols"] = wscols;
       wsCategory["A1"].v =
         "                                           BÁO CÁO TÌNH HÌNH CAMERA " +
-        nameCategory.toUpperCase();
+        listNameCategory[indexCategory].toUpperCase();
 
       wsCategory["A3"].v = "STT";
       wsCategory["B3"].v = "Tên đơn vị";
       wsCategory["C3"].v = "Sô camera hoạt động";
       wsCategory["D3"].v = "Số camera không hoạt động";
 
-      let indexSTTCategory = 1;
-      let indexRowCategory = 4;
-      const cameraCategory = treeData.children.filter(
-        item => item.name === nameCategory
+      indexSTTCategory = 1;
+      indexRowCategory = 4;
+      const cameraCategory = treeDataCategory.children.filter(
+        item => item.name === listNameCategory[indexCategory]
       );
 
-      // console.log(cameraCategory);
-
-      if (cameraCategory[0].children.length <= 0) {
-        wsCategory["A" + indexRowCategory].v = indexSTTCategory;
-        indexSTTCategory++;
-        wsCategory["B" + indexRowCategory].v = cameraCategory[0].name;
-        wsCategory["C" + indexRowCategory].v = cameraCategory[0].numberLive;
-        wsCategory["D" + indexRowCategory].v =
-          cameraCategory[0].numberAll - cameraCategory[0].numberLive;
-        indexRowCategory++;
-      } else {
-        cameraCategory[0].children.map(district => {
-          wsCategory["A" + indexRowCategory].v = indexSTTCategory;
-          indexSTTCategory++;
-          wsCategory["B" + indexRowCategory].v = district.name;
-          wsCategory["C" + indexRowCategory].v = district.numberLive;
-          wsCategory["D" + indexRowCategory].v =
-            district.numberAll - district.numberLive;
-          indexRowCategory++;
-          district.children.map(ward => {
-            wsCategory["A" + indexRowCategory].v = indexSTTCategory;
-            indexSTTCategory++;
-            wsCategory["B" + indexRowCategory].v = "      " + ward.name;
-            wsCategory["C" + indexRowCategory].v = ward.numberLive;
-            wsCategory["D" + indexRowCategory].v =
-              ward.numberAll - ward.numberLive;
-            indexRowCategory++;
-          });
-        });
-      }
-      XLSX.utils.book_append_sheet(wb, wsCategory, nameCategory);
-    });
+      this.handleDataCategory(cameraCategory[0], wsCategory, 0);
+      XLSX.utils.book_append_sheet(
+        wb,
+        wsCategory,
+        listNameCategory[indexCategory]
+      );
+    }
 
     /* generate an XLSX file */
     let fileTitle =
@@ -295,6 +287,74 @@ export default class CameraExportHelper {
       "_" +
       date.getMinutes();
     XLSX.writeFile(wb, fileTitle + ".xlsx");
+  }
+
+  static handleDataCategory(category, wsCategory) {
+    if (category.children.length == 0 && category.levelCategory == 0) {
+      wsCategory["A" + indexRowCategory].v = indexSTTCategory;
+      indexSTTCategory++;
+      wsCategory["B" + indexRowCategory].v = category.name;
+      wsCategory["C" + indexRowCategory].v = category.numberLive;
+      wsCategory["D" + indexRowCategory].v =
+        category.numberAll - category.numberLive;
+      indexRowCategory++;
+    } else {
+      for (let index = 0; index < category.children.length; index++) {
+        // console.log(category.children[index], levelCategory);
+
+        if (category.children[index].children.length == 0) {
+          wsCategory["A" + indexRowCategory].v = indexSTTCategory;
+          indexSTTCategory++;
+          let whiteSpace = "";
+          for (let i = 1; i < category.children[index].levelCategory; i++) {
+            whiteSpace += "     ";
+          }
+          wsCategory["B" + indexRowCategory].v =
+            whiteSpace + category.children[index].name;
+          wsCategory["C" + indexRowCategory].v =
+            category.children[index].numberLive;
+          wsCategory["D" + indexRowCategory].v =
+            category.children[index].numberAll -
+            category.children[index].numberLive;
+          indexRowCategory++;
+        } else {
+          wsCategory["A" + indexRowCategory].v = indexSTTCategory;
+          indexSTTCategory++;
+          let whiteSpace = "";
+          for (let i = 1; i < category.children[index].levelCategory; i++) {
+            whiteSpace += "     ";
+          }
+          wsCategory["B" + indexRowCategory].v =
+            whiteSpace + category.children[index].name;
+          wsCategory["C" + indexRowCategory].v =
+            category.children[index].numberLive;
+          wsCategory["D" + indexRowCategory].v =
+            category.children[index].numberAll -
+            category.children[index].numberLive;
+          indexRowCategory++;
+
+          this.handleDataCategory(category.children[index], wsCategory);
+        }
+      }
+    }
+  }
+
+  static setLevelCategory(treeCategory) {
+    let index = 0;
+    for (index = 0; index < treeCategory.length; index++) {
+      if (treeCategory[index].children.length == 0) {
+        // console.log(treeCategory[index], levelCategory);
+        treeCategory[index].levelCategory = levelCategory;
+      } else {
+        // console.log(treeCategory[index], levelCategory);
+        treeCategory[index].levelCategory = levelCategory;
+        levelCategory++;
+        this.setLevelCategory(treeCategory[index].children);
+      }
+    }
+    if (index == treeCategory.length && levelCategory > 0) {
+      levelCategory--;
+    }
   }
 }
 

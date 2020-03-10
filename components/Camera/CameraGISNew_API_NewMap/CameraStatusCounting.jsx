@@ -8,17 +8,17 @@ import cameraIcon4 from './resources/icons/statisicon/4.gif';
 import cameraIcon5 from './resources/icons/statisicon/5.png';
 import cameraIcon6 from './resources/icons/statisicon/6.png';
 
-export const StatisData ={
-    ALL:   { title: "Tổng số Camera", color: "#0abf71", icon: cameraIcon1 },
-    UNBROKEN:  { title: "Camera đang hoạt động", color: "#0abf71", icon: cameraIcon1 },
-    ACTIVE: { title: "Có lưu trữ TTĐH", color: "#0abf71", icon: cameraIcon1},
-    UNACTIVE: { title: "Không lưu trữ TTĐH", color: "#2dc0d2", icon: cameraIcon2 },
-    BROKEN: { title: "Camera không hoạt động", color: "#ec1c23", icon: cameraIcon0 },
-    AI: { title: "Camera phân tích AI", color: "#0abf71", icon: cameraIcon3 },
-    EVENT5P: { title: "Mới có sự kiện", color: "#ec1c23", icon: cameraIcon4 },
-    EVENT24H: { title: "Có sự kiện trong ngày", color: "#ff7708", icon: cameraIcon5 },
-    SOCIAL: { title: "Camera xã hội hóa", color: "#751f13", icon: cameraIcon6 },
-    VMS:  { title: "Danh sách VMS", color: "#0abf71", icon: cameraIcon1 },
+export const StatisData = {
+    ALL: {title: "Tổng số Camera", color: "#0abf71", icon: cameraIcon1},
+    UNBROKEN: {title: "Camera đang hoạt động", color: "#0abf71", icon: cameraIcon1},
+    ACTIVE: {title: "Có lưu trữ TTĐH", color: "#0abf71", icon: cameraIcon1},
+    UNACTIVE: {title: "Không lưu trữ TTĐH", color: "#2dc0d2", icon: cameraIcon2},
+    BROKEN: {title: "Camera không hoạt động", color: "#ec1c23", icon: cameraIcon0},
+    AI: {title: "Camera phân tích AI", color: "#0abf71", icon: cameraIcon3},
+    EVENT5P: {title: "Mới có sự kiện", color: "#ec1c23", icon: cameraIcon4},
+    EVENT24H: {title: "Có sự kiện trong ngày", color: "#ff7708", icon: cameraIcon5},
+    SOCIAL: {title: "Camera xã hội hóa", color: "#751f13", icon: cameraIcon6},
+    VMS: {title: "Danh sách VMS", color: "#0abf71", icon: cameraIcon1},
 };
 
 class CameraStatusCounting extends Component {
@@ -42,7 +42,7 @@ class CameraStatusCounting extends Component {
 
     componentDidUpdate(prevProps) {
         const {currentLayer, status, cameraDataByLayer} = this.props;
-        if(prevProps.currentLayer != currentLayer || prevProps.cameraDataByLayer != cameraDataByLayer || (status != null && status.isNeedUpdate)) {
+        if (prevProps.currentLayer != currentLayer || prevProps.cameraDataByLayer != cameraDataByLayer || (status != null && status.isNeedUpdate)) {
             status.isNeedUpdate = false;
             this.onCount();
         }
@@ -112,14 +112,14 @@ class CameraStatusCounting extends Component {
             }
             if (glevel === 6) {
                 _camSocial++;
-                if (typeof(item.numberChilds) === "number") {
+                if (typeof (item.numberChilds) === "number") {
                     numberChilds = item.numberChilds;
                     _sumCamSocial += numberChilds;
                 }
             }
             if (clusterDataID != null) {
                 if (!countVMS[clusterDataID]) countVMS[clusterDataID] = 0;
-                countVMS[clusterDataID]+=numberChilds;
+                countVMS[clusterDataID] += numberChilds;
             }
         });
         let _camUnbroken = _camActive + _camUnactive;
@@ -138,7 +138,7 @@ class CameraStatusCounting extends Component {
             camSocial: _camSocial,
             sumCamSocial: _sumCamSocial,
             countVMS: countVMS,
-            ignoreVMSIDs:ignoreVMSIDs
+            ignoreVMSIDs: ignoreVMSIDs
         });
     }
 
@@ -149,49 +149,96 @@ class CameraStatusCounting extends Component {
         const boldStyle = {fontWeight: 'bold'};
         return (
             <div style={{fontSize: '15px'}}>
-                <div style={{marginBottom: '8px', cursor: 'pointer'}} onClick={()=>handleFilter(StatisData.ALL, currentClusterDataID)}>
-                    <img src={StatisData.ALL.icon} style={{width: '25px'}} />
-                    <span style={currentFilter==StatisData.ALL? boldStyle: {}}>&nbsp;{StatisData.ALL.title}</span>
-                    <span style={{float: 'right', color: StatisData.ALL.color, paddingRight: '10px', fontWeight: 'bold'}}>&nbsp;{camAll}&nbsp;</span>
+                <div style={{marginBottom: '8px', cursor: 'pointer'}}
+                     onClick={() => handleFilter(StatisData.ALL, currentClusterDataID)}>
+                    <img src={StatisData.ALL.icon} style={{width: '25px'}}/>
+                    <span style={currentFilter == StatisData.ALL ? boldStyle : {}}>&nbsp;{StatisData.ALL.title}</span>
+                    <span style={{
+                        float: 'right',
+                        color: StatisData.ALL.color,
+                        paddingRight: '10px',
+                        fontWeight: 'bold'
+                    }}>&nbsp;{camAll}&nbsp;</span>
                 </div>
                 <div style={{paddingLeft: 23}}>
                     {((showVMSCountInList == false || showVMSCountInListInTop == false || cameraVMSController == null || cameraVMSController.applyMultipleVMS == false || cameraVMSController.vmsManager.getListVMS().length <= 1) ? [] : cameraVMSController.vmsManager.getListVMS())
                         .filter((vms, index) => vms.id != null && ignoreVMSIDs.indexOf(vms.id) < 0)
                         .map((vms, index) => {
-                        return  <div style={{marginBottom: '8px', cursor: 'pointer'}} onClick={()=>handleFilter(currentFilter, vms.id)}>
-                            <img src={StatisData.VMS.icon} style={{width: '25px'}} />
-                            <span style={currentClusterDataID==vms.id ? boldStyle : {}}>&nbsp;{vms.Name}</span>
-                            <span style={{float: 'right', color: StatisData.VMS.color, paddingRight: '10px', fontWeight: 'bold'}}>&nbsp;{countVMS[vms.id]}&nbsp;</span>
-                        </div>
-                    })}
-                    <div style={{marginBottom: '8px', cursor: 'pointer'}} onClick={()=>handleFilter(StatisData.UNBROKEN, currentClusterDataID)}>
-                        <img src={StatisData.UNBROKEN.icon} style={{width: '25px'}} />
-                        <span style={currentFilter==StatisData.UNBROKEN? boldStyle: {}}>&nbsp;{StatisData.UNBROKEN.title}</span>
-                        <span style={{float: 'right', color: StatisData.UNBROKEN.color, paddingRight: '10px', fontWeight: 'bold'}}>&nbsp;{camUnbroken}&nbsp;</span>
+                            return <div style={{marginBottom: '8px', cursor: 'pointer'}}
+                                        onClick={() => handleFilter(currentFilter, vms.id)}>
+                                <img src={StatisData.VMS.icon} style={{width: '25px'}}/>
+                                <span style={currentClusterDataID == vms.id ? boldStyle : {}}>&nbsp;{vms.Name}</span>
+                                <span style={{
+                                    float: 'right',
+                                    color: StatisData.VMS.color,
+                                    paddingRight: '10px',
+                                    fontWeight: 'bold'
+                                }}>&nbsp;{countVMS[vms.id]}&nbsp;</span>
+                            </div>
+                        })}
+                    <div style={{marginBottom: '8px', cursor: 'pointer'}}
+                         onClick={() => handleFilter(StatisData.UNBROKEN, currentClusterDataID)}>
+                        <img src={StatisData.UNBROKEN.icon} style={{width: '25px'}}/>
+                        <span
+                            style={currentFilter == StatisData.UNBROKEN ? boldStyle : {}}>&nbsp;{StatisData.UNBROKEN.title}</span>
+                        <span style={{
+                            float: 'right',
+                            color: StatisData.UNBROKEN.color,
+                            paddingRight: '10px',
+                            fontWeight: 'bold'
+                        }}>&nbsp;{camUnbroken}&nbsp;</span>
                     </div>
                     <div style={{paddingLeft: 23}}>
-                        <div style={{marginBottom: '8px', cursor: 'pointer'}} onClick={()=>handleFilter(StatisData.ACTIVE, currentClusterDataID)}>
+                        <div style={{marginBottom: '8px', cursor: 'pointer'}}
+                             onClick={() => handleFilter(StatisData.ACTIVE, currentClusterDataID)}>
                             <img src={StatisData.ACTIVE.icon} style={{width: '25px'}}/>
-                            <span style={currentFilter == StatisData.ACTIVE ? boldStyle : {}}>&nbsp;{StatisData.ACTIVE.title}</span>
-                            <span style={{float: 'right', color: StatisData.ACTIVE.color, paddingRight: '10px', fontWeight: 'bold'}}>&nbsp;{camActive}&nbsp;</span>
+                            <span
+                                style={currentFilter == StatisData.ACTIVE ? boldStyle : {}}>&nbsp;{StatisData.ACTIVE.title}</span>
+                            <span style={{
+                                float: 'right',
+                                color: StatisData.ACTIVE.color,
+                                paddingRight: '10px',
+                                fontWeight: 'bold'
+                            }}>&nbsp;{camActive}&nbsp;</span>
                         </div>
-                        <div style={{marginBottom: '8px', cursor: 'pointer'}} onClick={() => handleFilter(StatisData.UNACTIVE, currentClusterDataID)}>
+                        <div style={{marginBottom: '8px', cursor: 'pointer'}}
+                             onClick={() => handleFilter(StatisData.UNACTIVE, currentClusterDataID)}>
                             <img src={StatisData.UNACTIVE.icon} style={{width: '25px'}}/>
-                            <span style={currentFilter == StatisData.UNACTIVE ? boldStyle : {}}>&nbsp;{StatisData.UNACTIVE.title}</span>
-                            <span style={{float: 'right', color: StatisData.UNACTIVE.color, paddingRight: '10px', fontWeight: 'bold'}}>&nbsp;{camUnactive}&nbsp;</span>
+                            <span
+                                style={currentFilter == StatisData.UNACTIVE ? boldStyle : {}}>&nbsp;{StatisData.UNACTIVE.title}</span>
+                            <span style={{
+                                float: 'right',
+                                color: StatisData.UNACTIVE.color,
+                                paddingRight: '10px',
+                                fontWeight: 'bold'
+                            }}>&nbsp;{camUnactive}&nbsp;</span>
                         </div>
                     </div>
-                    <div style={{marginBottom: '8px', cursor: 'pointer'}} onClick={()=>handleFilter(StatisData.BROKEN, currentClusterDataID)}>
-                        <img src={StatisData.BROKEN.icon} style={{width: '25px'}} />
-                        <span style={currentFilter==StatisData.BROKEN? boldStyle: {}}>&nbsp;{StatisData.BROKEN.title}</span>
-                        <span style={{float: 'right', color: StatisData.BROKEN.color, paddingRight: '10px', fontWeight: 'bold'}}>&nbsp;{camBroken}&nbsp;</span>
+                    <div style={{marginBottom: '8px', cursor: 'pointer'}}
+                         onClick={() => handleFilter(StatisData.BROKEN, currentClusterDataID)}>
+                        <img src={StatisData.BROKEN.icon} style={{width: '25px'}}/>
+                        <span
+                            style={currentFilter == StatisData.BROKEN ? boldStyle : {}}>&nbsp;{StatisData.BROKEN.title}</span>
+                        <span style={{
+                            float: 'right',
+                            color: StatisData.BROKEN.color,
+                            paddingRight: '10px',
+                            fontWeight: 'bold'
+                        }}>&nbsp;{camBroken}&nbsp;</span>
                     </div>
                     {
                         (va_support == true ?
-                            <div style={{marginBottom: '8px', cursor: 'pointer'}} onClick={()=>handleFilter(StatisData.AI, currentClusterDataID)}>
-                                <img src={StatisData.AI.icon} style={{width: '25px'}} />
-                                <span style={currentFilter==StatisData.AI? boldStyle: {}}>&nbsp;{StatisData.AI.title}</span>
-                                <span style={{float: 'right', color: StatisData.AI.color, paddingRight: '10px', fontWeight: 'bold'}}>&nbsp;{camAI}&nbsp;</span>
+                            <div style={{marginBottom: '8px', cursor: 'pointer'}}
+                                 onClick={() => handleFilter(StatisData.AI, currentClusterDataID)}>
+                                <img src={StatisData.AI.icon} style={{width: '25px'}}/>
+                                <span
+                                    style={currentFilter == StatisData.AI ? boldStyle : {}}>&nbsp;{StatisData.AI.title}</span>
+                                <span style={{
+                                    float: 'right',
+                                    color: StatisData.AI.color,
+                                    paddingRight: '10px',
+                                    fontWeight: 'bold'
+                                }}>&nbsp;{camAI}&nbsp;</span>
                             </div>
                             :
                             <div></div>)
@@ -199,15 +246,29 @@ class CameraStatusCounting extends Component {
                     {
                         (va_support == true ?
                             <div style={{paddingLeft: 23}}>
-                                <div style={{marginBottom: '8px', cursor: 'pointer'}} onClick={()=>handleFilter(StatisData.EVENT24H, currentClusterDataID)}>
-                                    <img src={StatisData.EVENT24H.icon} style={{width: '25px'}} />
-                                    <span style={currentFilter==StatisData.EVENT24H? boldStyle: {}}>&nbsp;{StatisData.EVENT24H.title}</span>
-                                    <span style={{float: 'right', color: StatisData.EVENT24H.color, paddingRight: '10px', fontWeight: 'bold'}}>&nbsp;{camAI24hpEvent}&nbsp;</span>
+                                <div style={{marginBottom: '8px', cursor: 'pointer'}}
+                                     onClick={() => handleFilter(StatisData.EVENT24H, currentClusterDataID)}>
+                                    <img src={StatisData.EVENT24H.icon} style={{width: '25px'}}/>
+                                    <span
+                                        style={currentFilter == StatisData.EVENT24H ? boldStyle : {}}>&nbsp;{StatisData.EVENT24H.title}</span>
+                                    <span style={{
+                                        float: 'right',
+                                        color: StatisData.EVENT24H.color,
+                                        paddingRight: '10px',
+                                        fontWeight: 'bold'
+                                    }}>&nbsp;{camAI24hpEvent}&nbsp;</span>
                                 </div>
-                                <div style={{marginBottom: '8px', cursor: 'pointer'}} onClick={()=>handleFilter(StatisData.EVENT5P, currentClusterDataID)}>
-                                    <img src={StatisData.EVENT5P.icon} style={{width: '25px'}} />
-                                    <span style={currentFilter==StatisData.EVENT5P? boldStyle: {}}>&nbsp;{StatisData.EVENT5P.title}</span>
-                                    <span style={{float: 'right', color: StatisData.EVENT5P.color, paddingRight: '10px', fontWeight: 'bold'}}>&nbsp;{camAI5pEvent}&nbsp;</span>
+                                <div style={{marginBottom: '8px', cursor: 'pointer'}}
+                                     onClick={() => handleFilter(StatisData.EVENT5P, currentClusterDataID)}>
+                                    <img src={StatisData.EVENT5P.icon} style={{width: '25px'}}/>
+                                    <span
+                                        style={currentFilter == StatisData.EVENT5P ? boldStyle : {}}>&nbsp;{StatisData.EVENT5P.title}</span>
+                                    <span style={{
+                                        float: 'right',
+                                        color: StatisData.EVENT5P.color,
+                                        paddingRight: '10px',
+                                        fontWeight: 'bold'
+                                    }}>&nbsp;{camAI5pEvent}&nbsp;</span>
                                 </div>
                             </div>
                             :
@@ -215,10 +276,17 @@ class CameraStatusCounting extends Component {
                     }
                     {
                         (sumCamSocial > 0 && socialization_support) ?
-                            <div style={{marginBottom: '8px', cursor: 'pointer'}} onClick={()=>handleFilter(StatisData.SOCIAL, currentClusterDataID)}>
-                                <img src={StatisData.SOCIAL.icon} style={{width: '25px'}} />
-                                <span style={currentFilter==StatisData.SOCIAL? boldStyle: {}}>&nbsp;{StatisData.SOCIAL.title}</span>
-                                <span style={{float: 'right', color: StatisData.SOCIAL.color, paddingRight: '10px', fontWeight: 'bold'}}>&nbsp;{sumCamSocial}&nbsp;</span>
+                            <div style={{marginBottom: '8px', cursor: 'pointer'}}
+                                 onClick={() => handleFilter(StatisData.SOCIAL, currentClusterDataID)}>
+                                <img src={StatisData.SOCIAL.icon} style={{width: '25px'}}/>
+                                <span
+                                    style={currentFilter == StatisData.SOCIAL ? boldStyle : {}}>&nbsp;{StatisData.SOCIAL.title}</span>
+                                <span style={{
+                                    float: 'right',
+                                    color: StatisData.SOCIAL.color,
+                                    paddingRight: '10px',
+                                    fontWeight: 'bold'
+                                }}>&nbsp;{sumCamSocial}&nbsp;</span>
                             </div>
                             :
                             <div></div>
@@ -226,12 +294,18 @@ class CameraStatusCounting extends Component {
                     {((showVMSCountInList == false || showVMSCountInListInBottom == false || cameraVMSController == null || cameraVMSController.applyMultipleVMS == false || cameraVMSController.vmsManager.getListVMS().length <= 1) ? [] : cameraVMSController.vmsManager.getListVMS())
                         .filter((vms, index) => vms.id != null && ignoreVMSIDs.indexOf(vms.id) < 0)
                         .map((vms, index) => {
-                        return  <div style={{marginBottom: '8px', cursor: 'pointer'}} onClick={()=>handleFilter(currentFilter, vms.id)}>
-                            <img src={StatisData.VMS.icon} style={{width: '25px'}} />
-                            <span style={currentClusterDataID==vms.id ? boldStyle : {}}>&nbsp;{vms.Name}</span>
-                            <span style={{float: 'right', color: StatisData.VMS.color, paddingRight: '10px', fontWeight: 'bold'}}>&nbsp;{countVMS[vms.id]}&nbsp;</span>
-                        </div>
-                    })}
+                            return <div style={{marginBottom: '8px', cursor: 'pointer'}}
+                                        onClick={() => handleFilter(currentFilter, vms.id)}>
+                                <img src={StatisData.VMS.icon} style={{width: '25px'}}/>
+                                <span style={currentClusterDataID == vms.id ? boldStyle : {}}>&nbsp;{vms.Name}</span>
+                                <span style={{
+                                    float: 'right',
+                                    color: StatisData.VMS.color,
+                                    paddingRight: '10px',
+                                    fontWeight: 'bold'
+                                }}>&nbsp;{countVMS[vms.id]}&nbsp;</span>
+                            </div>
+                        })}
                 </div>
             </div>
         );

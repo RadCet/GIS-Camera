@@ -1,6 +1,6 @@
 import React from "react";
 import Widget from "@wso2-dashboards/widget";
-import { TreeSelect, Button, Modal } from "antd";
+import { TreeSelect, Button, Modal, Select } from "antd";
 import "antd/dist/antd.css";
 import Fuse from "fuse.js";
 
@@ -41,6 +41,7 @@ import "./styles/ViewMap.css";
 import { loadModules } from "esri-loader";
 
 const { TreeNode } = TreeSelect;
+const { Option } = Select;
 
 let incidentMap = null;
 
@@ -144,6 +145,7 @@ export default class GeoChartCamera extends Widget {
     this.removeFeatures = this.removeFeatures.bind(this);
     this.applyEditsToLayer = this.applyEditsToLayer.bind(this);
     this.setViewMap = this.setViewMap.bind(this);
+    this.handleChange = this.handleChange.bind(this);
 
     this.latCenter = 10.762622;
     this.lngCenter = 106.660172;
@@ -417,11 +419,11 @@ export default class GeoChartCamera extends Widget {
           let graphic = response.results[0].graphic;
 
           let clickedMarker = dataCamera[graphic.layer.layerId].filter(
-            marker => marker.ObjectID == graphic.attributes.ObjectID
+            marker => marker.ObjectID === graphic.attributes.ObjectID
           )[0];
           // console.log(clickedMarker);
           let marker = listDisplayCamera.filter(
-            camera => camera.id == clickedMarker.IDCAMERA
+            camera => camera.id === clickedMarker.IDCAMERA
           )[0];
 
           // console.log(marker);
@@ -444,7 +446,7 @@ export default class GeoChartCamera extends Widget {
               ].filter(
                 marker => marker.ObjectID == graphicMarker.attributes.ObjectID
               )[0];
-              console.log(clickedMarker);
+              // console.log(clickedMarker);
               let marker = listDisplayCamera.filter(
                 camera => camera.id == clickedMarker.IDCAMERA
               )[0];
@@ -472,14 +474,12 @@ export default class GeoChartCamera extends Widget {
       });
     });
 
-    var L = require("leaflet");
-    require("leaflet/dist/leaflet.css");
-    var esri = require("esri-leaflet");
-    var map1 = L.map(this.mapEsriRef.current).setView([45.528, -122.68], 13);
+    // var L = require("leaflet");
+    // require("leaflet/dist/leaflet.css");
+    // var esri = require("esri-leaflet");
+    // var map1 = L.map(this.mapEsriRef.current).setView([45.528, -122.68], 13);
 
-    esri.basemapLayer("Streets").addTo(map1);
-
-    // console.log("ESRI::", L.esri);
+    // esri.basemapLayer("Streets").addTo(map1);
   }
 
   filterByClusterIDHandler(item, clusterDataID = null) {
@@ -913,7 +913,7 @@ export default class GeoChartCamera extends Widget {
 
   componentDidUpdate(prevProps, prevState) {
     // console.log(prevState.cameraData);
-    console.log(this.state.map);
+    // console.log(this.state.map);
     if (
       prevState.currentFilter != this.state.currentFilter ||
       prevState.cameraDataByLayer != this.state.cameraDataByLayer ||
@@ -1491,7 +1491,7 @@ export default class GeoChartCamera extends Widget {
   }
 
   addFeatures(monumentLayer, markerCamera) {
-    console.log("adddd feature");
+    // console.log("adddd feature");
     if (markerCamera.length > 0) {
       // create an array of graphics based on the data above
       var graphics = [];
@@ -1545,6 +1545,10 @@ export default class GeoChartCamera extends Widget {
           });
       });
     }
+  }
+
+  handleChange(value) {
+    console.log(`selected ${value}`);
   }
 
   render() {
@@ -1689,16 +1693,16 @@ export default class GeoChartCamera extends Widget {
             <div
               id={"arcgisMap"}
               className="webmap"
-              style={(vbdStyle, { display: "none" })}
+              style={vbdStyle}
               ref={this.mapRef}
             />
 
-            <div
+            {/* <div
               id={"esriMap"}
               className="webmap"
-              style={(vbdStyle)}
+              style={vbdStyle}
               ref={this.mapEsriRef}
-            />
+            /> */}
 
             {!this.state.isMobile && liveCamera.length > 0 && (
               <div
@@ -1866,8 +1870,8 @@ export default class GeoChartCamera extends Widget {
               ? ((height + 60) * 1280) / 720
               : width
           }
-          visible={videoEventVisible}
           footer={null}
+          visible={videoEventVisible}
           destroyOnClose={true}
           style={{ top: "0px" }}
           zIndex={1500}
@@ -1875,14 +1879,25 @@ export default class GeoChartCamera extends Widget {
           onCancel={this.closeVideoPopup}
         >
           {videoEventDataType == "image" ? (
-            <img
-              src={videoEventSrc}
-              style={{ width: "100%" }}
-              onError={e => {
-                e.target.onerror = null;
-                e.target.src = disconnectLarge;
-              }}
-            />
+            // <img
+            //   src={videoEventSrc}
+            //   style={{ width: "100%" }}
+            //   onError={e => {
+            //     e.target.onerror = null;
+            //     e.target.src = disconnectLarge;
+            //   }}
+            // />
+            <div style = {{float: 'right', zIndex:100}}>
+            <Select
+              defaultValue="lucy"
+              style={{ width: 120 }}
+              onChange={this.handleChange}
+            >
+              <Option value="jack">Jack</Option>
+              <Option value="lucy">Lucy</Option>
+            </Select>
+          </div>
+
           ) : videoEventDataType == "frame" ? (
             <iframe src={videoEventSrc} style={{ width: "100%" }}>
               <p>Your browser does not support iframes.</p>
