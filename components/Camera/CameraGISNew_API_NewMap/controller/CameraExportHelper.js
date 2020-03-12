@@ -59,7 +59,7 @@ export default class CameraExportHelper {
     // const { currentLayer, cameraData} = this.state;
     treeDataCategory = treeData;
     this.setLevelCategory(treeDataCategory.children, 0);
-    console.log(treeDataCategory);
+    // console.log(treeDataCategory);
 
     //set level Category
 

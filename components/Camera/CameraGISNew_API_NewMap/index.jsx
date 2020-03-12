@@ -318,168 +318,353 @@ export default class GeoChartCamera extends Widget {
     this.props.glContainer.on("resize", this.handleResize);
     console.log("________________v________________" + 170);
 
-    loadModules(
-      [
-        "esri/Map",
-        "esri/views/MapView",
-        "esri/widgets/Search",
-        "esri/layers/FeatureLayer",
-        "esri/widgets/BasemapGallery"
-      ],
-      { css: true }
-    ).then(([ArcGISMap, MapView, Search, FeatureLayer, BasemapGallery]) => {
-      let searchWidget, view;
-      let map = new ArcGISMap({
-        basemap: "streets-navigation-vector"
-      });
+    // loadModules(
+    //   [
+    //     "esri/Map",
+    //     "esri/views/MapView",
+    //     "esri/widgets/Search",
+    //     "esri/layers/FeatureLayer",
+    //     "esri/widgets/BasemapGallery"
+    //   ],
+    //   { css: true }
+    // ).then(([ArcGISMap, MapView, Search, FeatureLayer, BasemapGallery]) => {
+    //   let searchWidget, view;
+    //   let map = new ArcGISMap({
+    //     basemap: "streets-navigation-vector"
+    //   });
 
-      this.setState({
-        map: map
-      });
+    //   this.setState({
+    //     map: map
+    //   });
 
-      this.view = new MapView({
-        container: this.mapRef.current,
-        map: map,
-        zoom: this.zoomDefault,
-        center: [this.lngCenter, this.latCenter]
-        // center: [-122.18, 37.49] // longitude, latitude
-      });
+    //   this.view = new MapView({
+    //     container: this.mapRef.current,
+    //     map: map,
+    //     zoom: this.zoomDefault,
+    //     center: [this.lngCenter, this.latCenter]
+    //     // center: [-122.18, 37.49] // longitude, latitude
+    //   });
 
-      this.setState({
-        view: this.view
-      });
+    //   this.setState({
+    //     view: this.view
+    //   });
 
-      view = this.view;
+    //   view = this.view;
 
-      // var basemapGallery = new BasemapGallery({
-      //   view: view,
-      //   source: {
-      //     portal: {
-      //       url: "http://www.arcgis.com",
-      //       useVectorBasemaps: true // Load vector tile basemap group
-      //     }
-      //   }
-      // });
+    //   // var basemapGallery = new BasemapGallery({
+    //   //   view: view,
+    //   //   source: {
+    //   //     portal: {
+    //   //       url: "http://www.arcgis.com",
+    //   //       useVectorBasemaps: true // Load vector tile basemap group
+    //   //     }
+    //   //   }
+    //   // });
 
-      // view.ui.add(basemapGallery, "top-right"); // Add to the view
+    //   // view.ui.add(basemapGallery, "top-right"); // Add to the view
 
-      searchWidget = new Search({
-        view: this.view,
-        resultGraphicEnabled: false,
-        popupEnabled: false
-      });
+    //   searchWidget = new Search({
+    //     view: this.view,
+    //     resultGraphicEnabled: false,
+    //     popupEnabled: false
+    //   });
 
-      // Adds the search widget below other elements in
-      // the top right corner of the view
-      this.view.ui.add(searchWidget, {
-        position: "top-right",
-        index: 2
-      });
+    //   // Adds the search widget below other elements in
+    //   // the top right corner of the view
+    //   this.view.ui.add(searchWidget, {
+    //     position: "top-right",
+    //     index: 2
+    //   });
 
-      searchWidget.watch("activeSource", function(evt) {
-        evt.placeholder = "Tìm kiếm theo địa chỉ";
-      });
+    //   searchWidget.watch("activeSource", function(evt) {
+    //     evt.placeholder = "Tìm kiếm theo địa chỉ";
+    //   });
 
-      // create icon marker
-      for (let i = 0; i < cameraIcons.length; i++) {
-        const monumentLayer = new FeatureLayer({
-          // create an instance of esri/layers/support/Field for each field object
-          objectIdField: "ObjectID",
-          layerId: i,
-          geometryType: "point",
-          spatialReference: { wkid: 4326 },
-          source: [], // adding an empty feature collection
-          renderer: {
-            type: "simple",
-            symbol: {
-              //   type: "web-style", // autocasts as new WebStyleSymbol()
-              //   styleName: "Esri2DPointSymbolsStyle",
-              //   name: "landmark"
-              type: "picture-marker",
-              url: cameraIcons[i],
-              width: "26",
-              height: "26"
-            }
-          }
-          // popupTemplate: {
-          //     title: "{Name}"
-          // }
-        });
+    //   const clusterConfig = {
+    //     type: "cluster",
+    //     clusterRadius: "100px",
+    //     popupTemplate: {
+    //       // cluster_count is an aggregate field indicating the number
+    //       // of features summarized by the cluster
+    //       content: "This cluster represents {cluster_count} earthquakes."
+    //     }
+    //   };
 
-        map.add(monumentLayer);
-        imageMarker[i] = monumentLayer;
-      }
+    //   // create icon marker
+    //   for (let i = 0; i < cameraIcons.length; i++) {
+    //     const monumentLayer = new FeatureLayer({
+    //       // create an instance of esri/layers/support/Field for each field object
+    //       objectIdField: "ObjectID",
+    //       layerId: i,
+    //       geometryType: "point",
+    //       featureReduction: clusterConfig,
+    //       spatialReference: { wkid: 4326 },
+    //       source: [], // adding an empty feature collection
+    //       renderer: {
+    //         type: "simple",
+    //         symbol: {
+    //           //   type: "web-style", // autocasts as new WebStyleSymbol()
+    //           //   styleName: "Esri2DPointSymbolsStyle",
+    //           //   name: "landmark"
+    //           type: "picture-marker",
+    //           url: cameraIcons[i],
+    //           width: "26",
+    //           height: "26"
+    //         }
+    //       }
+    //       // popupTemplate: {
+    //       //     title: "{Name}"
+    //       // }
+    //     });
 
-      var that = this;
+    //     // map.add(monumentLayer);
+    //     imageMarker[i] = monumentLayer;
+    //   }
 
-      view.on("click", function(evt) {
-        var screenPoint = evt.screenPoint;
-        view.hitTest(screenPoint).then(function(response) {
-          // do something with the result graphic
-          let graphic = response.results[0].graphic;
+    //   var that = this;
 
-          let clickedMarker = dataCamera[graphic.layer.layerId].filter(
-            marker => marker.ObjectID === graphic.attributes.ObjectID
-          )[0];
-          // console.log(clickedMarker);
-          let marker = listDisplayCamera.filter(
-            camera => camera.id === clickedMarker.IDCAMERA
-          )[0];
+    //   view.on("click", function(evt) {
+    //     var screenPoint = evt.screenPoint;
+    //     view.hitTest(screenPoint).then(function(response) {
+    //       // do something with the result graphic
+    //       let graphic = response.results[0].graphic;
 
-          // console.log(marker);
+    //       let clickedMarker = dataCamera[graphic.layer.layerId].filter(
+    //         marker => marker.ObjectID === graphic.attributes.ObjectID
+    //       )[0];
+    //       // console.log(clickedMarker);
+    //       let marker = listDisplayCamera.filter(
+    //         camera => camera.id === clickedMarker.IDCAMERA
+    //       )[0];
 
-          that.handleClickCamera(marker);
-        });
-      });
+    //       // console.log(marker);
 
-      view.on("pointer-move", function(event) {
-        view.hitTest(event).then(function(response) {
-          // check if a feature is returned from the hurricanesLayer
-          // do something with the result graphic
+    //       that.handleClickCamera(marker);
+    //     });
+    //   });
 
-          if (response.results[0].graphic.attributes.ObjectID) {
-            // console.log(response.results[0].graphic.attributes.ObjectID);
-            response.results.filter(function(result) {
-              let graphicMarker = result.graphic;
-              let clickedMarker = dataCamera[
-                graphicMarker.layer.layerId
-              ].filter(
-                marker => marker.ObjectID == graphicMarker.attributes.ObjectID
-              )[0];
-              // console.log(clickedMarker);
-              let marker = listDisplayCamera.filter(
-                camera => camera.id == clickedMarker.IDCAMERA
-              )[0];
+    //   view.on("pointer-move", function(event) {
+    //     view.hitTest(event).then(function(response) {
+    //       // check if a feature is returned from the hurricanesLayer
+    //       // do something with the result graphic
 
-              result.mapPoint.latitude = marker.latitude;
-              result.mapPoint.longitude = marker.longitude;
+    //       if (response.results[0].graphic.attributes.ObjectID) {
+    //         // console.log(response.results[0].graphic.attributes.ObjectID);
+    //         response.results.filter(function(result) {
+    //           let graphicMarker = result.graphic;
+    //           let clickedMarker = dataCamera[
+    //             graphicMarker.layer.layerId
+    //           ].filter(
+    //             marker => marker.ObjectID == graphicMarker.attributes.ObjectID
+    //           )[0];
+    //           // console.log(clickedMarker);
+    //           let marker = listDisplayCamera.filter(
+    //             camera => camera.id == clickedMarker.IDCAMERA
+    //           )[0];
 
-              document.getElementById("arcgisMap").style.cursor = "pointer";
+    //           result.mapPoint.latitude = marker.latitude;
+    //           result.mapPoint.longitude = marker.longitude;
 
-              view.popup.open({
-                // Set the popup's title to the coordinates of the location
-                title: marker.name,
-                location: result.mapPoint, // Set the location of the popup to the clicked location
-                // content: marker.address
-                content:
-                  "<div style='color: black'>" + marker.address + "</div>"
-                // + "<div>ADs</div>"
-              });
-            });
-          } else {
-            document.getElementById("arcgisMap").style.cursor = "default";
-            view.popup.close();
-          }
-        });
-      });
+    //           document.getElementById("arcgisMap").style.cursor = "pointer";
+
+    //           view.popup.open({
+    //             // Set the popup's title to the coordinates of the location
+    //             title: marker.name,
+    //             location: result.mapPoint, // Set the location of the popup to the clicked location
+    //             // content: marker.address
+    //             content:
+    //               "<div style='color: black'>" + marker.address + "</div>"
+    //             // + "<div>ADs</div>"
+    //           });
+    //         });
+    //       } else {
+    //         document.getElementById("arcgisMap").style.cursor = "default";
+    //         view.popup.close();
+    //       }
+    //     });
+    //   });
+    // });
+
+    require("leaflet");
+    var esri = require("esri-leaflet");
+    require("leaflet/dist/leaflet.css");
+    require("esri-leaflet-cluster");
+    require("leaflet.markercluster");
+    require("leaflet.markercluster/dist/MarkerCluster.Default.css");
+    require("leaflet.markercluster/dist/MarkerCluster.css");
+
+    var map = L.map("esriMap").setView([21.023273, 105.791158], 3);
+    esri.basemapLayer("Streets").addTo(map);
+
+    var myIcon = L.icon({
+      iconUrl: cameraIcon0
+    });
+    var myIcon1 = L.icon({
+      iconUrl: cameraIcon1
+    });
+    var myIcon2 = L.icon({
+      iconUrl: cameraIcon2
     });
 
-    // var L = require("leaflet");
-    // require("leaflet/dist/leaflet.css");
-    // var esri = require("esri-leaflet");
-    // var map1 = L.map(this.mapEsriRef.current).setView([45.528, -122.68], 13);
+    //  var markerGroup = L.layerGroup().addTo(map);
+    var markerGroup = L.layerGroup();
+    var markerGroup1 = L.layerGroup();
+    var markerGroup2 = L.layerGroup();
+    for (let index = 0; index < 100; index++) {
+      L.marker(
+        [
+          31.023273 +
+            index * 0.001 -
+            (Math.random() * (1.52 - 0.002) + 0.002).toFixed(4),
+          135.791158 +
+            index * 0.04 -
+            (Math.random() * (1.52 - 0.002) + 0.002).toFixed(4)
+        ],
+        {
+          icon: myIcon,
+          abcdefg: "21321312312312"
+        }
+      ).addTo(markerGroup);
+    }
+    for (let index = 0; index < 100; index++) {
+      L.marker(
+        [
+          21.023273 +
+            index * 0.001 -
+            (Math.random() * (3.52 - 1.002) + 1.002).toFixed(4),
+          105.791158 +
+            index * 0.04 -
+            (Math.random() * (3.52 - 1.002) + 1.002).toFixed(4)
+        ],
+        {
+          icon: myIcon1,
+          abcdefg: "21321312312312"
+        }
+      ).addTo(markerGroup1);
+    }
+    for (let index = 0; index < 100; index++) {
+      L.marker(
+        [
+          21.023273 +
+            index * 0.001 -
+            (Math.random() * (5.52 - 0.102) + 0.102).toFixed(4),
+          105.791158 +
+            index * 0.04 -
+            (Math.random() * (5.52 - 0.102) + 0.102).toFixed(4)
+        ],
+        {
+          icon: myIcon2,
+          abcdefg: "21321312312312"
+        }
+      ).addTo(markerGroup2);
+    }
 
-    // esri.basemapLayer("Streets").addTo(map1);
+    var markers = L.markerClusterGroup({
+      iconCreateFunction: function(cluster) {
+        return L.divIcon({
+          html: cluster.getChildCount(),
+          className:
+            "clusterRed cluster digits-" +
+            (cluster.getChildCount() + "").length,
+          iconSize: null
+        });
+      },
+      //Disable all of the defaults:
+      spiderfyOnMaxZoom: false,
+      showCoverageOnHover: false,
+      zoomToBoundsOnClick: false
+    });
+    markers.addLayer(markerGroup);
+
+    var markers1 = L.markerClusterGroup({
+      iconCreateFunction: function(cluster) {
+        return L.divIcon({
+          html: cluster.getChildCount(),
+          className:
+            "clusterGreen cluster digits-" +
+            (cluster.getChildCount() + "").length,
+          iconSize: null
+        });
+      },
+      //Disable all of the defaults:
+      spiderfyOnMaxZoom: false,
+      showCoverageOnHover: false,
+      zoomToBoundsOnClick: false
+    });
+    markers1.addLayer(markerGroup1);
+
+    var markers2 = L.markerClusterGroup({
+      iconCreateFunction: function(cluster) {
+        return L.divIcon({
+          html: cluster.getChildCount(),
+          className:
+            "clusterBlue cluster digits-" +
+            (cluster.getChildCount() + "").length,
+          iconSize: null
+        });
+      },
+      //Disable all of the defaults:
+      spiderfyOnMaxZoom: false,
+      showCoverageOnHover: false,
+      zoomToBoundsOnClick: false
+    });
+    markers2.addLayer(markerGroup2);
+
+    var shownLayer, polygon;
+    function removePolygon() {
+      if (shownLayer) {
+        shownLayer.setOpacity(1);
+        shownLayer = null;
+      }
+      if (polygon) {
+        map.removeLayer(polygon);
+        polygon = null;
+      }
+    }
+    markers.on("clustermouseover", function(a) {
+      removePolygon();
+
+      a.layer.setOpacity(0.2);
+      shownLayer = a.layer;
+      polygon = L.polygon(a.layer.getConvexHull());
+      map.addLayer(polygon);
+    });
+    markers.on("clustermouseout", removePolygon);
+
+    markers1.on("clustermouseover", function(a) {
+      removePolygon();
+
+      a.layer.setOpacity(0.2);
+      shownLayer = a.layer;
+      polygon = L.polygon(a.layer.getConvexHull());
+      map.addLayer(polygon);
+    });
+    markers1.on("clustermouseout", removePolygon);
+
+    markers2.on("clustermouseover", function(a) {
+      removePolygon();
+
+      a.layer.setOpacity(0.2);
+      shownLayer = a.layer;
+      polygon = L.polygon(a.layer.getConvexHull());
+      map.addLayer(polygon);
+    });
+    markers2.on("clustermouseout", removePolygon);
+
+    map.addLayer(markers);
+    map.addLayer(markers1);
+    map.addLayer(markers2);
+
+    // map1.on("click", function(e) {
+    //   console.log(e);
+    //   var popLocation = e.latlng;
+    //   var popup = L.popup()
+    //     .setLatLng(popLocation)
+    //     .setContent(
+    //       '<p style="color: red">Hello world!<br />This is a nice popup.</p>'
+    //     )
+    //     .openOn(map1);
+    // });
   }
 
   filterByClusterIDHandler(item, clusterDataID = null) {
@@ -921,7 +1106,7 @@ export default class GeoChartCamera extends Widget {
       prevState.map != this.state.map ||
       prevState.view != this.state.view
     ) {
-      this.addMarkerToMap();
+      // this.addMarkerToMap();
     } else {
       // console.log("bo qua  updateddd");
     }
@@ -1693,16 +1878,16 @@ export default class GeoChartCamera extends Widget {
             <div
               id={"arcgisMap"}
               className="webmap"
-              style={vbdStyle}
+              style={(vbdStyle, { display: "none" })}
               ref={this.mapRef}
             />
 
-            {/* <div
+            <div
               id={"esriMap"}
               className="webmap"
               style={vbdStyle}
               ref={this.mapEsriRef}
-            /> */}
+            />
 
             {!this.state.isMobile && liveCamera.length > 0 && (
               <div
@@ -1887,17 +2072,16 @@ export default class GeoChartCamera extends Widget {
             //     e.target.src = disconnectLarge;
             //   }}
             // />
-            <div style = {{float: 'right', zIndex:100}}>
-            <Select
-              defaultValue="lucy"
-              style={{ width: 120 }}
-              onChange={this.handleChange}
-            >
-              <Option value="jack">Jack</Option>
-              <Option value="lucy">Lucy</Option>
-            </Select>
-          </div>
-
+            <div style={{ float: "right", zIndex: 100 }}>
+              <Select
+                defaultValue="lucy"
+                style={{ width: 120 }}
+                onChange={this.handleChange}
+              >
+                <Option value="jack">Jack</Option>
+                <Option value="lucy">Lucy</Option>
+              </Select>
+            </div>
           ) : videoEventDataType == "frame" ? (
             <iframe src={videoEventSrc} style={{ width: "100%" }}>
               <p>Your browser does not support iframes.</p>
