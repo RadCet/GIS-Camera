@@ -103,19 +103,24 @@ button:disabled {
   padding-left: 20px;
 }
 
-.clusterRed {
+.clusterLevel-0 {
   background-color: rgba(214, 26, 26, 1);
   border: 1px solid rgba(214, 26, 26, 1);
 }
 
-.clusterGreen {
+.clusterLevel-1 {
   background-color: rgba(52, 224, 30, 1);
   border: 1px solid rgba(52, 224, 30, 1);
 }
 
-.clusterBlue {
+.clusterLevel-2 {
   background-color: rgba(10, 164, 235, 1);
   border: 1px solid rgba(10, 164, 235, 1);
+}
+
+.clusterLevel-3 {
+  background-color: rgb(243, 247, 3);
+  border: 1px solid rgb(243, 247, 3);
 }
 
 .cluster {

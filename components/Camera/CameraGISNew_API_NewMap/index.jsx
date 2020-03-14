@@ -38,7 +38,6 @@ import { TextHelper } from "./controller/TextHelper";
 import "./styles/InfoWindow.css";
 import "./styles/Modal.css";
 import "./styles/ViewMap.css";
-import { loadModules } from "esri-loader";
 
 const { TreeNode } = TreeSelect;
 const { Option } = Select;
@@ -59,23 +58,13 @@ const cameraIcons = [
   cameraIcon6
 ];
 
-let imageMarker = [];
-let dataCameraAI3 = [];
-let dataCameraAI4 = [];
-let dataCameraAI5 = [];
-let dataCameraLevel0 = [];
-let dataCameraLevel1 = [];
-let dataCameraLevel2 = [];
-let dataCamera = [
-  dataCameraLevel0,
-  dataCameraLevel1,
-  dataCameraLevel2,
-  dataCameraAI3,
-  dataCameraAI4,
-  dataCameraAI5
-]; // include IDCAMERA,LAT,LONG,ObjectID
-let listDisplayCamera = []; // same cameraData
-
+var map = null;
+// var iconCamBroken, iconCamActive, iconCamUnactive, iconCamAI;
+var listIcons = [];
+// var markerCamBroken, markerCamActive, markerCamUnactive, markerCamAI;
+var listMarkerGroups = [];
+var listClusters = [];
+var listMarkerDatas = []; //name cam, lat long,....
 export default class GeoChartCamera extends Widget {
   constructor(props) {
     super(props);
@@ -107,8 +96,6 @@ export default class GeoChartCamera extends Widget {
       timeDataUpdate: null,
       timeElapse: "00:00",
       isLoadingData: true,
-      map: null,
-      view: null,
       updateCameraData: true,
       showLeftMenu: true
     };
@@ -141,10 +128,6 @@ export default class GeoChartCamera extends Widget {
     this.getTSearch = this.getTSearch.bind(this);
     this.handleReloadData = this.handleReloadData.bind(this);
 
-    this.addFeatures = this.addFeatures.bind(this);
-    this.removeFeatures = this.removeFeatures.bind(this);
-    this.applyEditsToLayer = this.applyEditsToLayer.bind(this);
-    this.setViewMap = this.setViewMap.bind(this);
     this.handleChange = this.handleChange.bind(this);
 
     this.latCenter = 10.762622;
@@ -318,173 +301,6 @@ export default class GeoChartCamera extends Widget {
     this.props.glContainer.on("resize", this.handleResize);
     console.log("________________v________________" + 170);
 
-    // loadModules(
-    //   [
-    //     "esri/Map",
-    //     "esri/views/MapView",
-    //     "esri/widgets/Search",
-    //     "esri/layers/FeatureLayer",
-    //     "esri/widgets/BasemapGallery"
-    //   ],
-    //   { css: true }
-    // ).then(([ArcGISMap, MapView, Search, FeatureLayer, BasemapGallery]) => {
-    //   let searchWidget, view;
-    //   let map = new ArcGISMap({
-    //     basemap: "streets-navigation-vector"
-    //   });
-
-    //   this.setState({
-    //     map: map
-    //   });
-
-    //   this.view = new MapView({
-    //     container: this.mapRef.current,
-    //     map: map,
-    //     zoom: this.zoomDefault,
-    //     center: [this.lngCenter, this.latCenter]
-    //     // center: [-122.18, 37.49] // longitude, latitude
-    //   });
-
-    //   this.setState({
-    //     view: this.view
-    //   });
-
-    //   view = this.view;
-
-    //   // var basemapGallery = new BasemapGallery({
-    //   //   view: view,
-    //   //   source: {
-    //   //     portal: {
-    //   //       url: "http://www.arcgis.com",
-    //   //       useVectorBasemaps: true // Load vector tile basemap group
-    //   //     }
-    //   //   }
-    //   // });
-
-    //   // view.ui.add(basemapGallery, "top-right"); // Add to the view
-
-    //   searchWidget = new Search({
-    //     view: this.view,
-    //     resultGraphicEnabled: false,
-    //     popupEnabled: false
-    //   });
-
-    //   // Adds the search widget below other elements in
-    //   // the top right corner of the view
-    //   this.view.ui.add(searchWidget, {
-    //     position: "top-right",
-    //     index: 2
-    //   });
-
-    //   searchWidget.watch("activeSource", function(evt) {
-    //     evt.placeholder = "Tìm kiếm theo địa chỉ";
-    //   });
-
-    //   const clusterConfig = {
-    //     type: "cluster",
-    //     clusterRadius: "100px",
-    //     popupTemplate: {
-    //       // cluster_count is an aggregate field indicating the number
-    //       // of features summarized by the cluster
-    //       content: "This cluster represents {cluster_count} earthquakes."
-    //     }
-    //   };
-
-    //   // create icon marker
-    //   for (let i = 0; i < cameraIcons.length; i++) {
-    //     const monumentLayer = new FeatureLayer({
-    //       // create an instance of esri/layers/support/Field for each field object
-    //       objectIdField: "ObjectID",
-    //       layerId: i,
-    //       geometryType: "point",
-    //       featureReduction: clusterConfig,
-    //       spatialReference: { wkid: 4326 },
-    //       source: [], // adding an empty feature collection
-    //       renderer: {
-    //         type: "simple",
-    //         symbol: {
-    //           //   type: "web-style", // autocasts as new WebStyleSymbol()
-    //           //   styleName: "Esri2DPointSymbolsStyle",
-    //           //   name: "landmark"
-    //           type: "picture-marker",
-    //           url: cameraIcons[i],
-    //           width: "26",
-    //           height: "26"
-    //         }
-    //       }
-    //       // popupTemplate: {
-    //       //     title: "{Name}"
-    //       // }
-    //     });
-
-    //     // map.add(monumentLayer);
-    //     imageMarker[i] = monumentLayer;
-    //   }
-
-    //   var that = this;
-
-    //   view.on("click", function(evt) {
-    //     var screenPoint = evt.screenPoint;
-    //     view.hitTest(screenPoint).then(function(response) {
-    //       // do something with the result graphic
-    //       let graphic = response.results[0].graphic;
-
-    //       let clickedMarker = dataCamera[graphic.layer.layerId].filter(
-    //         marker => marker.ObjectID === graphic.attributes.ObjectID
-    //       )[0];
-    //       // console.log(clickedMarker);
-    //       let marker = listDisplayCamera.filter(
-    //         camera => camera.id === clickedMarker.IDCAMERA
-    //       )[0];
-
-    //       // console.log(marker);
-
-    //       that.handleClickCamera(marker);
-    //     });
-    //   });
-
-    //   view.on("pointer-move", function(event) {
-    //     view.hitTest(event).then(function(response) {
-    //       // check if a feature is returned from the hurricanesLayer
-    //       // do something with the result graphic
-
-    //       if (response.results[0].graphic.attributes.ObjectID) {
-    //         // console.log(response.results[0].graphic.attributes.ObjectID);
-    //         response.results.filter(function(result) {
-    //           let graphicMarker = result.graphic;
-    //           let clickedMarker = dataCamera[
-    //             graphicMarker.layer.layerId
-    //           ].filter(
-    //             marker => marker.ObjectID == graphicMarker.attributes.ObjectID
-    //           )[0];
-    //           // console.log(clickedMarker);
-    //           let marker = listDisplayCamera.filter(
-    //             camera => camera.id == clickedMarker.IDCAMERA
-    //           )[0];
-
-    //           result.mapPoint.latitude = marker.latitude;
-    //           result.mapPoint.longitude = marker.longitude;
-
-    //           document.getElementById("arcgisMap").style.cursor = "pointer";
-
-    //           view.popup.open({
-    //             // Set the popup's title to the coordinates of the location
-    //             title: marker.name,
-    //             location: result.mapPoint, // Set the location of the popup to the clicked location
-    //             // content: marker.address
-    //             content:
-    //               "<div style='color: black'>" + marker.address + "</div>"
-    //             // + "<div>ADs</div>"
-    //           });
-    //         });
-    //       } else {
-    //         document.getElementById("arcgisMap").style.cursor = "default";
-    //         view.popup.close();
-    //       }
-    //     });
-    //   });
-    // });
-
     require("leaflet");
     var esri = require("esri-leaflet");
     require("leaflet/dist/leaflet.css");
@@ -493,124 +309,43 @@ export default class GeoChartCamera extends Widget {
     require("leaflet.markercluster/dist/MarkerCluster.Default.css");
     require("leaflet.markercluster/dist/MarkerCluster.css");
 
-    var map = L.map("esriMap").setView([21.023273, 105.791158], 3);
+    map = L.map("esriMap", {
+      // maxZoom: 17
+    }).setView([this.latCenter, this.lngCenter], this.zoomDefault);
     esri.basemapLayer("Streets").addTo(map);
 
-    var myIcon = L.icon({
-      iconUrl: cameraIcon0
-    });
-    var myIcon1 = L.icon({
-      iconUrl: cameraIcon1
-    });
-    var myIcon2 = L.icon({
-      iconUrl: cameraIcon2
-    });
+    // khởi tạo icon, marker, sự kiện marker và cluster
+    for (let index = 0; index < cameraIcons.length; index++) {
+      let icon = L.icon({
+        iconUrl: cameraIcons[index]
+      });
+      listIcons.push(icon);
+      listMarkerGroups.push(L.layerGroup());
 
-    //  var markerGroup = L.layerGroup().addTo(map);
-    var markerGroup = L.layerGroup();
-    var markerGroup1 = L.layerGroup();
-    var markerGroup2 = L.layerGroup();
-    for (let index = 0; index < 100; index++) {
-      L.marker(
-        [
-          31.023273 +
-            index * 0.001 -
-            (Math.random() * (1.52 - 0.002) + 0.002).toFixed(4),
-          135.791158 +
-            index * 0.04 -
-            (Math.random() * (1.52 - 0.002) + 0.002).toFixed(4)
-        ],
-        {
-          icon: myIcon,
-          abcdefg: "21321312312312"
-        }
-      ).addTo(markerGroup);
-    }
-    for (let index = 0; index < 100; index++) {
-      L.marker(
-        [
-          21.023273 +
-            index * 0.001 -
-            (Math.random() * (3.52 - 1.002) + 1.002).toFixed(4),
-          105.791158 +
-            index * 0.04 -
-            (Math.random() * (3.52 - 1.002) + 1.002).toFixed(4)
-        ],
-        {
-          icon: myIcon1,
-          abcdefg: "21321312312312"
-        }
-      ).addTo(markerGroup1);
-    }
-    for (let index = 0; index < 100; index++) {
-      L.marker(
-        [
-          21.023273 +
-            index * 0.001 -
-            (Math.random() * (5.52 - 0.102) + 0.102).toFixed(4),
-          105.791158 +
-            index * 0.04 -
-            (Math.random() * (5.52 - 0.102) + 0.102).toFixed(4)
-        ],
-        {
-          icon: myIcon2,
-          abcdefg: "21321312312312"
-        }
-      ).addTo(markerGroup2);
+      let cluster = L.markerClusterGroup({
+        iconCreateFunction: function(cluster) {
+          return L.divIcon({
+            html: cluster.getChildCount(),
+            className:
+              "clusterLevel-" +
+              index +
+              " cluster digits-" +
+              (cluster.getChildCount() + "").length,
+            iconSize: null
+          });
+        },
+        //Disable all of the defaults:
+        spiderfyOnMaxZoom: false,
+        showCoverageOnHover: false,
+        zoomToBoundsOnClick: false,
+        disableClusteringAtZoom: 15
+      });
+      listClusters.push(cluster);
+      cluster.addLayer(listMarkerGroups[index]);
+      map.addLayer(cluster);
     }
 
-    var markers = L.markerClusterGroup({
-      iconCreateFunction: function(cluster) {
-        return L.divIcon({
-          html: cluster.getChildCount(),
-          className:
-            "clusterRed cluster digits-" +
-            (cluster.getChildCount() + "").length,
-          iconSize: null
-        });
-      },
-      //Disable all of the defaults:
-      spiderfyOnMaxZoom: false,
-      showCoverageOnHover: false,
-      zoomToBoundsOnClick: false
-    });
-    markers.addLayer(markerGroup);
-
-    var markers1 = L.markerClusterGroup({
-      iconCreateFunction: function(cluster) {
-        return L.divIcon({
-          html: cluster.getChildCount(),
-          className:
-            "clusterGreen cluster digits-" +
-            (cluster.getChildCount() + "").length,
-          iconSize: null
-        });
-      },
-      //Disable all of the defaults:
-      spiderfyOnMaxZoom: false,
-      showCoverageOnHover: false,
-      zoomToBoundsOnClick: false
-    });
-    markers1.addLayer(markerGroup1);
-
-    var markers2 = L.markerClusterGroup({
-      iconCreateFunction: function(cluster) {
-        return L.divIcon({
-          html: cluster.getChildCount(),
-          className:
-            "clusterBlue cluster digits-" +
-            (cluster.getChildCount() + "").length,
-          iconSize: null
-        });
-      },
-      //Disable all of the defaults:
-      spiderfyOnMaxZoom: false,
-      showCoverageOnHover: false,
-      zoomToBoundsOnClick: false
-    });
-    markers2.addLayer(markerGroup2);
-
-    var shownLayer, polygon;
+    let shownLayer, polygon;
     function removePolygon() {
       if (shownLayer) {
         shownLayer.setOpacity(1);
@@ -621,50 +356,18 @@ export default class GeoChartCamera extends Widget {
         polygon = null;
       }
     }
-    markers.on("clustermouseover", function(a) {
-      removePolygon();
+    //khởi tạo sự kiện hiển thị zone khi hover vào cluster
+    for (let index = 0; index < listClusters.length; index++) {
+      listClusters[index].on("clustermouseover", function(a) {
+        removePolygon();
 
-      a.layer.setOpacity(0.2);
-      shownLayer = a.layer;
-      polygon = L.polygon(a.layer.getConvexHull());
-      map.addLayer(polygon);
-    });
-    markers.on("clustermouseout", removePolygon);
-
-    markers1.on("clustermouseover", function(a) {
-      removePolygon();
-
-      a.layer.setOpacity(0.2);
-      shownLayer = a.layer;
-      polygon = L.polygon(a.layer.getConvexHull());
-      map.addLayer(polygon);
-    });
-    markers1.on("clustermouseout", removePolygon);
-
-    markers2.on("clustermouseover", function(a) {
-      removePolygon();
-
-      a.layer.setOpacity(0.2);
-      shownLayer = a.layer;
-      polygon = L.polygon(a.layer.getConvexHull());
-      map.addLayer(polygon);
-    });
-    markers2.on("clustermouseout", removePolygon);
-
-    map.addLayer(markers);
-    map.addLayer(markers1);
-    map.addLayer(markers2);
-
-    // map1.on("click", function(e) {
-    //   console.log(e);
-    //   var popLocation = e.latlng;
-    //   var popup = L.popup()
-    //     .setLatLng(popLocation)
-    //     .setContent(
-    //       '<p style="color: red">Hello world!<br />This is a nice popup.</p>'
-    //     )
-    //     .openOn(map1);
-    // });
+        a.layer.setOpacity(0.2);
+        shownLayer = a.layer;
+        polygon = L.polygon(a.layer.getConvexHull());
+        map.addLayer(polygon);
+      });
+      listClusters[index].on("clustermouseout", removePolygon);
+    }
   }
 
   filterByClusterIDHandler(item, clusterDataID = null) {
@@ -1097,32 +800,7 @@ export default class GeoChartCamera extends Widget {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    // console.log(prevState.cameraData);
-    // console.log(this.state.map);
-    if (
-      prevState.currentFilter != this.state.currentFilter ||
-      prevState.cameraDataByLayer != this.state.cameraDataByLayer ||
-      prevState.cameraData != this.state.cameraData ||
-      prevState.map != this.state.map ||
-      prevState.view != this.state.view
-    ) {
-      // this.addMarkerToMap();
-    } else {
-      // console.log("bo qua  updateddd");
-    }
-    // if (
-    //   prevState.cameraData != this.state.cameraData ||
-    //   prevState.eventDetectData != this.state.eventDetectData ||
-    //   prevState.currentFilter != this.state.currentFilter ||
-    //   prevState.treeData != this.state.treeData ||
-    //   prevState.map != this.state.map ||
-    //   prevState.view != this.state.view ||
-    //   prevState.cameraDataByLayer != this.state.cameraDataByLayer ||
-    //   prevState.updateCameraData != this.state.updateCameraData ||
-    //   prevState.liveCamera == this.state.liveCamera
-    // ) {
-    //   this.addMarkerToMap();
-    // }
+    this.addMarkerToMap();
 
     const prevLayer = prevState.currentLayer;
     if (prevLayer != this.state.currentLayer) {
@@ -1343,14 +1021,7 @@ export default class GeoChartCamera extends Widget {
 
   addMarkerToMap() {
     // console.log("updateddd");
-    //reset data before update
-    for (let index = 0; index < dataCamera.length; index++) {
-      dataCamera[index] = [];
-    }
-
     let displayCamera = this.getCameraDataByLayer(this.state.currentLayer);
-    listDisplayCamera = displayCamera;
-
     let cameraDataByLayer = this.state.cameraDataByLayer;
     if (!cameraDataByLayer) {
       cameraDataByLayer = this.getCameraDataByLayer(this.state.currentLayer);
@@ -1379,45 +1050,78 @@ export default class GeoChartCamera extends Widget {
       );
     });
 
-    displayCamera.map(camera => {
-      if (camera.latitude && camera.longitude) {
-        let objectCamera = {
-          IDCAMERA: camera.id,
-          NAME: camera.name,
-          LATITUDE: camera.latitude,
-          LONGITUDE: camera.longitude
-        };
-
-        if (camera.ailevel != null) {
-          dataCamera[camera.ailevel].push(objectCamera);
-        } else {
-          dataCamera[camera.level].push(objectCamera);
-        }
-      }
+    listMarkerDatas = [];
+    let dataCameraLevel0 = displayCamera.filter(camera => {
+      return camera.level == 0 && !camera.ailevel;
+    });
+    let dataCameraLevel1 = displayCamera.filter(camera => {
+      return camera.level == 1 && !camera.ailevel;
+    });
+    let dataCameraLevel2 = displayCamera.filter(camera => {
+      return camera.level == 2 && !camera.ailevel;
+    });
+    let dataCameraLevel3 = displayCamera.filter(camera => {
+      return camera.ailevel == 3;
+    });
+    let dataCameraLevel4 = displayCamera.filter(camera => {
+      return camera.ailevel == 4;
+    });
+    let dataCameraLevel5 = displayCamera.filter(camera => {
+      return camera.ailevel == 5;
     });
 
-    // delete marker before adding
-    for (let i = 0; i < imageMarker.length; i++) {
-      this.removeFeatures(imageMarker[i]);
-    }
+    listMarkerDatas.push(dataCameraLevel0);
+    listMarkerDatas.push(dataCameraLevel1);
+    listMarkerDatas.push(dataCameraLevel2);
+    listMarkerDatas.push(dataCameraLevel3);
+    listMarkerDatas.push(dataCameraLevel4);
+    listMarkerDatas.push(dataCameraLevel5);
 
-    if (this.state.map) {
-      for (let i = 0; i < dataCamera.length; i++) {
-        if (imageMarker[i] && dataCamera[i].length > 0) {
-          this.addFeatures(imageMarker[i], dataCamera[i]);
+    this.removeAllMarker();
+    for (let index = 0; index < listMarkerDatas.length; index++) {
+      listMarkerDatas[index].map(camera => {
+        if (camera.latitude && camera.longitude) {
+          let objectMarker = L.marker([camera.latitude, camera.longitude], {
+            icon: listIcons[index],
+            idCamera: camera.id,
+            nameCamera: camera.name,
+            addressCamera: camera.address
+          }).addTo(listMarkerGroups[index]);
+
+          //set action for marker
+          objectMarker.bindPopup(function(camera) {
+            // console.log(camera);
+            return (
+              '<h1 style="font-size: 20px">' +
+              camera.options.nameCamera +
+              "</h1>" +
+              "<p>" +
+              camera.options.addressCamera +
+              "</p"
+            );
+          });
+
+          var that = this;
+
+          objectMarker.on("click", function(e) {
+            let targetCamera = displayCamera.filter(camera => {
+              return camera.id == e.target.options.idCamera;
+            });
+            that.handleClickCamera(targetCamera);
+          });
+
+          objectMarker.on("mouseover", function(e) {
+            this.openPopup();
+          });
+          objectMarker.on("mouseout", function(e) {
+            this.closePopup();
+          });
+        } else {
+          // console.log(camera);
         }
-      }
-    } else {
-      let interval = setInterval(() => {
-        if (this.state.map) {
-          for (let i = 0; i < dataCamera.length; i++) {
-            if (imageMarker[i] && dataCamera[i].length > 0) {
-              this.addFeatures(imageMarker[i], dataCamera[i]);
-            }
-          }
-          clearInterval(interval);
-        }
-      }, 5000);
+      });
+
+      listClusters[index].addLayer(listMarkerGroups[index]);
     }
   }
 
@@ -1483,9 +1187,8 @@ export default class GeoChartCamera extends Widget {
       incidentMap.setCenter(centerDefault);
     }
 
-    if (this.state.view) {
-      this.state.view.center = [this.lngCenter, this.latCenter];
-      this.state.view.zoom = this.zoomDefault;
+    if (map) {
+      map.setView([this.latCenter, this.lngCenter], this.zoomDefault);
     }
   }
 
@@ -1546,16 +1249,15 @@ export default class GeoChartCamera extends Widget {
       lngCenter = camera.longitude;
     }
 
-    if (this.state.view) {
-      this.state.view.center = [lngCenter, latCenter];
-      this.state.view.zoom = zoom;
-    }
-
     const centerDefault = new vbd.LatLng(latCenter, lngCenter);
     // if (incidentMap.getZoom()  < zoom) {
     incidentMap.setZoom(zoom);
     // }
     incidentMap.setCenter(centerDefault);
+
+    if (map) {
+      map.setView([latCenter, lngCenter], zoom);
+    }
   }
 
   handleSelectSearch(camera) {
@@ -1630,110 +1332,15 @@ export default class GeoChartCamera extends Widget {
     });
   }
 
-  setViewMap(camera) {
-    //focus map
-    if (this.state.view) {
-      this.state.view.center = [camera.LONGITUDE, camera.LATITUDE];
-      this.state.view.zoom = 13;
-    }
-  }
-
-  applyEditsToLayer(typelayer, edits) {
-    typelayer
-      .applyEdits(edits)
-      .then(function(results) {
-        //delete marker
-        if (results.deleteFeatureResults.length > 0) {
-          // console.log(
-          //     results.deleteFeatureResults.length,
-          //     "features have been removed"
-          // );
-        }
-
-        //apply add marker
-        if (results.addFeatureResults.length > 0) {
-          var objectIds = [];
-          results.addFeatureResults.forEach(function(item) {
-            objectIds.push(item.objectId);
-          });
-
-          // query the newly added features from the layer
-          typelayer
-            .queryFeatures({
-              objectIds: objectIds
-            })
-            .then(function(results) {
-              // console.log(
-              //     results.features.length,
-              //     "features have been added."
-              // );
-            });
-        }
-      })
-      .catch(function(error) {
-        console.log(error);
-      });
-  }
-
-  addFeatures(monumentLayer, markerCamera) {
-    // console.log("adddd feature");
-    if (markerCamera.length > 0) {
-      // create an array of graphics based on the data above
-      var graphics = [];
-      var graphic;
-      loadModules(["esri/Graphic"], { css: true }).then(([Graphic]) => {
-        for (var i = 0; i < markerCamera.length; i++) {
-          if (markerCamera[i].LATITUDE) {
-            graphic = new Graphic({
-              geometry: {
-                type: "point",
-                latitude: markerCamera[i].LATITUDE,
-                longitude: markerCamera[i].LONGITUDE
-              },
-              attributes: markerCamera[i]
-            });
-            graphics.push(graphic);
-          }
-        }
-      });
-
-      // addEdits object tells applyEdits that you want to add the features
-      const addEdits = {
-        addFeatures: graphics
-      };
-
-      // apply the edits to the layer
-      this.applyEditsToLayer(monumentLayer, addEdits);
-      // this.setViewMap(markerCamera[0]);
-    }
-  }
-
-  removeFeatures(monumentLayer) {
-    // if (markerCamera.length > 0) {
-    if (monumentLayer) {
-      let deleteEdits;
-      // query for the features you want to remove
-      monumentLayer.queryFeatures().then(function(results) {
-        // edits object tells apply edits that you want to delete the features
-        deleteEdits = {
-          deleteFeatures: results.features
-        };
-
-        monumentLayer
-          .applyEdits(deleteEdits)
-          .then(function(results) {
-            if (results.deleteFeatureResults.length > 0) {
-            }
-          })
-          .catch(function(error) {
-            // console.log(error);
-          });
-      });
-    }
-  }
-
   handleChange(value) {
     console.log(`selected ${value}`);
+  }
+
+  removeAllMarker() {
+    for (let index = 0; index < listClusters.length; index++) {
+      listClusters[index].removeLayer(listMarkerGroups[index]);
+      listMarkerGroups[index]._layers = {};
+    }
   }
 
   render() {
@@ -1874,14 +1481,6 @@ export default class GeoChartCamera extends Widget {
                 onClick={this.resetMap}
               ></Button>
             </div>
-            <div id={"vbdContainer"} style={{ display: "none" }} />
-            <div
-              id={"arcgisMap"}
-              className="webmap"
-              style={(vbdStyle, { display: "none" })}
-              ref={this.mapRef}
-            />
-
             <div
               id={"esriMap"}
               className="webmap"
