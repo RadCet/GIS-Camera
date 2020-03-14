@@ -1106,7 +1106,7 @@ export default class GeoChartCamera extends Widget {
           objectMarker.on("click", function(e) {
             let targetCamera = displayCamera.filter(camera => {
               return camera.id == e.target.options.idCamera;
-            });
+            })[0];
             that.handleClickCamera(targetCamera);
           });
 
