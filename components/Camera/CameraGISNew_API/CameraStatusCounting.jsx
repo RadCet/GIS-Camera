@@ -7,6 +7,7 @@ import cameraIcon3 from './resources/icons/statisicon/3.png';
 import cameraIcon4 from './resources/icons/statisicon/4.gif';
 import cameraIcon5 from './resources/icons/statisicon/5.png';
 import cameraIcon6 from './resources/icons/statisicon/6.png';
+import cameraIcon7 from './resources/icons/statisicon/7.png';
 
 export const StatisData ={
     ALL:   { title: "Tổng số Camera", color: "#0abf71", icon: cameraIcon1 },
@@ -18,6 +19,7 @@ export const StatisData ={
     EVENT5P: { title: "Mới có sự kiện", color: "#ec1c23", icon: cameraIcon4 },
     EVENT24H: { title: "Có sự kiện trong ngày", color: "#ff7708", icon: cameraIcon5 },
     SOCIAL: { title: "Camera xã hội hóa", color: "#751f13", icon: cameraIcon6 },
+    UNDONE: { title: "Chưa lấy về", color: "#777777", icon: cameraIcon7 },
     VMS:  { title: "Danh sách VMS", color: "#0abf71", icon: cameraIcon1 },
 };
 
@@ -35,7 +37,8 @@ class CameraStatusCounting extends Component {
             camAI5pEvent: 0,
             camAI24hpEvent: 0,
             camSocial: 0,
-            sumCamSocial: 0
+            sumCamSocial: 0,
+            sumUnDone: 0
         };
         this.onCount = this.onCount.bind(this);
     }
@@ -91,6 +94,7 @@ class CameraStatusCounting extends Component {
         let _camAI24hEvent = 0;
         let _camSocial = 0;
         let _sumCamSocial = 0;
+        let _camUnDone = 0;
 
         cameraDataByLayer.forEach(item => {
             const {level, glevel, ailevel, clusterDataID} = item;
@@ -109,6 +113,10 @@ class CameraStatusCounting extends Component {
                 _camAI24hEvent++;
             } else if (ailevel === 5) {
                 _camAI24hEvent++;
+            } else if (ailevel === 9) {
+                _camAINoEvent++;
+            } else if (ailevel === 10) {
+                _camAINoEvent++;
             }
             if (glevel === 6) {
                 _camSocial++;
@@ -117,6 +125,9 @@ class CameraStatusCounting extends Component {
                     _sumCamSocial += numberChilds;
                 }
             }
+            if (glevel === 7) {
+                _camUnDone++;
+            }
             if (clusterDataID != null) {
                 if (!countVMS[clusterDataID]) countVMS[clusterDataID] = 0;
                 countVMS[clusterDataID]+=numberChilds;
@@ -124,7 +135,7 @@ class CameraStatusCounting extends Component {
         });
         let _camUnbroken = _camActive + _camUnactive;
         let _camAI = _camAINoEvent + _camAI24hEvent;// + _camAI5pEvent;
-        let _camAll = _camBroken + _camUnbroken + _sumCamSocial;// - _camSocial;
+        let _camAll = _camBroken + _camUnbroken + _sumCamSocial;// + _camUnDone;// - _camSocial;
 
         this.setState({
             camAll: _camAll,
@@ -138,14 +149,19 @@ class CameraStatusCounting extends Component {
             camSocial: _camSocial,
             sumCamSocial: _sumCamSocial,
             countVMS: countVMS,
-            ignoreVMSIDs:ignoreVMSIDs
+            ignoreVMSIDs:ignoreVMSIDs,
+            cameUnDone:_camUnDone
         });
     }
 
     render() {
         // TODO distinct cam
-        const {handleFilter, currentFilter, va_support, cameraVMSController, socialization_support, currentClusterDataID, showVMSCountInList, showVMSCountInListInTop, showVMSCountInListInBottom} = this.props;
-        const {ignoreVMSIDs, countVMS, camAll, camUnbroken, camActive, camUnactive, camBroken, camAI, camAI5pEvent, camAI24hpEvent, camSocial, sumCamSocial} = this.state;
+        const {handleFilter, currentFilter, va_support, cameraVMSController,
+            socialization_support, currentClusterDataID,
+            showVMSCountInList, showVMSCountInListInTop, showVMSCountInListInBottom,
+            camera_undone_support
+        } = this.props;
+        const {ignoreVMSIDs, countVMS, camAll, camUnbroken, camActive, camUnactive, camBroken, camAI, camAI5pEvent, camAI24hpEvent, camSocial, sumCamSocial, cameUnDone} = this.state;
         const boldStyle = {fontWeight: 'bold'};
         return (
             <div style={{fontSize: '15px'}}>
@@ -212,6 +228,16 @@ class CameraStatusCounting extends Component {
                             </div>
                             :
                             <div></div>)
+                    }
+                    {
+                        (cameUnDone > 0 && camera_undone_support) ?
+                            <div style={{marginBottom: '8px', cursor: 'pointer'}} onClick={()=>handleFilter(StatisData.UNDONE, currentClusterDataID)}>
+                                <img src={StatisData.UNDONE.icon} style={{width: '25px'}} />
+                                <span style={currentFilter==StatisData.UNDONE? boldStyle: {}}>&nbsp;{StatisData.UNDONE.title}</span>
+                                <span style={{float: 'right', color: StatisData.UNDONE.color, paddingRight: '10px', fontWeight: 'bold'}}>&nbsp;{cameUnDone}&nbsp;</span>
+                            </div>
+                            :
+                            <div></div>
                     }
                     {
                         (sumCamSocial > 0 && socialization_support) ?

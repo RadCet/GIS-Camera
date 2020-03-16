@@ -1,5 +1,27 @@
+const DEFAULT_EVENT_TITLE = "Sự kiện mới";
+
+const DEFAULT_EVENT_TITLES = {
+    default: DEFAULT_EVENT_TITLE,
+    abandon: "Cảnh báo",
+    access: "Xâm nhập",
+    activity: "Hoạt động",
+    face: "Nhận diện",
+    fire: "Cháy nổ",
+    flood: "Lũ lụt",
+    license_plate: "Biển số xe",
+    lost: "Trộm cắp",
+    motion: "Chuyển động",
+    number: "Biển số xe",
+    pedestrian: "Người đi bộ",
+    people_in: "Người vào",
+    people_out: "Người ra",
+    protest: "Biểu tình",
+    reception: "Tiếp dân",
+    administration: "Hành chính công",
+};
 
 export default class CameraVAController {
+
     constructor(configs, vmsManager, updateAICameraHandler, updateEventsHandler) {
         this.configs = configs;
         const {va_protocol, va_domain, va_port, va_get_vms_api_template, va_events_api_template, va_get_cameras_api_template, va_get_event_image_template, va_get_event_video_template} = this.configs;
@@ -13,6 +35,17 @@ export default class CameraVAController {
         this.aievent_newest_minute_value = this.configs.aievent_newest_minute_value;
         this.aievent_get_day_mode = this.configs.aievent_get_day_mode;
         this.va_token_api = this.configs.va_token_api;
+        this.va_event_view = this.configs.va_event_view;
+        if (this.va_event_view == null) {
+            this.va_event_view = DEFAULT_EVENT_TITLES;
+        }
+        for (let key in DEFAULT_EVENT_TITLES) {
+            if (!this.va_event_view[key]) {
+                this.va_event_view[key] = DEFAULT_EVENT_TITLES[key];
+            }
+        }
+        this.va_event_type_map = this.configs.va_event_type_map;
+
         this.va_get_vms_api          = va_get_vms_api_template.replace("{va_protocol}", va_protocol).replace("{va_domain}", va_domain).replace("{va_port}", va_port);
         this.va_events_api           = va_events_api_template.replace("{va_protocol}", va_protocol).replace("{va_domain}", va_domain).replace("{va_port}", va_port);
         this.va_get_cameras_api      = va_get_cameras_api_template.replace("{va_protocol}", va_protocol).replace("{va_domain}", va_domain).replace("{va_port}", va_port);
@@ -42,8 +75,44 @@ export default class CameraVAController {
         this.start = this.start.bind(this);
         this.stop = this.stop.bind(this);
 
+        this.getEventName = this.getEventName.bind(this);
+        this.getEventType = this.getEventType.bind(this);
+
         this.timeouts = [];
         this.vmsManager = vmsManager;
+    }
+
+    getEventName(event) {
+        let type = event.type.replace('-', '_');
+        if (this.va_event_view == null) {
+            this.va_event_view = DEFAULT_EVENT_TITLES;
+        }
+        let _name = this.va_event_view[type];
+        if (_name == null) {
+            _name = this.va_event_view.default;
+        }
+        if (_name == null || _name.length === 0) {
+            _name = DEFAULT_EVENT_TITLE;
+        }
+        return _name;
+    }
+
+    getEventType(event) {
+        let _type = event.type.replace('-', '_');
+        // if (this.va_event_type_map == null) {
+        //     this.va_event_type_map = {
+        //         default: 1, fire:4, access:2, face:2, motion:1, // administration:1
+        //         violence: 6
+        //     };
+        // }
+        // let _type = this.va_event_type_map[type];
+        // if (_type == null) {
+        //     _type = this.va_event_type_map.default;
+        // }
+        // if (_type == null || _type <= 0 || _type > 6) {
+        //     _type = 1;
+        // }
+        return _type;
     }
 
     start() {
@@ -133,9 +202,8 @@ export default class CameraVAController {
         let methodTag = "loadAICameras";
         console.log(`${methodTag}`);
         if (this.va_vms_id == null) return this.loadVMSID().then(vms_id => this.loadAICameras());
-        if (this.va_token_api == null) {
-            return this.loadVAToken().then(token => this.loadAICameras());
-        }
+        if (this.va_token_api == null) return this.loadVAToken().then(token => this.loadAICameras());
+
         let apiUrl = this.va_get_cameras_api;
         let params = {vmsId:this.va_vms_id, view:this.ai_cam_view_filter};
         const axios = require('axios');
@@ -290,9 +358,7 @@ export default class CameraVAController {
     }
 
     updateEvents(aievents) {
-        if (this.updateEventsHandler == null) {
-            return;
-        }
+        if (this.updateEventsHandler == null) return;
         const allAIcamerasHaveEvent = new Set();
         const newestAIcamerasHaveEvent = new Set();
         let count = 0;

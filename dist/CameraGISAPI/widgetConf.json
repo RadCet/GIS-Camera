@@ -1,6 +1,6 @@
 {
-  "name": "CameraGISAPI",
-  "id": "CameraGISAPI",
+  "name": "CameraGISAPI_New",
+  "id": "CameraGISAPI_New",
   "thumbnailURL": "",
   "configs": {
     "providerConfig": {
@@ -27,8 +27,8 @@
       },
       "apiConfig":{
         "vms_protocol": "https",
-        "vms_domain": "vmshaiduong.hcdt.vn",
-        "vms_port": 3443,
+        "vms_domain": "vmsqn.hcdt.vn",
+        "vms_port": 9444,
         "vms_username_default": null,
         "vms_password_default": null,
         "vms_login_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/host/login",
@@ -42,17 +42,17 @@
         "vms_get_tree_data_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/tree?modeTree=full&mode=compact",
         "cameraUpdateIntervalValue": 600000,
         "cms_protocol": "https",
-        "cms_domain": "vmshaiduong.hcdt.vn",
-        "cms_port": 3443,
+        "cms_domain": "vmsqn.hcdt.vn",
+        "cms_port": 9444,
         "cms_camera_data_api_template": "{cms_protocol}://{cms_domain}:{cms_port}/cms/api/CameraInGroup/GetTreeData",
         "cms_profile_api_template": "{cms_protocol}://{cms_domain}:{cms_port}/cms/api/Profile/AddIfNotExist",
         "cms_profile_id": null,
         "vms_token_api": null,
         "va_support": true,
         "va_protocol": "https",
-        "va_domain": "aihaiduong.hcdt.vn",
-        "va_port": 2443,
-        "va_token_api": "ZN9X+7W4ZOw60NyxV3UKCA==",
+        "va_domain": "aiqn.hcdt.vn",
+        "va_port": 443,
+        "va_token_api": "hwCazL3bXT3Nu5U60Usd+w==",
         "va_vms_id": null,
         "va_get_vms_api_template": "{va_protocol}://{va_domain}:{va_port}/api/vms",
         "va_events_api_template": "{va_protocol}://{va_domain}:{va_port}/api/event-newest-vms",
@@ -68,19 +68,41 @@
         "aievent_get_day_mode": "start",
         "va_event_view": {
           "default": "Sự kiện mới",
-          "fire": "Cháy nổ",
+          "abandon": "Cảnh báo",
           "access": "Xâm nhập",
+          "activity": "Hoạt động",
           "face": "Nhận diện",
+          "fire": "Cháy nổ",
+          "flood": "Lũ lụt",
+          "license_plate": "Biển số xe",
+          "lost": "Trộm cắp",
           "motion": "Chuyển động",
-          "administration": "Hành chính công",
-          "reception": "Tiếp dân"
+          "number": "Biển số xe",
+          "pedestrian": "Người đi bộ",
+          "people_in": "Người vào",
+          "people_out": "Người ra",
+          "protest": "Biểu tình",
+          "reception": "Tiếp dân",
+          "administration": "Hành chính công"
         },
         "va_event_type_map": {
-          "default": 1,
+          "default": 2,
+          "abandon": 0,
+          "access": 1,
+          "activity": 2,
+          "face": 3,
           "fire": 4,
-          "access": 2,
-          "face": 2,
-          "motion": 1
+          "flood": 5,
+          "license_plate": 6,
+          "lost": 7,
+          "motion": 8,
+          "number": 9,
+          "pedestrian": 10,
+          "people_in": 11,
+          "people_out": 12,
+          "protest": 13,
+          "reception": 14,
+          "administration": 15
         },
         "vms_support_get_tree_data": false,
         "vms_multi_cluster_config": {
@@ -116,7 +138,10 @@
         ],
         "showElapTime" : false,
         "showReload": true,
-        "hiddenExportInMobile": true
+        "hiddenExportInMobile": true,
+        "widget_version": 10,
+        "mobile_scale": 30,
+        "camera_undone_support": true
       },
       "viewConfig": {
         "treeConfig": {

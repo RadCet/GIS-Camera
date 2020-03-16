@@ -54,7 +54,12 @@ export default class SearchBoxByName extends React.Component {
         const { isMobile } = this.props;
         const width = isMobile ? 200 : 250;
         const { cameraData } = this.props;
-        const colors = ['#ec1c23', '#0abf71', '#2dc0d2', '#ff7708', '#ff7708', '#ff7708', '#751f13'];
+        const colors = [
+            '#ec1c23', '#0abf71', '#2dc0d2',
+            '#ff7708', '#ff7708', '#ff7708',
+            '#751f13', '#777777',
+            '#ff7708', '#2dc0d2', '#ec1c23',
+        ];
         return (
             <div style={{ display: 'inline-block', width: '100%', paddingRight: '10px', paddingTop: '5px' }}>
                 <Select

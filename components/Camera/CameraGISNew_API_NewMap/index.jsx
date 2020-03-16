@@ -310,7 +310,7 @@ export default class GeoChartCamera extends Widget {
     require("leaflet.markercluster/dist/MarkerCluster.css");
 
     map = L.map("esriMap", {
-      // maxZoom: 17
+      maxZoom: 17
     }).setView([this.latCenter, this.lngCenter], this.zoomDefault);
     esri.basemapLayer("Streets").addTo(map);
 
@@ -333,12 +333,12 @@ export default class GeoChartCamera extends Widget {
               (cluster.getChildCount() + "").length,
             iconSize: null
           });
-        },
+        }
         //Disable all of the defaults:
-        spiderfyOnMaxZoom: false,
-        showCoverageOnHover: false,
-        zoomToBoundsOnClick: false,
-        disableClusteringAtZoom: 15
+        // spiderfyOnMaxZoom: false,
+        // showCoverageOnHover: false,
+        // zoomToBoundsOnClick: false,
+        // disableClusteringAtZoom: 15
       });
       listClusters.push(cluster);
       cluster.addLayer(listMarkerGroups[index]);
@@ -1663,24 +1663,14 @@ export default class GeoChartCamera extends Widget {
           onCancel={this.closeVideoPopup}
         >
           {videoEventDataType == "image" ? (
-            // <img
-            //   src={videoEventSrc}
-            //   style={{ width: "100%" }}
-            //   onError={e => {
-            //     e.target.onerror = null;
-            //     e.target.src = disconnectLarge;
-            //   }}
-            // />
-            <div style={{ float: "right", zIndex: 100 }}>
-              <Select
-                defaultValue="lucy"
-                style={{ width: 120 }}
-                onChange={this.handleChange}
-              >
-                <Option value="jack">Jack</Option>
-                <Option value="lucy">Lucy</Option>
-              </Select>
-            </div>
+            <img
+              src={videoEventSrc}
+              style={{ width: "100%" }}
+              onError={e => {
+                e.target.onerror = null;
+                e.target.src = disconnectLarge;
+              }}
+            />
           ) : videoEventDataType == "frame" ? (
             <iframe src={videoEventSrc} style={{ width: "100%" }}>
               <p>Your browser does not support iframes.</p>

@@ -9,7 +9,45 @@ import event3chayno from './resources/events/event-4-chayno.png';
 import event3bienso from './resources/events/event-5-bienso.png';
 import eventviolate from './resources/events/violation.png';
 
+import default_icon from './resources/vaevents/activity.svg';
+import abandon_icon from './resources/vaevents/abandon.svg';
+import access_icon from './resources/vaevents/access.svg';
+import activity_icon from './resources/vaevents/activity.svg';
+import face_icon from './resources/vaevents/face.svg';
+import fire_icon from './resources/vaevents/fire.svg';
+import flood_icon from './resources/vaevents/flood.svg';
+import licese_plate_icon from './resources/vaevents/license-plate.svg';
+import lost_icon from './resources/vaevents/lost.svg';
+import motion_icon from './resources/vaevents/motion.svg';
+import number_icon from './resources/vaevents/number.svg';
+import pedestrian_icon from './resources/vaevents/pedestrian.svg';
+import people_in_icon from './resources/vaevents/people-in.svg';
+import people_out_icon from './resources/vaevents/people-out.svg';
+import protest_icon from './resources/vaevents/protest.svg';
+import reception_icon from './resources/vaevents/reception.svg';
+import violence_icon from './resources/events/violation.png'
+
 const cameraIcons = [event1trelac, event2toipham, event3bieutinh, event3chayno, event3bienso, eventviolate];
+
+const cameraIconMap = {
+    default: default_icon,
+    abandon: abandon_icon,
+    access: access_icon,
+    activity: activity_icon,
+    face: face_icon,
+    fire: fire_icon,
+    flood: flood_icon,
+    licese_plate: licese_plate_icon,
+    lost: lost_icon,
+    motion: motion_icon,
+    number: number_icon,
+    pedestrian: pedestrian_icon,
+    people_in: people_in_icon,
+    people_out: people_out_icon,
+    protest: protest_icon,
+    reception: reception_icon,
+    violence: violence_icon
+};
 
 class EventComponent extends Component {
     constructor(props) {
@@ -37,8 +75,8 @@ class EventComponent extends Component {
         const timeText = from.toLocaleTimeString().replace(/:\d{2}\s/,' ');
         const eventStr = ' - ' + event.eventName + ' - ' + addr;
         const eventTitle = from.toLocaleString() + ' - ' + event.eventName + ' - ' + addr;
-        const thisIcon = cameraIcons[event.eventType-1];
-        // const thisIcon = eventviolate; // Bệnh viện K
+        // const thisIcon = cameraIcons[event.eventType-1];
+        const thisIcon = cameraIconMap[event.eventType];
         const pStyle={
             fontSize: '15px',
             overflow: 'hidden',
@@ -49,7 +87,7 @@ class EventComponent extends Component {
         return (
             <div role="presentation" onClick={this.onClick} style={{overflow: 'ellipsis', cursor: 'pointer'}}>
                 <p style={pStyle} title={eventTitle}>
-                    <img src={thisIcon} />
+                    <img src={thisIcon ? thisIcon : default_icon} style={{width: 30, height: 30, borderRadius:50}} />
                     <span style={{marginLeft: '10px'}}>{timeText}</span>
                     {eventStr}
                 </p>
