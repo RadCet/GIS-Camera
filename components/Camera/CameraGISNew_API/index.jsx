@@ -1,6 +1,6 @@
 import React from "react";
 import Widget from "@wso2-dashboards/widget";
-import { Button, Modal, TreeSelect } from "antd";
+import { Button, Modal, TreeSelect, Icon } from "antd";
 import "antd/dist/antd.css";
 
 import ListCameraComponent from "./ListCameraComponent";
@@ -9,6 +9,7 @@ import CameraStatusCounting, { StatisData } from "./CameraStatusCounting";
 import { renderInfoWindowContent } from "./InfoWindowTemplate";
 import SearchBox from "./SearchBox";
 import SearchBoxByName from "./SearchBoxByName";
+import FormSubmitStatusCamera from "./FormSubmitStatusCamera";
 import {
   browser,
   isMobileBrowser,
@@ -103,7 +104,10 @@ export default class GeoChartCamera extends Widget {
       },
       timeDataUpdate: null,
       timeElapse: "00:00",
-      isLoadingData: true
+      isLoadingData: true,
+      titleAlertCameraNotActive: "",
+      showPopupConfirmForCameraNotActive: false,
+      showFormSubmit: false
     };
 
     this.handleResize = this.handleResize.bind(this);
@@ -134,6 +138,9 @@ export default class GeoChartCamera extends Widget {
     this.handleReloadData = this.handleReloadData.bind(this);
     this.showInfo = this.showInfo.bind(this);
     this.closeInfoPopup = this.closeInfoPopup.bind(this);
+    this.visibleFormSubmit = this.visibleFormSubmit.bind(this);
+    this.invisibleFormSubmit = this.invisibleFormSubmit.bind(this);
+    this.handleCancelPopupCameraNotActive = this.handleCancelPopupCameraNotActive.bind(this);
 
     this.getEventName = this.getEventName.bind(this);
     this.getEventType = this.getEventType.bind(this);
@@ -361,7 +368,8 @@ export default class GeoChartCamera extends Widget {
                 (cluster.getChildCount() + "").length,
               iconSize: null
             });
-          }
+          },
+          maxClusterRadius: 20
           //Disable all of the defaults:
           // spiderfyOnMaxZoom: false,
           // showCoverageOnHover: false,
@@ -369,6 +377,7 @@ export default class GeoChartCamera extends Widget {
           // disableClusteringAtZoom: 15
         });
         listClusters[index] = cluster;
+        // console.log(cluster);
         cluster.addLayer(listMarkerGroups[index]);
         map.addLayer(cluster);
       } else if (index == 3) {
@@ -850,7 +859,11 @@ export default class GeoChartCamera extends Widget {
 
   handleClickCamera(camera) {
     if (camera.level === 0) {
-      alert(`Camera '${camera.name}' không hoạt động`);
+      // alert(`Camera '${camera.name}' không hoạt động`);
+      this.setState({
+        titleAlertCameraNotActive: `Camera '${camera.name}' không hoạt động`,
+        showPopupConfirmForCameraNotActive: true
+      });
     } else if (camera.glevel === 6) {
       if (this.showSocializationInNewTab) {
         window.open(camera.url, "_blank");
@@ -1158,9 +1171,9 @@ export default class GeoChartCamera extends Widget {
           objectMarker.bindPopup(function(camera) {
             // console.log(camera);
             return (
-              '<h1 style="font-size: 20px">' +
+              '<div style="font-size: 18px; font-weight: bold;">' +
               camera.options.nameCamera +
-              "</h1>" +
+              "</div>" +
               "<p>" +
               camera.options.addressCamera +
               "</p"
@@ -1471,6 +1484,23 @@ export default class GeoChartCamera extends Widget {
     }
   }
 
+  handleCancelPopupCameraNotActive() {
+    this.setState({
+      showPopupConfirmForCameraNotActive: false
+    });
+  }
+
+  visibleFormSubmit() {
+    this.setState({ showFormSubmit: true });
+    this.setState({
+      showPopupConfirmForCameraNotActive: false
+    });
+  }
+
+  invisibleFormSubmit() {
+    this.setState({ showFormSubmit: false });
+  }
+
   render() {
     const {
       currentFilter,
@@ -1495,7 +1525,10 @@ export default class GeoChartCamera extends Widget {
       infoVersion,
       infoTimeUpdate,
       infoContent,
-      isMobileFunction
+      isMobileFunction,
+      titleAlertCameraNotActive,
+      showPopupConfirmForCameraNotActive,
+      showFormSubmit
     } = this.state;
     let cameraDataByLayer = this.state.cameraDataByLayer;
     if (!cameraDataByLayer) {
@@ -1777,6 +1810,19 @@ export default class GeoChartCamera extends Widget {
           bodyStyle={{ padding: "5px" }}
           onCancel={this.closeVideoPopup}
         >
+          <Icon
+            type="flag"
+            theme="filled"
+            style={{
+              color: "#000000",
+              fontSize: "24px",
+              float: "right",
+              marginRight: "20px",
+              marginLeft: "20px"
+            }}
+            onClick={this.visibleFormSubmit}
+          />
+
           {videoEventDataType == "image" ? (
             <img
               src={videoEventSrc}
@@ -1810,6 +1856,34 @@ export default class GeoChartCamera extends Widget {
             </div>
           )}
         </Modal>
+
+        <Modal
+          title={titleAlertCameraNotActive}
+          visible={showPopupConfirmForCameraNotActive}
+          onOk={this.visibleFormSubmit}
+          onCancel={this.handleCancelPopupCameraNotActive}
+          footer={[
+            <Button key="back" size="large" onClick={this.handleCancelPopupCameraNotActive}>
+              Không
+            </Button>,
+            <Button
+              key="submit"
+              type="primary"
+              size="large"
+              onClick={this.visibleFormSubmit}
+            >
+              Đồng ý
+            </Button>
+          ]}
+        >
+          <p>Bạn có muốn gửi báo cáo về Camera này ?</p>
+        </Modal>
+
+        <FormSubmitStatusCamera
+          zIndex={1501}
+          showSubmitForm={showFormSubmit}
+          closeSubmitForm={this.invisibleFormSubmit}
+        />
       </div>
     );
   }

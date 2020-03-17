@@ -19,6 +19,7 @@
 
 .ant-modal-close {
     left: 0;
+    z-index: 1801;
 }
 
 .ant-modal-close-x {
