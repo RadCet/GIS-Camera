@@ -1,0 +1,1 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[1],{2279:function(o,t,s){"use strict";s.r(t);t.default={vms_protocol:"https",vms_domain:"vmsqn.hcdt.vn",vms_port:9444,vms_login_api_template:"{vms_protocol}://{vms_domain}:{vms_port}/vms/api/host/login",authentication_without_token:!1}}}]);

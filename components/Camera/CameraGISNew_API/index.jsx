@@ -140,7 +140,9 @@ export default class GeoChartCamera extends Widget {
     this.closeInfoPopup = this.closeInfoPopup.bind(this);
     this.visibleFormSubmit = this.visibleFormSubmit.bind(this);
     this.invisibleFormSubmit = this.invisibleFormSubmit.bind(this);
-    this.handleCancelPopupCameraNotActive = this.handleCancelPopupCameraNotActive.bind(this);
+    this.handleCancelPopupCameraNotActive = this.handleCancelPopupCameraNotActive.bind(
+      this
+    );
 
     this.getEventName = this.getEventName.bind(this);
     this.getEventType = this.getEventType.bind(this);
@@ -1571,14 +1573,12 @@ export default class GeoChartCamera extends Widget {
           position: "absolute",
           top: 0,
           right: 202,
-          zIndex: 450,
           color: "black"
         }
       : {
           position: "absolute",
           top: 0,
           right: 252,
-          zIndex: 450,
           color: "black"
         };
 
@@ -1586,7 +1586,7 @@ export default class GeoChartCamera extends Widget {
       <div style={style}>
         {
           <div style={rightSide}>
-            <div style={styleSearchBox}>
+            <div id="searchBox" style={styleSearchBox}>
               <Button
                 icon="home"
                 style={{ marginRight: "2px", marginLeft: "2px" }}
@@ -1863,7 +1863,11 @@ export default class GeoChartCamera extends Widget {
           onOk={this.visibleFormSubmit}
           onCancel={this.handleCancelPopupCameraNotActive}
           footer={[
-            <Button key="back" size="large" onClick={this.handleCancelPopupCameraNotActive}>
+            <Button
+              key="back"
+              size="large"
+              onClick={this.handleCancelPopupCameraNotActive}
+            >
               Không
             </Button>,
             <Button

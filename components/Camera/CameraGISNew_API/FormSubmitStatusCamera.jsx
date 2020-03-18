@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { Modal, Form, Select, Input, Button } from "antd";
+const { TextArea } = Input;
 const FormItem = Form.Item;
 const Option = Select.Option;
 import "antd/dist/antd.css";
@@ -37,6 +38,18 @@ class FormSubmitStatusCamera1 extends React.Component {
         console.log("Received values of form: ", values);
       }
     });
+
+    // console.log("gasdh12312 v1 231");
+    var tarea = document.getElementById("note").value;
+    console.log(tarea);
+
+    setTimeout(() => {
+      document.getElementById("note").value = "datn ngu sisi";
+    }, 3000);
+
+    setTimeout(() => {
+      document.getElementById("note").value = tarea;
+    }, 5000);
   };
   handleSelectChange = value => {
     console.log(value);
@@ -63,13 +76,14 @@ class FormSubmitStatusCamera1 extends React.Component {
       wrapperCol: { span: 12 }
     };
     return (
-      <div>
+      <div class="formSubmit">
         <Modal
           visible={this.state.showModal}
           title="Báo cáo tình trạng Camera"
           onCancel={this.handleCancelModal}
           footer={null}
           width="75%"
+          zIndex={1600}
         >
           <Form style={{ marginTop: "50px" }} onSubmit={this.handleSubmit}>
             <FormItem {...formItemLayout} label="Tình trạng camera hiện tại">
@@ -112,15 +126,20 @@ class FormSubmitStatusCamera1 extends React.Component {
               {getFieldDecorator(
                 "note",
                 {}
-              )(<Input placeholder="Ghi ý kiến bổ sung" />)}
+              )(
+                <TextArea
+                  rows={4}
+                  placeholder="Ghi ý kiến bổ sung"
+                />
+              )}
             </FormItem>
-            <FormItem wrapperCol={{ span: 24 }}>
+            <FormItem wrapperCol={{ span: 20 }}>
               <Button
                 style={{ float: "right" }}
                 type="primary"
                 htmlType="submit"
               >
-                Submit
+                Gửi báo cáo
               </Button>
             </FormItem>
           </Form>
