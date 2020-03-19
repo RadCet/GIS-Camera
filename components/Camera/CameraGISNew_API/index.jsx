@@ -107,7 +107,9 @@ export default class GeoChartCamera extends Widget {
       isLoadingData: true,
       titleAlertCameraNotActive: "",
       showPopupConfirmForCameraNotActive: false,
-      showFormSubmit: false
+      showFormSubmit: false,
+      defineConditionCamera: [],
+      defineConditionNotGoodCamera: []
     };
 
     this.handleResize = this.handleResize.bind(this);
@@ -793,7 +795,34 @@ export default class GeoChartCamera extends Widget {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    this.addMarkerToMap();
+    if (
+      JSON.stringify(prevState.cameraData) !=
+        JSON.stringify(this.state.cameraData) ||
+      this.state.cameraData.length == 0
+    ) {
+      this.addMarkerToMap();
+    }
+
+    if (
+      JSON.stringify(prevState.defineConditionCamera) !=
+        JSON.stringify(this.state.defineConditionCamera) ||
+      this.state.defineConditionCamera.length == 0 ||
+      JSON.stringify(prevState.defineConditionNotGoodCamera) !=
+        JSON.stringify(this.state.defineConditionNotGoodCamera) ||
+      this.state.defineConditionNotGoodCamera.length == 0
+    ) {
+      this.cameraVMSController.getDefineError(2).then(result => {
+        this.setState({
+          defineConditionCamera: result
+        });
+      });
+      this.cameraVMSController.getDefineError(1).then(result => {
+        this.setState({
+          defineConditionNotGoodCamera: result
+        });
+      });
+    }
+
     const prevLayer = prevState.currentLayer;
     if (prevLayer != this.state.currentLayer)
       this.onChangeLayer(this.state.currentLayer);
@@ -1530,7 +1559,9 @@ export default class GeoChartCamera extends Widget {
       isMobileFunction,
       titleAlertCameraNotActive,
       showPopupConfirmForCameraNotActive,
-      showFormSubmit
+      showFormSubmit,
+      defineConditionCamera,
+      defineConditionNotGoodCamera
     } = this.state;
     let cameraDataByLayer = this.state.cameraDataByLayer;
     if (!cameraDataByLayer) {
@@ -1887,6 +1918,9 @@ export default class GeoChartCamera extends Widget {
           zIndex={1501}
           showSubmitForm={showFormSubmit}
           closeSubmitForm={this.invisibleFormSubmit}
+          defineConditionCamera={defineConditionCamera}
+          defineConditionNotGoodCamera={defineConditionNotGoodCamera}
+          cameraVMSController={this.cameraVMSController}
         />
       </div>
     );

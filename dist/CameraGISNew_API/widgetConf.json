@@ -40,6 +40,7 @@
         "vms_turn_on_camera_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/monitors/priority/{id}?Function=Monitor",
         "vms_get_live_camera_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/monitors/{id}?type=mjpeg&scale=100&width=1920&height=1080",
         "vms_get_tree_data_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/tree?modeTree=full&mode=compact",
+        "vms_get_define_error_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/defines?type={typeDefine}",
         "cameraUpdateIntervalValue": 600000,
         "cms_protocol": "https",
         "cms_domain": "vmsqn.hcdt.vn",
