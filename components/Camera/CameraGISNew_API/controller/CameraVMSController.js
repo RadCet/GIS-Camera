@@ -654,10 +654,6 @@ class CameraVMSController {
   }
 
   submitCameraConditionForm(idCamera, paramData) {
-    console.log(
-      this.vms_submit_form_report_camera.replace("{idCamera}", idCamera)
-    );
-
     return this.callAPI(
       this.vms_submit_form_report_camera.replace("{idCamera}", idCamera),
       paramData,

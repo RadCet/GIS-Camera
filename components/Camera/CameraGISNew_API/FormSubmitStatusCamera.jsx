@@ -1,11 +1,12 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { Modal, Form, Select, Input, Button } from "antd";
+import { Modal, Form, Select, Input, Button, message } from "antd";
 const { TextArea } = Input;
 const FormItem = Form.Item;
 const Option = Select.Option;
 import "antd/dist/antd.css";
 import "./styles/SubmitForm.css";
+import { id } from "date-fns/locale";
 class FormSubmitStatusCamera1 extends React.Component {
   constructor(props) {
     super(props);
@@ -20,6 +21,9 @@ class FormSubmitStatusCamera1 extends React.Component {
 
     this.setupFormSubmit = this.setupFormSubmit.bind(this);
     this.resetDataForm = this.resetDataForm.bind(this);
+    this.getDataInforCameraCondition = this.getDataInforCameraCondition.bind(
+      this
+    );
   }
 
   componentDidMount() {
@@ -35,12 +39,13 @@ class FormSubmitStatusCamera1 extends React.Component {
   componentDidUpdate(prevProps, prevState) {
     if (
       this.props.idCamera &&
-      (this.state.idCamera == "" || prevState.idCamera != this.state.idCamera)
+      (this.state.idCamera == "" ||
+        prevState.idCamera != this.state.idCamera ||
+        prevProps.idCamera != this.props.idCamera)
     ) {
       this.setState({
         idCamera: this.props.idCamera
       });
-      console.log(this.state.idCamera);
     }
 
     if (
@@ -57,37 +62,14 @@ class FormSubmitStatusCamera1 extends React.Component {
       });
       if (cameraVMSController != null) {
         if (this.state.showModal) {
-          cameraVMSController
-            .getInformationConditionCamera("1")
-            .then(result => {
-              console.log(result);
-            });
-
-          let param = {
-            PhysicalStateNote: "datvtd test"
-          };
-          cameraVMSController
-            .submitCameraConditionForm("1", param)
-            .then(result => {
-              console.log(result);
-            });
+          this.setupFormSubmit(
+            defineConditionCamera,
+            defineConditionNotGoodCamera
+          );
         } else {
           this.resetDataForm();
         }
-        this.setupFormSubmit(
-          defineConditionCamera,
-          defineConditionNotGoodCamera
-        );
       }
-
-      // let a = this.props.form.getFieldsValue([
-      //   "statusCamera",
-      //   "statusNotGoodCamera",
-      //   "noteContent"
-      // ]);
-
-      // console.log(a);
-      // console.log("++++++++++++");
     }
   }
 
@@ -116,12 +98,13 @@ class FormSubmitStatusCamera1 extends React.Component {
       listConditionCamera: listConditionCamera,
       listConditionNotGoodCamera: listConditionNotGoodCamera
     });
+    this.getDataInforCameraCondition(this.state.idCamera);
   }
 
   resetDataForm() {
     this.props.form.setFieldsValue({
-      statusCamera: undefined,
-      statusNotGoodCamera: undefined,
+      conditionCamera: undefined,
+      conditionNotGoodCamera: undefined,
       noteContent: undefined
     });
   }
@@ -131,20 +114,45 @@ class FormSubmitStatusCamera1 extends React.Component {
     this.props.form.validateFields((err, values) => {
       if (!err) {
         console.log("Received values of form: ", values);
+
+        //handle data before submit
+        let stringPhysicalStateNoteCode = "";
+        if (values.conditionNotGoodCamera != undefined) {
+          values.conditionNotGoodCamera.map((idError, index) => {
+            if (index < values.conditionNotGoodCamera.length - 1) {
+              stringPhysicalStateNoteCode += idError + ",";
+            } else {
+              stringPhysicalStateNoteCode += idError;
+            }
+          });
+        } else {
+          stringPhysicalStateNoteCode = "";
+        }
+
+        let stringNoteContent = "";
+        if (values.noteContent !== undefined) {
+          stringNoteContent = values.noteContent;
+        } else {
+          stringNoteContent = "";
+        }
+
+        let paramData = {
+          PhysicalState: values.conditionCamera,
+          PhysicalStateNoteCode: stringPhysicalStateNoteCode,
+          PhysicalStateNote: stringNoteContent
+        };
+
+        this.props.cameraVMSController
+          .submitCameraConditionForm(this.state.idCamera, paramData)
+          .then(result => {
+            if (result) {
+              this.showSuccessMessage();
+            } else {
+              this.showErrorMessage();
+            }
+          });
       }
     });
-
-    // console.log("gasdh12312 v1 231");
-    // var tarea = document.getElementById("noteContent").value;
-    // console.log(tarea);
-
-    // setTimeout(() => {
-    //   document.getElementById("noteContent").value = "datn ngu sisi";
-    // }, 3000);
-
-    // setTimeout(() => {
-    //   document.getElementById("noteContent").value = tarea;
-    // }, 5000);
   };
   handleChangeTypeCondition = value => {
     //show another select for not good camera: cam bi mo, sai mau...
@@ -156,12 +164,20 @@ class FormSubmitStatusCamera1 extends React.Component {
       this.setState({
         showOptionNotGoodCamera: false
       });
+      //set data in OptionNotGoodCamera = undefined
+      this.props.form.setFieldsValue({
+        conditionNotGoodCamera: undefined
+      });
     }
 
     // cam not good and cam die co them 1 text de ghi chu
     if (value == 1) {
       this.setState({
         showNoteTextArea: false
+      });
+      //set data in NoteTextArea = undefined
+      this.props.form.setFieldsValue({
+        noteContent: undefined
       });
     } else {
       this.setState({
@@ -171,7 +187,7 @@ class FormSubmitStatusCamera1 extends React.Component {
   };
 
   handleChangeConditionNotGoodCamera = value => {
-    console.log(value);
+    // console.log(value);
   };
 
   handleCancelModal = () => {
@@ -181,6 +197,92 @@ class FormSubmitStatusCamera1 extends React.Component {
     const { closeSubmitForm } = this.props;
     closeSubmitForm();
   };
+
+  getDataInforCameraCondition(idCamera) {
+    if (idCamera != "") {
+      this.props.cameraVMSController
+        .getInformationConditionCamera(idCamera)
+        .then(result => {
+          console.log(result);
+          let stringPhysicalState,
+            stringPhysicalStateNoteCode,
+            stringPhysicalStateNote;
+
+          if (result.PhysicalState == null) {
+            stringPhysicalState = undefined;
+          } else {
+            stringPhysicalState = result.PhysicalState;
+
+            //setup option in form
+            if (stringPhysicalState == "2") {
+              this.setState({
+                showOptionNotGoodCamera: true
+              });
+            } else {
+              this.setState({
+                showOptionNotGoodCamera: false
+              });
+              //set data in OptionNotGoodCamera = undefined
+              this.props.form.setFieldsValue({
+                conditionNotGoodCamera: undefined
+              });
+            }
+            // cam not good and cam die co them 1 text de ghi chu
+            if (stringPhysicalState == "1") {
+              this.setState({
+                showNoteTextArea: false
+              });
+              //set data in NoteTextArea = undefined
+              this.props.form.setFieldsValue({
+                noteContent: undefined
+              });
+            } else {
+              this.setState({
+                showNoteTextArea: true
+              });
+            }
+          }
+
+          if (
+            result.PhysicalStateNoteCode == null ||
+            result.PhysicalStateNoteCode == ""
+          ) {
+            stringPhysicalStateNoteCode = undefined;
+          } else {
+            stringPhysicalStateNoteCode = result.PhysicalStateNoteCode.split(
+              ","
+            );
+          }
+
+          if (result.PhysicalStateNote == "") {
+            stringPhysicalStateNote = undefined;
+          } else {
+            stringPhysicalStateNote = result.PhysicalStateNote;
+          }
+
+          this.props.form.setFieldsValue({
+            conditionCamera: stringPhysicalState,
+            conditionNotGoodCamera: stringPhysicalStateNoteCode,
+            noteContent: stringPhysicalStateNote
+          });
+        });
+    }
+  }
+
+  showSuccessMessage = () => {
+    message.success("Báo cáo tình trạng camera thành công");
+    message.config({
+      duration: 3
+    });
+  };
+
+  showErrorMessage = () => {
+    message.error("Báo cáo tình trạng camera thất bại. Vui lòng thử lại");
+    message.config({
+      duration: 3
+    });
+  };
+
   render() {
     const { getFieldDecorator } = this.props.form;
     const formItemLayout = {
@@ -199,10 +301,10 @@ class FormSubmitStatusCamera1 extends React.Component {
         >
           <Form style={{ marginTop: "50px" }} onSubmit={this.handleSubmit}>
             <FormItem {...formItemLayout} label="Tình trạng camera hiện tại">
-              {getFieldDecorator("statusCamera", {
+              {getFieldDecorator("conditionCamera", {
                 rules: [
                   {
-                    required: this.state.showOptionNotGoodCamera,
+                    required: true,
                     message: "Chọn một tình trạng cho camera!"
                   }
                 ]
@@ -225,10 +327,10 @@ class FormSubmitStatusCamera1 extends React.Component {
                   : { display: "none" }
               }
             >
-              {getFieldDecorator("statusNotGoodCamera", {
+              {getFieldDecorator("conditionNotGoodCamera", {
                 rules: [
                   {
-                    required: true,
+                    required: this.state.showOptionNotGoodCamera,
                     message: "Cần chọn ít nhất một trong các ý kiến!",
                     type: "array"
                   }
@@ -245,7 +347,15 @@ class FormSubmitStatusCamera1 extends React.Component {
                 </Select>
               )}
             </FormItem>
-            <FormItem {...formItemLayout} label="Ý kiến bổ sung">
+            <FormItem
+              {...formItemLayout}
+              label="Ý kiến bổ sung"
+              style={
+                this.state.showNoteTextArea
+                  ? { display: "", marginTop: "-20px" }
+                  : { display: "none" }
+              }
+            >
               {getFieldDecorator(
                 "noteContent",
                 {}

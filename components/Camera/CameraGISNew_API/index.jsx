@@ -105,8 +105,6 @@ export default class GeoChartCamera extends Widget {
       timeDataUpdate: null,
       timeElapse: "00:00",
       isLoadingData: true,
-      titleAlertCameraNotActive: "",
-      showPopupConfirmForCameraNotActive: false,
       showFormSubmit: false,
       idCurrentCameraModal: "",
       defineConditionCamera: [],
@@ -143,9 +141,6 @@ export default class GeoChartCamera extends Widget {
     this.closeInfoPopup = this.closeInfoPopup.bind(this);
     this.visibleFormSubmit = this.visibleFormSubmit.bind(this);
     this.invisibleFormSubmit = this.invisibleFormSubmit.bind(this);
-    this.handleCancelPopupCameraNotActive = this.handleCancelPopupCameraNotActive.bind(
-      this
-    );
 
     this.getEventName = this.getEventName.bind(this);
     this.getEventType = this.getEventType.bind(this);
@@ -893,10 +888,19 @@ export default class GeoChartCamera extends Widget {
   handleClickCamera(camera) {
     if (camera.level === 0) {
       // alert(`Camera '${camera.name}' không hoạt động`);
-      this.setState({
-        titleAlertCameraNotActive: `Camera '${camera.name}' không hoạt động`,
-        idCurrentCameraModal: camera.vmsCamId,
-        showPopupConfirmForCameraNotActive: true
+      Modal.confirm({
+        title: `Camera '${camera.name}' không hoạt động`,
+        // content:
+        //   "When clicked the OK button, this dialog will be closed after 1 second",
+        okText: "Báo cáo",
+        cancelText: "Hủy",
+        onOk: () => {
+          this.setState({
+            idCurrentCameraModal: camera.vmsCamId
+          });
+          this.visibleFormSubmit();
+        },
+        onCancel() {}
       });
     } else if (camera.glevel === 6) {
       if (this.showSocializationInNewTab) {
@@ -905,11 +909,27 @@ export default class GeoChartCamera extends Widget {
         this.showLiveCamOnMobile(camera.vmsCamId, camera.clusterDataID);
       }
     } else if (camera.glevel === 7) {
-      alert(
-        `Camera '${camera.name}' chưa lấy được. ${
+      // alert(
+      //   `Camera '${camera.name}' chưa lấy được. ${
+      //     camera.description ? camera.description : ""
+      //   }`
+      // );
+      Modal.confirm({
+        title: `Camera '${camera.name}' chưa lấy được. ${
           camera.description ? camera.description : ""
-        }`
-      );
+        }`,
+        // content:
+        //   "When clicked the OK button, this dialog will be closed after 1 second",
+        okText: "Báo cáo",
+        cancelText: "Hủy",
+        onOk: () => {
+          this.setState({
+            idCurrentCameraModal: camera.vmsCamId
+          });
+          this.visibleFormSubmit();
+        },
+        onCancel() {}
+      });
     } else if (this.state.isMobile || this.state.showPopupLiveCam) {
       this.showLiveCamOnMobile(camera.vmsCamId, camera.clusterDataID);
     } else {
@@ -1521,23 +1541,13 @@ export default class GeoChartCamera extends Widget {
     }
   }
 
-  handleCancelPopupCameraNotActive() {
-    this.setState({
-      showPopupConfirmForCameraNotActive: false
-    });
-  }
-
   visibleFormSubmit() {
     this.setState({ showFormSubmit: true });
-    this.setState({
-      showPopupConfirmForCameraNotActive: false
-    });
   }
 
   invisibleFormSubmit() {
     this.setState({ showFormSubmit: false });
   }
-
   render() {
     const {
       currentFilter,
@@ -1563,8 +1573,6 @@ export default class GeoChartCamera extends Widget {
       infoTimeUpdate,
       infoContent,
       isMobileFunction,
-      titleAlertCameraNotActive,
-      showPopupConfirmForCameraNotActive,
       showFormSubmit,
       idCurrentCameraModal,
       defineConditionCamera,
@@ -1894,33 +1902,6 @@ export default class GeoChartCamera extends Widget {
             </div>
           )}
         </Modal>
-
-        <Modal
-          title={titleAlertCameraNotActive}
-          visible={showPopupConfirmForCameraNotActive}
-          onOk={this.visibleFormSubmit}
-          onCancel={this.handleCancelPopupCameraNotActive}
-          footer={[
-            <Button
-              key="back"
-              size="large"
-              onClick={this.handleCancelPopupCameraNotActive}
-            >
-              Không
-            </Button>,
-            <Button
-              key="submit"
-              type="primary"
-              size="large"
-              onClick={this.visibleFormSubmit}
-            >
-              Đồng ý
-            </Button>
-          ]}
-        >
-          <p>Bạn có muốn gửi báo cáo về Camera này ?</p>
-        </Modal>
-
         <FormSubmitStatusCamera
           zIndex={1501}
           showSubmitForm={showFormSubmit}
