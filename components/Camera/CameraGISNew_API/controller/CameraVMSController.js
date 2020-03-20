@@ -37,7 +37,9 @@ class CameraVMSController {
     const {
       vms_login_api_template,
       vms_update_token_api_template,
-      vms_get_define_error_api_template
+      vms_get_define_error_api_template,
+      vms_get_information_report_camera_template,
+      vms_submit_form_report_camera_template
     } = this.configs;
     const {
       vms_monitors_api_template,
@@ -63,6 +65,8 @@ class CameraVMSController {
     this.vms_get_tree_data_api_template = vms_get_tree_data_api_template;
     this.vms_get_live_camera_api_template = vms_get_live_camera_api_template;
     this.vms_get_define_error_api_template = vms_get_define_error_api_template;
+    this.vms_get_information_report_camera_template = vms_get_information_report_camera_template;
+    this.vms_submit_form_report_camera_template = vms_submit_form_report_camera_template;
 
     this.vms_login_api = vms_login_api_template
       .replace("{vms_protocol}", vms_protocol)
@@ -106,6 +110,16 @@ class CameraVMSController {
       .replace("{vms_domain}", vms_domain)
       .replace("{vms_port}", vms_port);
 
+    this.vms_get_information_report_camera = vms_get_information_report_camera_template
+      .replace("{vms_protocol}", vms_protocol)
+      .replace("{vms_domain}", vms_domain)
+      .replace("{vms_port}", vms_port);
+
+    this.vms_submit_form_report_camera = vms_submit_form_report_camera_template
+      .replace("{vms_protocol}", vms_protocol)
+      .replace("{vms_domain}", vms_domain)
+      .replace("{vms_port}", vms_port);
+
     this.cameraUpdateInterval = null;
 
     this.state = {};
@@ -145,8 +159,11 @@ class CameraVMSController {
     this.callAPIToVMS = this.callAPIToVMS.bind(this);
     this.turnOnCameraToVMS = this.turnOnCameraToVMS.bind(this);
     this.getListVMS = this.getListVMS.bind(this);
-
     this.getDefineError = this.getDefineError.bind(this);
+    this.getInformationConditionCamera = this.getInformationConditionCamera.bind(
+      this
+    );
+    this.submitCameraConditionForm = this.submitCameraConditionForm.bind(this);
 
     this.state = {
       current_vms: this.loadFromPersistence("current_vms"),
@@ -366,7 +383,9 @@ class CameraVMSController {
       url: apiUrl,
       headers: headers,
       params:
-        "get" === method ? params : require("querystring").stringify(params)
+        "get" === method || "put" === method
+          ? params
+          : require("querystring").stringify(params)
     })
       .then(resp => {
         if (!!resp.data) {
@@ -626,6 +645,26 @@ class CameraVMSController {
       typeDefine
     );
     return this.callAPI(this.vms_get_define_error_api_specify);
+  }
+
+  getInformationConditionCamera(idCamera) {
+    return this.callAPI(
+      this.vms_get_information_report_camera.replace("{idCamera}", idCamera)
+    );
+  }
+
+  submitCameraConditionForm(idCamera, paramData) {
+    console.log(
+      this.vms_submit_form_report_camera.replace("{idCamera}", idCamera)
+    );
+
+    return this.callAPI(
+      this.vms_submit_form_report_camera.replace("{idCamera}", idCamera),
+      paramData,
+      null,
+      "put",
+      null
+    );
   }
 
   startUpdateCameras() {

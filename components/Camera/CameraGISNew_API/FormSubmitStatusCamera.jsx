@@ -12,10 +12,14 @@ class FormSubmitStatusCamera1 extends React.Component {
     this.state = {
       showModal: false,
       listConditionCamera: [],
-      listConditionNotGoodCamera: []
+      listConditionNotGoodCamera: [],
+      idCamera: "",
+      showOptionNotGoodCamera: false,
+      showNoteTextArea: false
     };
 
-    this.addDataIntoOption = this.addDataIntoOption.bind(this);
+    this.setupFormSubmit = this.setupFormSubmit.bind(this);
+    this.resetDataForm = this.resetDataForm.bind(this);
   }
 
   componentDidMount() {
@@ -29,22 +33,61 @@ class FormSubmitStatusCamera1 extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevProps.showSubmitForm != this.props.showSubmitForm) {
+    if (
+      this.props.idCamera &&
+      (this.state.idCamera == "" || prevState.idCamera != this.state.idCamera)
+    ) {
       this.setState({
-        showModal: this.props.showSubmitForm
+        idCamera: this.props.idCamera
       });
+      console.log(this.state.idCamera);
+    }
 
+    if (
+      prevProps.showSubmitForm != this.props.showSubmitForm ||
+      prevState.showModal != this.state.showModal
+    ) {
       const {
         cameraVMSController,
         defineConditionCamera,
         defineConditionNotGoodCamera
       } = this.props;
+      this.setState({
+        showModal: this.props.showSubmitForm
+      });
       if (cameraVMSController != null) {
-        this.addDataIntoOption(
+        if (this.state.showModal) {
+          cameraVMSController
+            .getInformationConditionCamera("1")
+            .then(result => {
+              console.log(result);
+            });
+
+          let param = {
+            PhysicalStateNote: "datvtd test"
+          };
+          cameraVMSController
+            .submitCameraConditionForm("1", param)
+            .then(result => {
+              console.log(result);
+            });
+        } else {
+          this.resetDataForm();
+        }
+        this.setupFormSubmit(
           defineConditionCamera,
           defineConditionNotGoodCamera
         );
       }
+
+      // let a = this.props.form.getFieldsValue([
+      //   "statusCamera",
+      //   "statusNotGoodCamera",
+      //   "noteContent"
+      // ]);
+
+      // console.log(a);
+      // console.log("++++++++++++");
     }
   }
 
@@ -52,7 +95,7 @@ class FormSubmitStatusCamera1 extends React.Component {
     // this.searchBox.removeListener('places_changed', this.onPlacesChanged);
   }
 
-  addDataIntoOption(defineConditionCamera, defineConditionNotGoodCamera) {
+  setupFormSubmit(defineConditionCamera, defineConditionNotGoodCamera) {
     let listConditionCamera = [];
     for (let index = 0; index < defineConditionCamera.length; index++) {
       listConditionCamera.push(
@@ -75,6 +118,14 @@ class FormSubmitStatusCamera1 extends React.Component {
     });
   }
 
+  resetDataForm() {
+    this.props.form.setFieldsValue({
+      statusCamera: undefined,
+      statusNotGoodCamera: undefined,
+      noteContent: undefined
+    });
+  }
+
   handleSubmit = e => {
     e.preventDefault();
     this.props.form.validateFields((err, values) => {
@@ -84,25 +135,42 @@ class FormSubmitStatusCamera1 extends React.Component {
     });
 
     // console.log("gasdh12312 v1 231");
-    var tarea = document.getElementById("note").value;
-    console.log(tarea);
+    // var tarea = document.getElementById("noteContent").value;
+    // console.log(tarea);
 
-    setTimeout(() => {
-      document.getElementById("note").value = "datn ngu sisi";
-    }, 3000);
+    // setTimeout(() => {
+    //   document.getElementById("noteContent").value = "datn ngu sisi";
+    // }, 3000);
 
-    setTimeout(() => {
-      document.getElementById("note").value = tarea;
-    }, 5000);
+    // setTimeout(() => {
+    //   document.getElementById("noteContent").value = tarea;
+    // }, 5000);
   };
-  handleSelectChange = value => {
-    console.log(value);
-    // this.props.form.setFieldsValue({
-    //   note: `Hi, ${value === "male" ? "man" : "lady"}!`
-    // });
+  handleChangeTypeCondition = value => {
+    //show another select for not good camera: cam bi mo, sai mau...
+    if (value == 2) {
+      this.setState({
+        showOptionNotGoodCamera: true
+      });
+    } else {
+      this.setState({
+        showOptionNotGoodCamera: false
+      });
+    }
+
+    // cam not good and cam die co them 1 text de ghi chu
+    if (value == 1) {
+      this.setState({
+        showNoteTextArea: false
+      });
+    } else {
+      this.setState({
+        showNoteTextArea: true
+      });
+    }
   };
 
-  handleMutipleSelectChange = value => {
+  handleChangeConditionNotGoodCamera = value => {
     console.log(value);
   };
 
@@ -133,13 +201,30 @@ class FormSubmitStatusCamera1 extends React.Component {
             <FormItem {...formItemLayout} label="Tình trạng camera hiện tại">
               {getFieldDecorator("statusCamera", {
                 rules: [
-                  { required: true, message: "Chọn một tình trạng cho camera!" }
+                  {
+                    required: this.state.showOptionNotGoodCamera,
+                    message: "Chọn một tình trạng cho camera!"
+                  }
                 ]
               })(
-                <Select defaultValue="lucy" onChange={this.handleSelectChange}>
+                <Select
+                  onChange={this.handleChangeTypeCondition}
+                  placeholder="Chọn một loại tình trạng camera sau đây"
+                  allowClear={true}
+                  defaultValue={null}
+                >
                   {this.state.listConditionCamera}
                 </Select>
               )}
+            </FormItem>
+            <FormItem
+              wrapperCol={{ offset: 8, span: 12 }}
+              style={
+                this.state.showOptionNotGoodCamera
+                  ? { display: "", marginTop: "-20px" }
+                  : { display: "none" }
+              }
+            >
               {getFieldDecorator("statusNotGoodCamera", {
                 rules: [
                   {
@@ -150,10 +235,11 @@ class FormSubmitStatusCamera1 extends React.Component {
                 ]
               })(
                 <Select
-                  style={{ display: "none" }}
+                  onChange={this.handleChangeConditionNotGoodCamera}
+                  defaultValue={null}
+                  allowClear={true}
                   mode="multiple"
-                  placeholder="Chọn một ý kiến sau đây"
-                  onChange={this.handleMutipleSelectChange}
+                  placeholder="Chọn một trong các ý kiến sau đây"
                 >
                   {this.state.listConditionNotGoodCamera}
                 </Select>
@@ -161,7 +247,7 @@ class FormSubmitStatusCamera1 extends React.Component {
             </FormItem>
             <FormItem {...formItemLayout} label="Ý kiến bổ sung">
               {getFieldDecorator(
-                "note",
+                "noteContent",
                 {}
               )(<TextArea rows={4} placeholder="Ghi ý kiến bổ sung" />)}
             </FormItem>

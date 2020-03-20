@@ -108,6 +108,7 @@ export default class GeoChartCamera extends Widget {
       titleAlertCameraNotActive: "",
       showPopupConfirmForCameraNotActive: false,
       showFormSubmit: false,
+      idCurrentCameraModal: "",
       defineConditionCamera: [],
       defineConditionNotGoodCamera: []
     };
@@ -804,12 +805,13 @@ export default class GeoChartCamera extends Widget {
     }
 
     if (
-      JSON.stringify(prevState.defineConditionCamera) !=
+      (JSON.stringify(prevState.defineConditionCamera) !=
         JSON.stringify(this.state.defineConditionCamera) ||
-      this.state.defineConditionCamera.length == 0 ||
-      JSON.stringify(prevState.defineConditionNotGoodCamera) !=
-        JSON.stringify(this.state.defineConditionNotGoodCamera) ||
-      this.state.defineConditionNotGoodCamera.length == 0
+        this.state.defineConditionCamera.length == 0 ||
+        JSON.stringify(prevState.defineConditionNotGoodCamera) !=
+          JSON.stringify(this.state.defineConditionNotGoodCamera) ||
+        this.state.defineConditionNotGoodCamera.length == 0) &&
+      this.cameraVAController != null
     ) {
       this.cameraVMSController.getDefineError(2).then(result => {
         this.setState({
@@ -893,6 +895,7 @@ export default class GeoChartCamera extends Widget {
       // alert(`Camera '${camera.name}' không hoạt động`);
       this.setState({
         titleAlertCameraNotActive: `Camera '${camera.name}' không hoạt động`,
+        idCurrentCameraModal: camera.vmsCamId,
         showPopupConfirmForCameraNotActive: true
       });
     } else if (camera.glevel === 6) {
@@ -1278,7 +1281,7 @@ export default class GeoChartCamera extends Widget {
     });
   }
 
-  handleLiveCameraClick(videoEventSrc, title) {
+  handleLiveCameraClick(videoEventSrc, title, idCamera) {
     if (this.videoEventSrc != videoEventSrc) {
       console.log(`handleLiveCameraClick:${videoEventSrc}`);
       this.setState({
@@ -1289,6 +1292,9 @@ export default class GeoChartCamera extends Widget {
       });
       setTimeout(() => this.setState({ videoEventSrc: videoEventSrc }), 100);
     }
+    this.setState({
+      idCurrentCameraModal: idCamera
+    });
   }
 
   handleFitBounds(s, w, n, e) {
@@ -1560,6 +1566,7 @@ export default class GeoChartCamera extends Widget {
       titleAlertCameraNotActive,
       showPopupConfirmForCameraNotActive,
       showFormSubmit,
+      idCurrentCameraModal,
       defineConditionCamera,
       defineConditionNotGoodCamera
     } = this.state;
@@ -1918,6 +1925,7 @@ export default class GeoChartCamera extends Widget {
           zIndex={1501}
           showSubmitForm={showFormSubmit}
           closeSubmitForm={this.invisibleFormSubmit}
+          idCamera={idCurrentCameraModal}
           defineConditionCamera={defineConditionCamera}
           defineConditionNotGoodCamera={defineConditionNotGoodCamera}
           cameraVMSController={this.cameraVMSController}
