@@ -1056,6 +1056,10 @@ export default class GeoChartCamera extends Widget {
         });
       }
     }
+
+    this.setState({
+      idCurrentCameraModal: vmsCamId
+    });
   }
 
   getCameraDataByLayer(layer) {
@@ -1312,6 +1316,7 @@ export default class GeoChartCamera extends Widget {
       });
       setTimeout(() => this.setState({ videoEventSrc: videoEventSrc }), 100);
     }
+
     this.setState({
       idCurrentCameraModal: idCamera
     });

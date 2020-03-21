@@ -1,12 +1,23 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { Modal, Form, Select, Input, Button, message } from "antd";
+import {
+  Modal,
+  Form,
+  Select,
+  Input,
+  Button,
+  message,
+  Spin,
+  List,
+  Avatar
+} from "antd";
 const { TextArea } = Input;
 const FormItem = Form.Item;
 const Option = Select.Option;
 import "antd/dist/antd.css";
 import "./styles/SubmitForm.css";
 import { id } from "date-fns/locale";
+
 class FormSubmitStatusCamera1 extends React.Component {
   constructor(props) {
     super(props);
@@ -16,7 +27,12 @@ class FormSubmitStatusCamera1 extends React.Component {
       listConditionNotGoodCamera: [],
       idCamera: "",
       showOptionNotGoodCamera: false,
-      showNoteTextArea: false
+      showNoteTextArea: false,
+      loading: true,
+      dataHistoryReport: [],
+      showHistoryReport: false,
+      totalRecordReport: 0,
+      recordPerPage: 0
     };
 
     this.setupFormSubmit = this.setupFormSubmit.bind(this);
@@ -24,6 +40,7 @@ class FormSubmitStatusCamera1 extends React.Component {
     this.getDataInforCameraCondition = this.getDataInforCameraCondition.bind(
       this
     );
+    this.getHistoryReportCamera = this.getHistoryReportCamera.bind(this);
   }
 
   componentDidMount() {
@@ -99,6 +116,7 @@ class FormSubmitStatusCamera1 extends React.Component {
       listConditionNotGoodCamera: listConditionNotGoodCamera
     });
     this.getDataInforCameraCondition(this.state.idCamera);
+    this.getHistoryReportCamera(this.state.idCamera, {});
   }
 
   resetDataForm() {
@@ -107,13 +125,19 @@ class FormSubmitStatusCamera1 extends React.Component {
       conditionNotGoodCamera: undefined,
       noteContent: undefined
     });
+
+    this.setState({
+      dataHistoryReport: []
+    });
   }
 
   handleSubmit = e => {
     e.preventDefault();
     this.props.form.validateFields((err, values) => {
       if (!err) {
-        console.log("Received values of form: ", values);
+        this.setState({
+          loading: true
+        });
 
         //handle data before submit
         let stringPhysicalStateNoteCode = "";
@@ -145,10 +169,17 @@ class FormSubmitStatusCamera1 extends React.Component {
         this.props.cameraVMSController
           .submitCameraConditionForm(this.state.idCamera, paramData)
           .then(result => {
+            // console.log(result);
             if (result) {
               this.showSuccessMessage();
+              this.setState({
+                loading: false
+              });
             } else {
               this.showErrorMessage();
+              this.setState({
+                loading: false
+              });
             }
           });
       }
@@ -203,67 +234,140 @@ class FormSubmitStatusCamera1 extends React.Component {
       this.props.cameraVMSController
         .getInformationConditionCamera(idCamera)
         .then(result => {
-          console.log(result);
-          let stringPhysicalState,
-            stringPhysicalStateNoteCode,
-            stringPhysicalStateNote;
+          this.setState({
+            loading: true
+          });
+          if (result) {
+            let stringPhysicalState,
+              stringPhysicalStateNoteCode,
+              stringPhysicalStateNote;
 
-          if (result.PhysicalState == null) {
-            stringPhysicalState = undefined;
-          } else {
-            stringPhysicalState = result.PhysicalState;
-
-            //setup option in form
-            if (stringPhysicalState == "2") {
-              this.setState({
-                showOptionNotGoodCamera: true
-              });
+            if (result.PhysicalState == null) {
+              stringPhysicalState = undefined;
             } else {
-              this.setState({
-                showOptionNotGoodCamera: false
-              });
-              //set data in OptionNotGoodCamera = undefined
-              this.props.form.setFieldsValue({
-                conditionNotGoodCamera: undefined
-              });
+              stringPhysicalState = result.PhysicalState;
+
+              //setup option in form
+              if (stringPhysicalState == "2") {
+                this.setState({
+                  showOptionNotGoodCamera: true
+                });
+              } else {
+                this.setState({
+                  showOptionNotGoodCamera: false
+                });
+                //set data in OptionNotGoodCamera = undefined
+                this.props.form.setFieldsValue({
+                  conditionNotGoodCamera: undefined
+                });
+              }
+              // cam not good and cam die co them 1 text de ghi chu
+              if (stringPhysicalState == "1") {
+                this.setState({
+                  showNoteTextArea: false
+                });
+                //set data in NoteTextArea = undefined
+                this.props.form.setFieldsValue({
+                  noteContent: undefined
+                });
+              } else {
+                this.setState({
+                  showNoteTextArea: true
+                });
+              }
             }
-            // cam not good and cam die co them 1 text de ghi chu
-            if (stringPhysicalState == "1") {
-              this.setState({
-                showNoteTextArea: false
-              });
-              //set data in NoteTextArea = undefined
-              this.props.form.setFieldsValue({
-                noteContent: undefined
-              });
+
+            if (
+              result.PhysicalStateNoteCode == null ||
+              result.PhysicalStateNoteCode == ""
+            ) {
+              stringPhysicalStateNoteCode = undefined;
             } else {
-              this.setState({
-                showNoteTextArea: true
-              });
+              stringPhysicalStateNoteCode = result.PhysicalStateNoteCode.split(
+                ","
+              );
             }
-          }
 
-          if (
-            result.PhysicalStateNoteCode == null ||
-            result.PhysicalStateNoteCode == ""
-          ) {
-            stringPhysicalStateNoteCode = undefined;
+            if (result.PhysicalStateNote == "") {
+              stringPhysicalStateNote = undefined;
+            } else {
+              stringPhysicalStateNote = result.PhysicalStateNote;
+            }
+
+            this.props.form.setFieldsValue({
+              conditionCamera: stringPhysicalState,
+              conditionNotGoodCamera: stringPhysicalStateNoteCode,
+              noteContent: stringPhysicalStateNote
+            });
           } else {
-            stringPhysicalStateNoteCode = result.PhysicalStateNoteCode.split(
-              ","
-            );
+            this.showErrorMessageLoad();
           }
 
-          if (result.PhysicalStateNote == "") {
-            stringPhysicalStateNote = undefined;
+          this.setState({
+            loading: false
+          });
+        });
+    }
+  }
+
+  getHistoryReportCamera(idCamera, paramData) {
+    if (idCamera != "") {
+      this.setState({
+        loading: true
+      });
+      this.props.cameraVMSController
+        .getHistoryReportCamera(idCamera, paramData)
+        .then(result => {
+          if (result) {
+            let dataRes = result.data;
+            dataRes.map(report => {
+              let condition = this.props.defineConditionCamera.filter(
+                define => {
+                  return define.Code === report.PhysicalState;
+                }
+              )[0];
+
+              report.PhysicalState = condition.Content_vi;
+
+              if (
+                report.PhysicalStateNoteCode &&
+                report.PhysicalStateNoteCode != ""
+              ) {
+                let listCode = report.PhysicalStateNoteCode.split(",");
+                let content = "";
+                listCode.map((code, index) => {
+                  let error = this.props.defineConditionNotGoodCamera.filter(
+                    errorNotGood => {
+                      return errorNotGood.Code == code;
+                    }
+                  )[0];
+                  if (index < listCode.length - 1) {
+                    content += error.Content_vi + ", ";
+                  } else {
+                    content += error.Content_vi;
+                  }
+                });
+
+                report.PhysicalStateNoteCode = content;
+              } else {
+                report.PhysicalStateNoteCode = null;
+              }
+
+              if (!report.PhysicalStateNote || report.PhysicalStateNote == "") {
+                report.PhysicalStateNote = null;
+              }
+            });
+
+            this.setState({
+              totalRecordReport: result.total,
+              recordPerPage: result.per_page,
+              dataHistoryReport: result.data
+            });
           } else {
-            stringPhysicalStateNote = result.PhysicalStateNote;
+            this.showErrorMessageLoad();
           }
-
-          this.props.form.setFieldsValue({
-            conditionCamera: stringPhysicalState,
-            conditionNotGoodCamera: stringPhysicalStateNoteCode,
-            noteContent: stringPhysicalStateNote
+          this.setState({
+            loading: false
           });
         });
     }
@@ -283,11 +387,30 @@ class FormSubmitStatusCamera1 extends React.Component {
     });
   };
 
+  showErrorMessageLoad = () => {
+    message.error("Có lỗi xảy ra . Vui lòng thử lại");
+    message.config({
+      duration: 5
+    });
+  };
+
   render() {
     const { getFieldDecorator } = this.props.form;
     const formItemLayout = {
-      labelCol: { span: 8 },
-      wrapperCol: { span: 12 }
+      labelCol: {
+        xl: { span: 8 },
+        lg: { span: 8 },
+        md: { span: 10 },
+        sm: { span: 12 },
+        xs: { span: 10 }
+      },
+      wrapperCol: {
+        xl: { span: 12 },
+        lg: { span: 12 },
+        md: { span: 12 },
+        sm: { span: 12 },
+        xs: { span: 24, offset: 0 }
+      }
     };
     return (
       <div class="formSubmit">
@@ -299,78 +422,161 @@ class FormSubmitStatusCamera1 extends React.Component {
           width="75%"
           zIndex={1600}
         >
-          <Form style={{ marginTop: "50px" }} onSubmit={this.handleSubmit}>
-            <FormItem {...formItemLayout} label="Tình trạng camera hiện tại">
-              {getFieldDecorator("conditionCamera", {
-                rules: [
-                  {
-                    required: true,
-                    message: "Chọn một tình trạng cho camera!"
-                  }
-                ]
-              })(
-                <Select
-                  onChange={this.handleChangeTypeCondition}
-                  placeholder="Chọn một loại tình trạng camera sau đây"
-                  allowClear={true}
-                  defaultValue={null}
-                >
-                  {this.state.listConditionCamera}
-                </Select>
-              )}
-            </FormItem>
-            <FormItem
-              wrapperCol={{ offset: 8, span: 12 }}
+          <Spin spinning={this.state.loading} tip="Đang tải...">
+            <Form
               style={
-                this.state.showOptionNotGoodCamera
-                  ? { display: "", marginTop: "-20px" }
-                  : { display: "none" }
+                this.state.showHistoryReport
+                  ? { display: "none" }
+                  : { display: "", marginTop: "20px" }
               }
+              onSubmit={this.handleSubmit}
             >
-              {getFieldDecorator("conditionNotGoodCamera", {
-                rules: [
-                  {
-                    required: this.state.showOptionNotGoodCamera,
-                    message: "Cần chọn ít nhất một trong các ý kiến!",
-                    type: "array"
-                  }
-                ]
-              })(
-                <Select
-                  onChange={this.handleChangeConditionNotGoodCamera}
-                  defaultValue={null}
-                  allowClear={true}
-                  mode="multiple"
-                  placeholder="Chọn một trong các ý kiến sau đây"
-                >
-                  {this.state.listConditionNotGoodCamera}
-                </Select>
-              )}
-            </FormItem>
-            <FormItem
-              {...formItemLayout}
-              label="Ý kiến bổ sung"
-              style={
-                this.state.showNoteTextArea
-                  ? { display: "", marginTop: "-20px" }
-                  : { display: "none" }
-              }
-            >
-              {getFieldDecorator(
-                "noteContent",
-                {}
-              )(<TextArea rows={4} placeholder="Ghi ý kiến bổ sung" />)}
-            </FormItem>
-            <FormItem wrapperCol={{ span: 20 }}>
-              <Button
-                style={{ float: "right" }}
-                type="primary"
-                htmlType="submit"
+              <FormItem
+                wrapperCol={{
+                  xl: { span: 24 },
+                  lg: { span: 24 },
+                  md: { span: 24 },
+                  sm: { span: 24 },
+                  xs: { span: 24 }
+                }}
+                onClick={() => {
+                  this.setState({
+                    showHistoryReport: true
+                  });
+                }}
               >
-                Gửi báo cáo
-              </Button>
-            </FormItem>
-          </Form>
+                <a>Lịch sử báo cáo</a>
+              </FormItem>
+              <FormItem {...formItemLayout} label="Tình trạng camera hiện tại">
+                {getFieldDecorator("conditionCamera", {
+                  rules: [
+                    {
+                      required: true,
+                      message: "Chọn một tình trạng cho camera!"
+                    }
+                  ]
+                })(
+                  <Select
+                    onChange={this.handleChangeTypeCondition}
+                    placeholder="Chọn một loại tình trạng camera sau đây"
+                    allowClear={true}
+                    defaultValue={null}
+                  >
+                    {this.state.listConditionCamera}
+                  </Select>
+                )}
+              </FormItem>
+              <FormItem
+                wrapperCol={{
+                  xl: { offset: 8, span: 12 },
+                  lg: { offset: 8, span: 12 },
+                  md: { offset: 10, span: 12 },
+                  sm: { offset: 12, span: 12 },
+                  xs: { offset: 0, span: 24 }
+                }}
+                style={
+                  this.state.showOptionNotGoodCamera
+                    ? { display: "", marginTop: "-20px" }
+                    : { display: "none" }
+                }
+              >
+                {getFieldDecorator("conditionNotGoodCamera", {
+                  rules: [
+                    {
+                      required: this.state.showOptionNotGoodCamera,
+                      message: "Cần chọn ít nhất một trong các ý kiến!",
+                      type: "array"
+                    }
+                  ]
+                })(
+                  <Select
+                    onChange={this.handleChangeConditionNotGoodCamera}
+                    defaultValue={null}
+                    allowClear={true}
+                    mode="multiple"
+                    placeholder="Chọn một trong các ý kiến sau đây"
+                  >
+                    {this.state.listConditionNotGoodCamera}
+                  </Select>
+                )}
+              </FormItem>
+              <FormItem
+                {...formItemLayout}
+                label="Ý kiến bổ sung"
+                style={
+                  this.state.showNoteTextArea
+                    ? { display: "", marginTop: "-20px" }
+                    : { display: "none" }
+                }
+              >
+                {getFieldDecorator(
+                  "noteContent",
+                  {}
+                )(<TextArea rows={4} placeholder="Ghi ý kiến bổ sung" />)}
+              </FormItem>
+              <FormItem wrapperCol={{ span: 20 }}>
+                <Button
+                  style={{ float: "right" }}
+                  type="primary"
+                  htmlType="submit"
+                >
+                  Gửi báo cáo
+                </Button>
+              </FormItem>
+            </Form>
+
+            <div
+              id="historyReport"
+              style={
+                this.state.showHistoryReport
+                  ? { display: "", marginTop: "20px" }
+                  : { display: "none" }
+              }
+            >
+              <a
+                onClick={() => {
+                  this.setState({
+                    showHistoryReport: false
+                  });
+                }}
+              >
+                Quay lại
+              </a>
+              <List
+                itemLayout="horizontal"
+                dataSource={this.state.dataHistoryReport}
+                pagination={{
+                  onChange: page => {
+                    this.setState({
+                      dataHistoryReport: []
+                    });
+                    this.getHistoryReportCamera(this.state.idCamera, {
+                      page: page
+                    });
+                  },
+                  total: this.state.totalRecordReport,
+                  pageSize: this.state.recordPerPage
+                }}
+                locale={{ emptyText: "Không có dữ liệu" }}
+                renderItem={item => (
+                  <List.Item>
+                    <List.Item.Meta
+                      // avatar={
+                      //   <Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />
+                      // }
+                      title={<h4>{item.UserNameBKA}</h4>}
+                      description={<div>{item.UpdateTimeBKA}</div>}
+                    />
+                    {item.PhysicalState}
+                    {item.PhysicalStateNoteCode ? <br></br> : ""}
+                    {item.PhysicalStateNoteCode}
+                    {item.PhysicalStateNote ? <br></br> : ""}
+                    {item.PhysicalStateNote}
+                  </List.Item>
+                )}
+              />
+            </div>
+          </Spin>
         </Modal>
       </div>
     );

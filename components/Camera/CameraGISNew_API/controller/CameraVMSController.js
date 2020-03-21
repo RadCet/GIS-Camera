@@ -39,7 +39,8 @@ class CameraVMSController {
       vms_update_token_api_template,
       vms_get_define_error_api_template,
       vms_get_information_report_camera_template,
-      vms_submit_form_report_camera_template
+      vms_submit_form_report_camera_template,
+      vms_get_history_report_camera_template
     } = this.configs;
     const {
       vms_monitors_api_template,
@@ -67,6 +68,7 @@ class CameraVMSController {
     this.vms_get_define_error_api_template = vms_get_define_error_api_template;
     this.vms_get_information_report_camera_template = vms_get_information_report_camera_template;
     this.vms_submit_form_report_camera_template = vms_submit_form_report_camera_template;
+    this.vms_get_history_report_camera_template = vms_get_history_report_camera_template;
 
     this.vms_login_api = vms_login_api_template
       .replace("{vms_protocol}", vms_protocol)
@@ -120,6 +122,11 @@ class CameraVMSController {
       .replace("{vms_domain}", vms_domain)
       .replace("{vms_port}", vms_port);
 
+    this.vms_get_history_report_camera = vms_get_history_report_camera_template
+      .replace("{vms_protocol}", vms_protocol)
+      .replace("{vms_domain}", vms_domain)
+      .replace("{vms_port}", vms_port);
+
     this.cameraUpdateInterval = null;
 
     this.state = {};
@@ -163,6 +170,7 @@ class CameraVMSController {
     this.getInformationConditionCamera = this.getInformationConditionCamera.bind(
       this
     );
+    this.getHistoryReportCamera = this.getHistoryReportCamera.bind(this);
     this.submitCameraConditionForm = this.submitCameraConditionForm.bind(this);
 
     this.state = {
@@ -378,14 +386,24 @@ class CameraVMSController {
     if (!this.applyWithoutToken) {
       headers.Authorization = `Bearer ${vms_token_api}`; //{Authorization: `Basic ${Buffer.from(`${current_vms.username}:${current_vms.password}`).toString('base64')}`},
     }
+    let _params = {};
+    let _data = {};
+    if ("get" === method) {
+      // _params = require("querystring").stringify(params);
+      _params = params;
+    } else {
+      _data = params;
+    }
     return axios({
       method: method,
       url: apiUrl,
       headers: headers,
-      params:
-        "get" === method || "put" === method
-          ? params
-          : require("querystring").stringify(params)
+      // params:
+      //   "get" === method
+      //     ? params
+      //     : require("querystring").stringify(params)
+      params: _params,
+      data: _data
     })
       .then(resp => {
         if (!!resp.data) {
@@ -650,6 +668,16 @@ class CameraVMSController {
   getInformationConditionCamera(idCamera) {
     return this.callAPI(
       this.vms_get_information_report_camera.replace("{idCamera}", idCamera)
+    );
+  }
+
+  getHistoryReportCamera(idCamera, paramData) {
+    return this.callAPI(
+      this.vms_get_history_report_camera.replace("{idCamera}", idCamera),
+      paramData,
+      null,
+      "get",
+      null
     );
   }
 
