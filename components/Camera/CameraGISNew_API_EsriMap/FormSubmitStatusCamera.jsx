@@ -9,6 +9,7 @@ import {
   message,
   Spin,
   List,
+  Icon,
   Avatar
 } from "antd";
 const { TextArea } = Input;
@@ -424,15 +425,51 @@ class FormSubmitStatusCamera1 extends React.Component {
           zIndex={1600}
         >
           <Spin spinning={this.state.loading} tip="Đang tải...">
+            <div
+              style={
+                this.state.showHistoryReport
+                  ? { display: "none" }
+                  : {
+                      display: "",
+                      height: "30px",
+                      cursor: "pointer",
+                      marginTop: "20px"
+                    }
+              }
+              onClick={() => {
+                this.setState({
+                  showHistoryReport: true
+                });
+              }}
+            >
+              <Icon
+                type="left"
+                theme="outlined"
+                style={{
+                  color: "#1890ff",
+                  fontSize: "18px",
+                  position: "absolute"
+                }}
+              />
+              <a
+                style={{
+                  position: "absolute",
+                  marginTop: "-1px",
+                  marginLeft: "18px"
+                }}
+              >
+                Lịch sử báo cáo
+              </a>
+            </div>
             <Form
               style={
                 this.state.showHistoryReport
                   ? { display: "none" }
-                  : { display: "", marginTop: "20px" }
+                  : { display: "" }
               }
               onSubmit={this.handleSubmit}
             >
-              <FormItem
+              {/* <FormItem
                 wrapperCol={{
                   xl: { span: 24 },
                   lg: { span: 24 },
@@ -446,8 +483,17 @@ class FormSubmitStatusCamera1 extends React.Component {
                   });
                 }}
               >
+                <Icon
+                  type="left"
+                  theme="outlined"
+                  style={{
+                    color: "#1890ff",
+                    fontSize: "18px",
+                    position: "absolute"
+                  }}
+                />
                 <a>Lịch sử báo cáo</a>
-              </FormItem>
+              </FormItem> */}
               <FormItem {...formItemLayout} label="Tình trạng camera hiện tại">
                 {getFieldDecorator("conditionCamera", {
                   rules: [
@@ -534,15 +580,34 @@ class FormSubmitStatusCamera1 extends React.Component {
                   : { display: "none" }
               }
             >
-              <a
+              <div
+                style={{ height: "30px", cursor: "pointer" }}
                 onClick={() => {
                   this.setState({
                     showHistoryReport: false
                   });
                 }}
               >
-                Quay lại
-              </a>
+                <Icon
+                  type="left"
+                  theme="outlined"
+                  style={{
+                    color: "#1890ff",
+                    fontSize: "18px",
+                    position: "absolute"
+                  }}
+                />
+                <a
+                  style={{
+                    position: "absolute",
+                    marginTop: "-1px",
+                    marginLeft: "18px"
+                  }}
+                >
+                  Quay lại
+                </a>
+              </div>
+
               <List
                 itemLayout="horizontal"
                 dataSource={this.state.dataHistoryReport}
