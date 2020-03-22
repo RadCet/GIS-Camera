@@ -1,0 +1,35 @@
+.ant-modal {
+    padding-bottom: 0px;
+  }
+  
+  .ant-modal-mask {
+    background-color: rgba(0, 0, 0, 0.85);
+  }
+  
+  .ant-modal-title {
+    font-weight: bold;
+    font-size: 25px;
+    margin-left: 10px;
+    max-width: calc(100% - 60px);
+  }
+  
+  .ant-modal-header {
+    position: absolute;
+    padding: 3px 24px;
+    text-overflow: ellipsis;
+    max-width: calc(100% - 60px);
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  
+  .ant-modal-close {
+    left: 0;
+    z-index: 101;
+  }
+  
+  .ant-modal-close-x {
+    width: 36px;
+    height: 30px;
+    line-height: 32px;
+  }
+  

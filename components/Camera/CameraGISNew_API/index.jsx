@@ -356,7 +356,14 @@ export default class GeoChartCamera extends Widget {
 
     //tao cluster
     for (let index = 0; index < cameraIcons.length; index++) {
-      if (index == 0 || index == 1 || index == 2 || index == 4) {
+      if (
+        index == 0 ||
+        index == 1 ||
+        index == 2 ||
+        index == 4 ||
+        index == 6 ||
+        index == 7
+      ) {
         let cluster = L.markerClusterGroup({
           iconCreateFunction: function(cluster) {
             return L.divIcon({

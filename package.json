@@ -186,7 +186,7 @@
     "build:cameraQN": "webpack --config widgets/camera/CameraQuangNinh/CameraGIS/webpack.config.js --mode production",
     "build:cameraQNAICAM": "webpack --config widgets/camera/CameraQuangNinh/CameraGISQN_AICAM/webpack.config.js --mode production",
     "build:cameraGISAPI": "webpack --config widgets/camera/CameraQuangNinh/CameraGISAPI/webpack.config.js --mode production",
-    "build:cameraGISAPINewMap": "webpack --config widgets/camera/CameraQuangNinh/CameraGISAPI_NewMap/webpack.config.js --mode production",
+    "build:cameraGISAPIEsriMap": "webpack --config widgets/camera/CameraQuangNinh/CameraGISAPI_EsriMap/webpack.config.js --mode production",
     "build:cameraQNGiaoDienMoi": "webpack --config widgets/camera/CameraQuangNinh/CameraGISGiaoDienMoi/webpack.config.js --mode production",
     "build:cameraGISVienK": "webpack --config widgets/camera/CameraVienK/CameraGISVienK/webpack.config.js --mode production",
     "build:monitoringVienK": "webpack --config widgets/camera/CameraVienK/MonitoringVienK/webpack.config.js --mode production",
