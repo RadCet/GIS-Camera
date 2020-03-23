@@ -1,3 +1,8 @@
+.leaflet-container .leaflet-control-attribution,
+.leaflet-container .leaflet-control-scale {
+  font-size: 11px;
+  display: none;
+}
 .clusterLevel-0 {
   background-color: #ed1c24;
   border: 1px solid #ed1c24;
@@ -105,4 +110,8 @@
 
 #searchBox {
   z-index: 1601 !important;
+}
+
+.customPopup{
+  margin-left: 16px;  /* 1/2 width icon image*/
 }

@@ -98,18 +98,32 @@ class FormSubmitStatusCamera1 extends React.Component {
 
   setupFormSubmit(defineConditionCamera, defineConditionNotGoodCamera) {
     let listConditionCamera = [];
-    for (let index = 0; index < defineConditionCamera.length; index++) {
-      listConditionCamera.push(
-        <Option key={defineConditionCamera[index].Code}>
-          {defineConditionCamera[index].Content_vi}
-        </Option>
-      );
-    }
     let listConditionNotGoodCamera = [];
-    for (let index = 0; index < defineConditionNotGoodCamera.length; index++) {
-      listConditionNotGoodCamera.push(
-        <Option key={defineConditionNotGoodCamera[index].Code}>
-          {defineConditionNotGoodCamera[index].Content_vi}
+    let isCamdie = this.props.isCamdie;
+    if (!isCamdie) {
+      for (let index = 0; index < defineConditionCamera.length; index++) {
+        listConditionCamera.push(
+          <Option key={defineConditionCamera[index].Code}>
+            {defineConditionCamera[index].Content_vi}
+          </Option>
+        );
+      }
+      for (
+        let index = 0;
+        index < defineConditionNotGoodCamera.length;
+        index++
+      ) {
+        listConditionNotGoodCamera.push(
+          <Option key={defineConditionNotGoodCamera[index].Code}>
+            {defineConditionNotGoodCamera[index].Content_vi}
+          </Option>
+        );
+      }
+    } else {
+      // only option cam khong co tin hieu
+      listConditionCamera.push(
+        <Option key={defineConditionCamera[0].Code}>
+          {defineConditionCamera[0].Content_vi}
         </Option>
       );
     }
@@ -118,7 +132,6 @@ class FormSubmitStatusCamera1 extends React.Component {
       listConditionNotGoodCamera: listConditionNotGoodCamera
     });
     this.getDataInforCameraCondition(this.state.idCamera);
-    this.getHistoryReportCamera(this.state.idCamera, {});
   }
 
   resetDataForm() {
@@ -169,7 +182,11 @@ class FormSubmitStatusCamera1 extends React.Component {
         };
 
         this.props.cameraVMSController
-          .submitCameraConditionForm(this.state.idCamera, paramData)
+          .submitCameraConditionForm(
+            this.props.vmsID,
+            this.state.idCamera,
+            paramData
+          )
           .then(result => {
             // console.log(result);
             if (result) {
@@ -234,7 +251,7 @@ class FormSubmitStatusCamera1 extends React.Component {
   getDataInforCameraCondition(idCamera) {
     if (idCamera != "") {
       this.props.cameraVMSController
-        .getInformationConditionCamera(idCamera)
+        .getInformationConditionCamera(this.props.vmsID, idCamera)
         .then(result => {
           this.setState({
             loading: true
@@ -244,7 +261,9 @@ class FormSubmitStatusCamera1 extends React.Component {
               stringPhysicalStateNoteCode,
               stringPhysicalStateNote;
 
-            if (result.PhysicalState == null) {
+            if (this.props.isCamdie) {
+              stringPhysicalState = "0";
+            } else if (result.PhysicalState == null) {
               stringPhysicalState = undefined;
             } else {
               stringPhysicalState = result.PhysicalState;
@@ -278,7 +297,6 @@ class FormSubmitStatusCamera1 extends React.Component {
                 });
               }
             }
-
             if (
               result.PhysicalStateNoteCode == null ||
               result.PhysicalStateNoteCode == ""
@@ -289,13 +307,11 @@ class FormSubmitStatusCamera1 extends React.Component {
                 ","
               );
             }
-
             if (result.PhysicalStateNote == "") {
               stringPhysicalStateNote = undefined;
             } else {
               stringPhysicalStateNote = result.PhysicalStateNote;
             }
-
             this.props.form.setFieldsValue({
               conditionCamera: stringPhysicalState,
               conditionNotGoodCamera: stringPhysicalStateNoteCode,
@@ -304,7 +320,6 @@ class FormSubmitStatusCamera1 extends React.Component {
           } else {
             this.showErrorMessageLoad();
           }
-
           this.setState({
             loading: false
           });
@@ -318,7 +333,7 @@ class FormSubmitStatusCamera1 extends React.Component {
         loading: true
       });
       this.props.cameraVMSController
-        .getHistoryReportCamera(idCamera, paramData)
+        .getHistoryReportCamera(this.props.vmsID, idCamera, paramData)
         .then(result => {
           if (result) {
             let dataRes = result.data;
@@ -440,6 +455,7 @@ class FormSubmitStatusCamera1 extends React.Component {
                 this.setState({
                   showHistoryReport: true
                 });
+                this.getHistoryReportCamera(this.state.idCamera, {});
               }}
             >
               <Icon
@@ -561,7 +577,15 @@ class FormSubmitStatusCamera1 extends React.Component {
                   {}
                 )(<TextArea rows={4} placeholder="Ghi ý kiến bổ sung" />)}
               </FormItem>
-              <FormItem wrapperCol={{ span: 20 }}>
+              <FormItem
+                wrapperCol={{
+                  xl: { span: 20 },
+                  lg: { span: 20 },
+                  md: { span: 22 },
+                  sm: { span: 24 },
+                  xs: { span: 24 }
+                }}
+              >
                 <Button
                   style={{ float: "right" }}
                   type="primary"

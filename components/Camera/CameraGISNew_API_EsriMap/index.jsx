@@ -44,11 +44,6 @@ import "./styles/ViewMap.css";
 
 const { TreeNode } = TreeSelect;
 
-let incidentMap = null;
-
-let markers = [];
-let infoWindows = [];
-
 const cameraIcons = [
   cameraIcon0,
   cameraIcon1,
@@ -104,15 +99,19 @@ export default class GeoChartCamera extends Widget {
       timeDataUpdate: null,
       timeElapse: "00:00",
       isLoadingData: true,
+
+      // report camera
+      permissionReport: null,
       showFormSubmit: false,
       idCurrentCameraModal: "",
+      isCamdie: false,
       defineConditionCamera: [],
       defineConditionNotGoodCamera: []
     };
 
     this.handleResize = this.handleResize.bind(this);
     this.closeVideoPopup = this.closeVideoPopup.bind(this);
-    this.initVietBanDoMap = this.initVietBanDoMap.bind(this);
+    // this.initVietBanDoMap = this.initVietBanDoMap.bind(this);
     this.handleLiveCameraClick = this.handleLiveCameraClick.bind(this);
     this.addLiveCamera = this.addLiveCamera.bind(this);
     this.handleClickCamera = this.handleClickCamera.bind(this);
@@ -321,7 +320,7 @@ export default class GeoChartCamera extends Widget {
             });
           }, 1000)
         : null;
-      this.initVietBanDoMap();
+      // this.initVietBanDoMap();
       console.log(
         `CAMERAGIS[version=${this.widget_version}:${new Date(
           this.widget_time_update
@@ -339,10 +338,15 @@ export default class GeoChartCamera extends Widget {
     require("leaflet/dist/leaflet.css");
 
     map = L.map("esriMap", {
-      maxZoom: 17
+      maxZoom: 17,
+      zoomControl: false
     }).setView([this.latCenter, this.lngCenter], this.zoomDefault);
     esri.basemapLayer("Streets").addTo(map);
-
+    L.control
+      .zoom({
+        position: "bottomright"
+      })
+      .addTo(map);
     // khởi tạo icon, marker
     for (let index = 0; index < cameraIcons.length; index++) {
       let icon = L.icon({
@@ -809,6 +813,18 @@ export default class GeoChartCamera extends Widget {
       this.addMarkerToMap();
     }
 
+    if (this.state.permissionReport == null) {
+      if (this.cameraVMSController.getCurrentVMS().auth.permission == "Edit") {
+        this.setState({
+          permissionReport: true
+        });
+      } else {
+        this.setState({
+          permissionReport: false
+        });
+      }
+    }
+
     if (
       (JSON.stringify(prevState.defineConditionCamera) !=
         JSON.stringify(this.state.defineConditionCamera) ||
@@ -842,31 +858,31 @@ export default class GeoChartCamera extends Widget {
   }
 
   // Khoi tao ban do
-  initVietBanDoMap() {
-    var mapContainer = document.getElementById("vbdContainer");
-    const centerDefault = new vbd.LatLng(this.latCenter, this.lngCenter);
-    // const sw = new vbd.LatLng(this.southwestLat, this.southwestLng);
-    // const ne = new vbd.LatLng(this.northeastLat, this.northeastLng);
-    var mapProp = {
-      center: centerDefault,
-      zoom: this.zoomDefault,
-      zoomControl: false,
-      minZoom: this.minZoom
-      // limitBounds: new vbd.latLngBounds(sw, ne)
-    };
-    incidentMap = new vbd.Map(mapContainer, mapProp);
+  // initVietBanDoMap() {
+  //   var mapContainer = document.getElementById("vbdContainer");
+  //   const centerDefault = new vbd.LatLng(this.latCenter, this.lngCenter);
+  //   // const sw = new vbd.LatLng(this.southwestLat, this.southwestLng);
+  //   // const ne = new vbd.LatLng(this.northeastLat, this.northeastLng);
+  //   var mapProp = {
+  //     center: centerDefault,
+  //     zoom: this.zoomDefault,
+  //     zoomControl: false,
+  //     minZoom: this.minZoom
+  //     // limitBounds: new vbd.latLngBounds(sw, ne)
+  //   };
+  //   incidentMap = new vbd.Map(mapContainer, mapProp);
 
-    //Khi click vào bản đồ, bỏ focus các ô text, xóa hết các infoWindow
-    vbd.event.addListener(incidentMap, "click", function(param) {
-      $("input#searchByName").blur();
-      $("input#searchByMaps").blur();
-      if (infoWindows) {
-        infoWindows.map(iw => {
-          iw.close();
-        });
-      }
-    });
-  }
+  //   //Khi click vào bản đồ, bỏ focus các ô text, xóa hết các infoWindow
+  //   vbd.event.addListener(incidentMap, "click", function(param) {
+  //     $("input#searchByName").blur();
+  //     $("input#searchByMaps").blur();
+  //     if (infoWindows) {
+  //       infoWindows.map(iw => {
+  //         iw.close();
+  //       });
+  //     }
+  //   });
+  // }
 
   handleResize() {
     const { glContainer } = this.props;
@@ -896,20 +912,28 @@ export default class GeoChartCamera extends Widget {
 
   handleClickCamera(camera) {
     if (camera.level === 0) {
-      Modal.confirm({
-        title: `Camera '${camera.name}' không hoạt động`,
-        // content:
-        //   "When clicked the OK button, this dialog will be closed after 1 second",
-        okText: "Báo cáo",
-        cancelText: "Hủy",
-        onOk: () => {
-          this.setState({
-            idCurrentCameraModal: camera.vmsCamId
-          });
-          this.visibleFormSubmit();
-        },
-        onCancel() {}
-      });
+      if (this.state.permissionReport) {
+        Modal.confirm({
+          title: `Camera '${camera.name}' không hoạt động`,
+          // content:
+          //   "When clicked the OK button, this dialog will be closed after 1 second",
+          okText: "Báo cáo",
+          cancelText: "Thoát",
+          onOk: () => {
+            this.setState({
+              idCurrentCameraModal: camera.vmsCamId,
+              isCamdie: true
+            });
+            this.visibleFormSubmit();
+          },
+          onCancel() {}
+        });
+      } else {
+        Modal.error({
+          title: `Camera '${camera.name}' không hoạt động`
+          // content: "some messages...some messages..."
+        });
+      }
     } else if (camera.glevel === 6) {
       if (this.showSocializationInNewTab) {
         window.open(camera.url, "_blank");
@@ -922,22 +946,32 @@ export default class GeoChartCamera extends Widget {
       //     camera.description ? camera.description : ""
       //   }`
       // );
-      Modal.confirm({
-        title: `Camera '${camera.name}' chưa lấy được. ${
-          camera.description ? camera.description : ""
-        }`,
-        // content:
-        //   "When clicked the OK button, this dialog will be closed after 1 second",
-        okText: "Báo cáo",
-        cancelText: "Hủy",
-        onOk: () => {
-          this.setState({
-            idCurrentCameraModal: camera.vmsCamId
-          });
-          this.visibleFormSubmit();
-        },
-        onCancel() {}
-      });
+      if (this.state.permissionReport) {
+        Modal.confirm({
+          title: `Camera '${camera.name}' chưa lấy được. ${
+            camera.description ? camera.description : ""
+          }`,
+          // content:
+          //   "When clicked the OK button, this dialog will be closed after 1 second",
+          okText: "Báo cáo",
+          cancelText: "Hủy",
+          onOk: () => {
+            this.setState({
+              idCurrentCameraModal: camera.vmsCamId,
+              isCamdie: true
+            });
+            this.visibleFormSubmit();
+          },
+          onCancel() {}
+        });
+      } else {
+        Modal.warning({
+          title: `Camera '${camera.name}' chưa lấy được. ${
+            camera.description ? camera.description : ""
+          }`
+          // content: 'some messages...some messages...',
+        });
+      }
     } else if (this.state.isMobile || this.state.showPopupLiveCam) {
       this.showLiveCamOnMobile(camera.vmsCamId, camera.clusterDataID);
     } else {
@@ -966,45 +1000,57 @@ export default class GeoChartCamera extends Widget {
 
   showInfoWindow(camera) {
     // Xóa hết các infowindow khác
-    if (infoWindows) {
-      infoWindows.map(iw => {
-        iw.close();
-      });
-    }
+    // if (infoWindows) {
+    //   infoWindows.map(iw => {
+    //     iw.close();
+    //   });
+    // }
 
-    const markerLatLng = new vbd.LatLng(camera.latitude, camera.longitude);
-    const markerIcon =
-      camera.ailevel != null
-        ? cameraIcons[camera.ailevel]
-        : cameraIcons[camera.level];
-    const vIcon = new vbd.Icon({
-      url: markerIcon,
-      size: new vbd.Size(32, 32)
-    });
-    const vMarker = new vbd.Marker({
-      position: markerLatLng,
-      icon: vIcon
-    });
-    vMarker.setMap(incidentMap);
+    L.popup()
+      .setLatLng([camera.latitude, camera.longitude])
+      .setContent(
+        '<div style="font-size: 18px; font-weight: bold;">' +
+          camera.name +
+          "</div>" +
+          "<p>" +
+          camera.address +
+          "</p"
+      )
+      .openOn(map);
 
-    var contentShow = renderInfoWindowContent({
-      id: camera.id,
-      vmsCamId: camera.vmsCamId,
-      title: camera.name,
-      address: camera.address,
-      description: camera.description,
-      events: camera.events,
-      username: camera.username,
-      password: camera.password,
-      numberChilds: camera.numberChilds
-    });
+    // const markerLatLng = new vbd.LatLng(camera.latitude, camera.longitude);
+    // const markerIcon =
+    //   camera.ailevel != null
+    //     ? cameraIcons[camera.ailevel]
+    //     : cameraIcons[camera.level];
+    // const vIcon = new vbd.Icon({
+    //   url: markerIcon,
+    //   size: new vbd.Size(32, 32)
+    // });
+    // const vMarker = new vbd.Marker({
+    //   position: markerLatLng,
+    //   icon: vIcon
+    // });
+    // vMarker.setMap(incidentMap);
 
-    var vbdInfowindow = new vbd.InfoWindow({ content: contentShow });
-    vbdInfowindow.open(incidentMap, vMarker);
-    infoWindows.push(vbdInfowindow);
-    setTimeout(() => {
-      incidentMap.removeMarker(vMarker);
-    }, 1000);
+    // var contentShow = renderInfoWindowContent({
+    //   id: camera.id,
+    //   vmsCamId: camera.vmsCamId,
+    //   title: camera.name,
+    //   address: camera.address,
+    //   description: camera.description,
+    //   events: camera.events,
+    //   username: camera.username,
+    //   password: camera.password,
+    //   numberChilds: camera.numberChilds
+    // });
+
+    // var vbdInfowindow = new vbd.InfoWindow({ content: contentShow });
+    // vbdInfowindow.open(incidentMap, vMarker);
+    // infoWindows.push(vbdInfowindow);
+    // setTimeout(() => {
+    //   incidentMap.removeMarker(vMarker);
+    // }, 1000);
   }
 
   showLiveCamOnMobile(vmsCamId, clusterDataID = null) {
@@ -1066,7 +1112,8 @@ export default class GeoChartCamera extends Widget {
     }
 
     this.setState({
-      idCurrentCameraModal: vmsCamId
+      idCurrentCameraModal: vmsCamId,
+      isCamdie: false
     });
   }
 
@@ -1080,14 +1127,18 @@ export default class GeoChartCamera extends Widget {
   }
 
   addMarkerToMap() {
-    if (incidentMap == null) {
+    // if (incidentMap == null) {
+    //   return;
+    // }
+
+    // // Remove cac marker hien tai
+    // markers.map(marker => {
+    //   incidentMap.removeMarker(marker);
+    // });
+
+    if (map == null) {
       return;
     }
-
-    // Remove cac marker hien tai
-    markers.map(marker => {
-      incidentMap.removeMarker(marker);
-    });
 
     markers = [];
     let cameraDataByLayer = this.state.cameraDataByLayer;
@@ -1118,94 +1169,94 @@ export default class GeoChartCamera extends Widget {
           (currentFilter == StatisData.UNDONE && item.glevel === 7))
       );
     });
-    displayCamera.map(marker => {
-      const markerLatLng = new vbd.LatLng(marker.latitude, marker.longitude);
-      const markerIcon =
-        marker.ailevel != null
-          ? cameraIcons[marker.ailevel]
-          : marker.glevel != null
-          ? cameraIcons[marker.glevel]
-          : cameraIcons[marker.level];
-      const vIcon = new vbd.Icon({
-        url: markerIcon,
-        size: new vbd.Size(32, 32)
-      });
-      const vMarker = new vbd.Marker({
-        position: markerLatLng,
-        icon: vIcon
-      });
-      vMarker.setMap(incidentMap);
+    // displayCamera.map(marker => {
+    //   const markerLatLng = new vbd.LatLng(marker.latitude, marker.longitude);
+    //   const markerIcon =
+    //     marker.ailevel != null
+    //       ? cameraIcons[marker.ailevel]
+    //       : marker.glevel != null
+    //       ? cameraIcons[marker.glevel]
+    //       : cameraIcons[marker.level];
+    //   const vIcon = new vbd.Icon({
+    //     url: markerIcon,
+    //     size: new vbd.Size(32, 32)
+    //   });
+    //   const vMarker = new vbd.Marker({
+    //     position: markerLatLng,
+    //     icon: vIcon
+    //   });
+    //   vMarker.setMap(incidentMap);
 
-      var contentShow = renderInfoWindowContent({
-        id: marker.id,
-        vmsCamId: marker.vmsCamId,
-        title: marker.name,
-        address: marker.address,
-        description: marker.description,
-        events: marker.events,
-        username: marker.username,
-        password: marker.password,
-        numberChilds: marker.numberChilds
-      });
+    //   var contentShow = renderInfoWindowContent({
+    //     id: marker.id,
+    //     vmsCamId: marker.vmsCamId,
+    //     title: marker.name,
+    //     address: marker.address,
+    //     description: marker.description,
+    //     events: marker.events,
+    //     username: marker.username,
+    //     password: marker.password,
+    //     numberChilds: marker.numberChilds
+    //   });
 
-      var vbdInfowindow = new vbd.InfoWindow({ content: contentShow });
+    //   var vbdInfowindow = new vbd.InfoWindow({ content: contentShow });
 
-      var that = this;
+    //   var that = this;
 
-      vbd.event.addListener(vMarker, "click", function(event) {
-        that.handleClickCamera(marker);
-      });
+    //   vbd.event.addListener(vMarker, "click", function(event) {
+    //     that.handleClickCamera(marker);
+    //   });
 
-      vbd.event.addListener(vMarker, "mouseover", function(param) {
-        if (infoWindows) {
-          infoWindows.map(iw => {
-            iw.close();
-          });
-        }
-        infoWindows = [];
-        this.timer = setTimeout(function() {
-          vbdInfowindow.open(incidentMap, vMarker);
-          infoWindows.push(vbdInfowindow);
+    //   vbd.event.addListener(vMarker, "mouseover", function(param) {
+    //     if (infoWindows) {
+    //       infoWindows.map(iw => {
+    //         iw.close();
+    //       });
+    //     }
+    //     infoWindows = [];
+    //     this.timer = setTimeout(function() {
+    //       vbdInfowindow.open(incidentMap, vMarker);
+    //       infoWindows.push(vbdInfowindow);
 
-          // Thêm sự kiện khi click vào một event
-          $(".aEvent").click(function(event) {
-            var title = "";
-            if ($(event.target).data("camname"))
-              title += $(event.target).data("camname");
-            if ($(event.target).data("type"))
-              title += " - " + $(event.target).data("type");
-            if ($(event.target).data("time"))
-              title += " - " + $(event.target).data("time");
+    //       // Thêm sự kiện khi click vào một event
+    //       $(".aEvent").click(function(event) {
+    //         var title = "";
+    //         if ($(event.target).data("camname"))
+    //           title += $(event.target).data("camname");
+    //         if ($(event.target).data("type"))
+    //           title += " - " + $(event.target).data("type");
+    //         if ($(event.target).data("time"))
+    //           title += " - " + $(event.target).data("time");
 
-            const eventID = $(event.target).data("eventid");
-            const clusterdataid = $(event.target).data("clusterdataid");
+    //         const eventID = $(event.target).data("eventid");
+    //         const clusterdataid = $(event.target).data("clusterdataid");
 
-            let isSupportVideo = browser() !== "safari";
-            let apiUrl = isSupportVideo
-              ? that.cameraVAController.getEventVideoLink(
-                  eventID,
-                  clusterdataid
-                )
-              : that.cameraVAController.getEventImageLink(
-                  eventID,
-                  clusterdataid
-                );
-            that.setState({
-              videoEventSrc: apiUrl,
-              videoEventTitle: title,
-              videoEventDataType: isSupportVideo ? "video" : "image",
-              videoEventVisible: true
-            });
-          });
-        }, 500);
-      });
+    //         let isSupportVideo = browser() !== "safari";
+    //         let apiUrl = isSupportVideo
+    //           ? that.cameraVAController.getEventVideoLink(
+    //               eventID,
+    //               clusterdataid
+    //             )
+    //           : that.cameraVAController.getEventImageLink(
+    //               eventID,
+    //               clusterdataid
+    //             );
+    //         that.setState({
+    //           videoEventSrc: apiUrl,
+    //           videoEventTitle: title,
+    //           videoEventDataType: isSupportVideo ? "video" : "image",
+    //           videoEventVisible: true
+    //         });
+    //       });
+    //     }, 500);
+    //   });
 
-      vbd.event.addListener(vMarker, "mouseout", function() {
-        clearTimeout(this.timer);
-      });
+    //   vbd.event.addListener(vMarker, "mouseout", function() {
+    //     clearTimeout(this.timer);
+    //   });
 
-      markers.push(vMarker);
-    });
+    //   markers.push(vMarker);
+    // });
 
     //esri map
     listMarkerDatas = [];
@@ -1234,20 +1285,25 @@ export default class GeoChartCamera extends Widget {
           }).addTo(listMarkerGroups[index]);
 
           //set action for marker
-          objectMarker.bindPopup(function(camera) {
-            // console.log(camera);
-            return (
-              '<div style="font-size: 18px; font-weight: bold;">' +
-              camera.options.nameCamera +
-              "</div>" +
-              "<p>" +
-              camera.options.addressCamera +
-              "</p"
-            );
-          });
+          objectMarker.bindPopup(
+            function(camera) {
+              // console.log(camera);
+              return (
+                '<div style="font-size: 18px; font-weight: bold;">' +
+                camera.options.nameCamera +
+                "</div>" +
+                "<p>" +
+                camera.options.addressCamera +
+                "</p"
+              );
+            },
+            {
+              maxWidth: 1000,
+              className: "customPopup"
+            }
+          );
 
           var that = this;
-
           objectMarker.on("click", function(e) {
             let targetCamera = displayCamera.filter(camera => {
               return camera.id == e.target.options.idCamera;
@@ -1325,17 +1381,18 @@ export default class GeoChartCamera extends Widget {
       setTimeout(() => this.setState({ videoEventSrc: videoEventSrc }), 100);
     }
     this.setState({
-      idCurrentCameraModal: idCamera
+      idCurrentCameraModal: idCamera,
+      isCamdie: false
     });
   }
 
   handleFitBounds(s, w, n, e) {
-    if (incidentMap) {
-      console.log("handleFitBounds:" + s);
-      const sw = new vbd.LatLng(s, w);
-      const ne = new vbd.LatLng(n, e);
-      incidentMap.zoomFitEx([sw, ne]);
-    }
+    // if (incidentMap) {
+    //   console.log("handleFitBounds:" + s);
+    //   const sw = new vbd.LatLng(s, w);
+    //   const ne = new vbd.LatLng(n, e);
+    //   incidentMap.zoomFitEx([sw, ne]);
+    // }
 
     if (map) {
       map.fitBounds([
@@ -1346,21 +1403,22 @@ export default class GeoChartCamera extends Widget {
   }
 
   resetMap() {
-    if (incidentMap) {
-      console.log(
-        `resetMap:${this.latCenter}:${this.lngCenter}:${this.zoomDefault}`
-      );
-      const centerDefault = new vbd.LatLng(this.latCenter, this.lngCenter);
-      incidentMap.setZoom(this.zoomDefault);
-      incidentMap.setCenter(centerDefault);
-    }
+    // if (incidentMap) {
+    //   console.log(
+    //     `resetMap:${this.latCenter}:${this.lngCenter}:${this.zoomDefault}`
+    //   );
+    //   const centerDefault = new vbd.LatLng(this.latCenter, this.lngCenter);
+    //   incidentMap.setZoom(this.zoomDefault);
+    //   incidentMap.setCenter(centerDefault);
+    // }
     if (map) {
       map.setView([this.latCenter, this.lngCenter], this.zoomDefault);
     }
   }
 
   focusMap(camera) {
-    if (!incidentMap) return;
+    // if (!incidentMap) return;
+    if (!map) return;
     console.log(
       `focusMap:${this.latCenter}:${this.lngCenter}:${this.zoomDefault}`
     );
@@ -1415,11 +1473,11 @@ export default class GeoChartCamera extends Widget {
       latCenter = camera.latitude;
       lngCenter = camera.longitude;
     }
-    const centerDefault = new vbd.LatLng(latCenter, lngCenter);
-    // if (incidentMap.getZoom()  < zoom) {
-    incidentMap.setZoom(zoom);
-    // }
-    incidentMap.setCenter(centerDefault);
+    // const centerDefault = new vbd.LatLng(latCenter, lngCenter);
+    // // if (incidentMap.getZoom()  < zoom) {
+    // incidentMap.setZoom(zoom);
+    // // }
+    // incidentMap.setCenter(centerDefault);
     if (map) {
       map.setView([latCenter, lngCenter], zoom);
     }
@@ -1428,12 +1486,16 @@ export default class GeoChartCamera extends Widget {
   handleSelectSearch(camera) {
     if (typeof camera != "undefined") {
       // Zoom bản đồ vào vị trí cam
-      if (incidentMap) {
-        const center = new vbd.LatLng(camera.latitude, camera.longitude);
-        if (incidentMap.getZoom() < 18) {
-          incidentMap.setZoom(18);
-        }
-        incidentMap.setCenter(center);
+      // if (incidentMap) {
+      //   const center = new vbd.LatLng(camera.latitude, camera.longitude);
+      //   if (incidentMap.getZoom() < 18) {
+      //     incidentMap.setZoom(18);
+      //   }
+      //   incidentMap.setCenter(center);
+      // }
+
+      if (map) {
+        map.setView([camera.latitude, camera.longitude], 17);
       }
 
       this.showInfoWindow(camera);
@@ -1584,8 +1646,10 @@ export default class GeoChartCamera extends Widget {
       infoTimeUpdate,
       infoContent,
       isMobileFunction,
+      permissionReport,
       showFormSubmit,
       idCurrentCameraModal,
+      isCamdie,
       defineConditionCamera,
       defineConditionNotGoodCamera
     } = this.state;
@@ -1667,7 +1731,7 @@ export default class GeoChartCamera extends Widget {
                 />
               </div>
             </div>
-            <div id={"vbdContainer"} style={(vbdStyle, { display: "none" })} />
+            {/* <div id={"vbdContainer"} style={(vbdStyle, { display: "none" })} /> */}
             <div
               id={"esriMap"}
               className="webmap"
@@ -1870,13 +1934,17 @@ export default class GeoChartCamera extends Widget {
           <Icon
             type="flag"
             theme="filled"
-            style={{
-              color: "#000000",
-              fontSize: "24px",
-              float: "right",
-              marginRight: "20px",
-              marginLeft: "20px"
-            }}
+            style={
+              permissionReport
+                ? {
+                    color: "#000000",
+                    fontSize: "24px",
+                    float: "right",
+                    marginRight: "20px",
+                    marginLeft: "20px"
+                  }
+                : { display: "none" }
+            }
             onClick={this.visibleFormSubmit}
           />
           {videoEventDataType == "image" ? (
@@ -1916,7 +1984,9 @@ export default class GeoChartCamera extends Widget {
           zIndex={1501}
           showSubmitForm={showFormSubmit}
           closeSubmitForm={this.invisibleFormSubmit}
+          vmsID={currentClusterDataID}
           idCamera={idCurrentCameraModal}
+          isCamdie={isCamdie}
           defineConditionCamera={defineConditionCamera}
           defineConditionNotGoodCamera={defineConditionNotGoodCamera}
           cameraVMSController={this.cameraVMSController}

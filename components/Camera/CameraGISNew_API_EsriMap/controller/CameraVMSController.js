@@ -172,6 +172,7 @@ class CameraVMSController {
     );
     this.getHistoryReportCamera = this.getHistoryReportCamera.bind(this);
     this.submitCameraConditionForm = this.submitCameraConditionForm.bind(this);
+    this.getCurrentVMS = this.getCurrentVMS.bind(this);
 
     this.state = {
       current_vms: this.loadFromPersistence("current_vms"),
@@ -670,28 +671,49 @@ class CameraVMSController {
     );
     return this.callAPI(this.vms_get_define_error_api_specify);
   }
-  getInformationConditionCamera(idCamera) {
-    return this.callAPI(
-      this.vms_get_information_report_camera.replace("{idCamera}", idCamera)
+  getInformationConditionCamera(vmsID, idCamera) {
+    return this.callAPIToVMS(
+      vmsID,
+      this.vms_get_information_report_camera.replace("{idCamera}", idCamera),
+      {},
+      null,
+      "get"
     );
+    // return this.callAPI(
+    //   this.vms_get_information_report_camera.replace("{idCamera}", idCamera)
+    // );
   }
-  getHistoryReportCamera(idCamera, paramData) {
-    return this.callAPI(
+  getHistoryReportCamera(vmsID, idCamera, paramData) {
+    return this.callAPIToVMS(
+      vmsID,
       this.vms_get_history_report_camera.replace("{idCamera}", idCamera),
       paramData,
       null,
-      "get",
-      null
+      "get"
     );
+    // return this.callAPI(
+    //   this.vms_get_history_report_camera.replace("{idCamera}", idCamera),
+    //   paramData,
+    //   null,
+    //   "get",
+    //   null
+    // );
   }
-  submitCameraConditionForm(idCamera, paramData) {
-    return this.callAPI(
+  submitCameraConditionForm(vmsID, idCamera, paramData) {
+    return this.callAPIToVMS(
+      vmsID,
       this.vms_submit_form_report_camera.replace("{idCamera}", idCamera),
       paramData,
       null,
-      "put",
-      null
+      "put"
     );
+    // return this.callAPI(
+    //   this.vms_submit_form_report_camera.replace("{idCamera}", idCamera),
+    //   paramData,
+    //   null,
+    //   "put",
+    //   null
+    // );
   }
   startUpdateCameras() {
     if (!!this.cameraUpdateInterval) {
@@ -765,6 +787,10 @@ class CameraVMSController {
       null,
       "put"
     );
+  }
+
+  getCurrentVMS() {
+    return this.state.current_vms;
   }
 }
 
