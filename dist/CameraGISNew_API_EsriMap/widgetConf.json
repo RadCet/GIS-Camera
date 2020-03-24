@@ -44,6 +44,7 @@
         "vms_get_information_report_camera_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/monitors/{idCamera}?mode=report",
         "vms_submit_form_report_camera_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/monitors/{idCamera}",
         "vms_get_history_report_camera_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/logs/camerareport/{idCamera}",
+        "vms_get_data_report_camera_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/monitors?mode=report",
         "cameraUpdateIntervalValue": 600000,
         "cms_protocol": "https",
         "cms_domain": "vmsqn.hcdt.vn",

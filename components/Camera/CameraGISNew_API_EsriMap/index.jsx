@@ -1,6 +1,6 @@
 import React from "react";
 import Widget from "@wso2-dashboards/widget";
-import { Button, Modal, TreeSelect, Icon } from "antd";
+import { Button, Modal, TreeSelect, Icon, message } from "antd";
 import "antd/dist/antd.css";
 
 import ListCameraComponent from "./ListCameraComponent";
@@ -1127,20 +1127,10 @@ export default class GeoChartCamera extends Widget {
   }
 
   addMarkerToMap() {
-    // if (incidentMap == null) {
-    //   return;
-    // }
-
-    // // Remove cac marker hien tai
-    // markers.map(marker => {
-    //   incidentMap.removeMarker(marker);
-    // });
-
     if (map == null) {
       return;
     }
 
-    markers = [];
     let cameraDataByLayer = this.state.cameraDataByLayer;
     if (!cameraDataByLayer) {
       cameraDataByLayer = this.getCameraDataByLayer(this.state.currentLayer);
@@ -1547,8 +1537,32 @@ export default class GeoChartCamera extends Widget {
   }
 
   exportData() {
-    const { currentLayer, cameraData, treeData } = this.state;
-    CameraExportHelper.exportData(currentLayer, cameraData, treeData);
+    this.cameraVMSController
+      .getDataReportCamera(this.state.clusterDataID)
+      .then(cameraReportData => {
+        if (cameraReportData) {
+          // filter camera da report
+          cameraReportData = cameraReportData.filter(cameraData => {
+            return (
+              cameraData.PhysicalState != "" && cameraData.PhysicalState != null
+            );
+          });
+          const { currentLayer, cameraData, treeData } = this.state;
+          CameraExportHelper.exportData(
+            currentLayer,
+            cameraData,
+            treeData,
+            cameraReportData,
+            this.state.defineConditionCamera,
+            this.state.defineConditionNotGoodCamera
+          );
+        } else {
+          message.error("Có lỗi xảy ra. Vui lòng thử lại");
+          message.config({
+            duration: 3
+          });
+        }
+      });
   }
 
   handleReloadData(target) {

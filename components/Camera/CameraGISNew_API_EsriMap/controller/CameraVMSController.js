@@ -44,7 +44,8 @@ class CameraVMSController {
       vms_get_define_error_api_template,
       vms_get_information_report_camera_template,
       vms_submit_form_report_camera_template,
-      vms_get_history_report_camera_template
+      vms_get_history_report_camera_template,
+      vms_get_data_report_camera_template
     } = this.configs;
     const {
       vms_monitors_api_template,
@@ -73,6 +74,7 @@ class CameraVMSController {
     this.vms_get_information_report_camera_template = vms_get_information_report_camera_template;
     this.vms_submit_form_report_camera_template = vms_submit_form_report_camera_template;
     this.vms_get_history_report_camera_template = vms_get_history_report_camera_template;
+    this.vms_get_data_report_camera_template = vms_get_data_report_camera_template;
 
     this.vms_login_api = vms_login_api_template
       .replace("{vms_protocol}", vms_protocol)
@@ -127,6 +129,11 @@ class CameraVMSController {
       .replace("{vms_domain}", vms_domain)
       .replace("{vms_port}", vms_port);
 
+    this.vms_get_data_report_camera = vms_get_data_report_camera_template
+      .replace("{vms_protocol}", vms_protocol)
+      .replace("{vms_domain}", vms_domain)
+      .replace("{vms_port}", vms_port);
+
     this.cameraUpdateInterval = null;
 
     this.state = {};
@@ -173,6 +180,7 @@ class CameraVMSController {
     this.getHistoryReportCamera = this.getHistoryReportCamera.bind(this);
     this.submitCameraConditionForm = this.submitCameraConditionForm.bind(this);
     this.getCurrentVMS = this.getCurrentVMS.bind(this);
+    this.getDataReportCamera = this.getDataReportCamera.bind(this);
 
     this.state = {
       current_vms: this.loadFromPersistence("current_vms"),
@@ -664,57 +672,7 @@ class CameraVMSController {
         console.error(error);
       });
   }
-  getDefineError(typeDefine) {
-    this.vms_get_define_error_api_specify = this.vms_get_define_error_api.replace(
-      "{typeDefine}",
-      typeDefine
-    );
-    return this.callAPI(this.vms_get_define_error_api_specify);
-  }
-  getInformationConditionCamera(vmsID, idCamera) {
-    return this.callAPIToVMS(
-      vmsID,
-      this.vms_get_information_report_camera.replace("{idCamera}", idCamera),
-      {},
-      null,
-      "get"
-    );
-    // return this.callAPI(
-    //   this.vms_get_information_report_camera.replace("{idCamera}", idCamera)
-    // );
-  }
-  getHistoryReportCamera(vmsID, idCamera, paramData) {
-    return this.callAPIToVMS(
-      vmsID,
-      this.vms_get_history_report_camera.replace("{idCamera}", idCamera),
-      paramData,
-      null,
-      "get"
-    );
-    // return this.callAPI(
-    //   this.vms_get_history_report_camera.replace("{idCamera}", idCamera),
-    //   paramData,
-    //   null,
-    //   "get",
-    //   null
-    // );
-  }
-  submitCameraConditionForm(vmsID, idCamera, paramData) {
-    return this.callAPIToVMS(
-      vmsID,
-      this.vms_submit_form_report_camera.replace("{idCamera}", idCamera),
-      paramData,
-      null,
-      "put"
-    );
-    // return this.callAPI(
-    //   this.vms_submit_form_report_camera.replace("{idCamera}", idCamera),
-    //   paramData,
-    //   null,
-    //   "put",
-    //   null
-    // );
-  }
+
   startUpdateCameras() {
     if (!!this.cameraUpdateInterval) {
       return;
@@ -791,6 +749,67 @@ class CameraVMSController {
 
   getCurrentVMS() {
     return this.state.current_vms;
+  }
+
+  getDefineError(typeDefine) {
+    this.vms_get_define_error_api_specify = this.vms_get_define_error_api.replace(
+      "{typeDefine}",
+      typeDefine
+    );
+    return this.callAPI(this.vms_get_define_error_api_specify);
+  }
+  getInformationConditionCamera(vmsID, idCamera) {
+    return this.callAPIToVMS(
+      vmsID,
+      this.vms_get_information_report_camera.replace("{idCamera}", idCamera),
+      {},
+      null,
+      "get"
+    );
+    // return this.callAPI(
+    //   this.vms_get_information_report_camera.replace("{idCamera}", idCamera)
+    // );
+  }
+  getHistoryReportCamera(vmsID, idCamera, paramData) {
+    return this.callAPIToVMS(
+      vmsID,
+      this.vms_get_history_report_camera.replace("{idCamera}", idCamera),
+      paramData,
+      null,
+      "get"
+    );
+    // return this.callAPI(
+    //   this.vms_get_history_report_camera.replace("{idCamera}", idCamera),
+    //   paramData,
+    //   null,
+    //   "get",
+    //   null
+    // );
+  }
+  submitCameraConditionForm(vmsID, idCamera, paramData) {
+    return this.callAPIToVMS(
+      vmsID,
+      this.vms_submit_form_report_camera.replace("{idCamera}", idCamera),
+      paramData,
+      null,
+      "put"
+    );
+    // return this.callAPI(
+    //   this.vms_submit_form_report_camera.replace("{idCamera}", idCamera),
+    //   paramData,
+    //   null,
+    //   "put",
+    //   null
+    // );
+  }
+  getDataReportCamera(vmsID) {
+    return this.callAPIToVMS(
+      vmsID,
+      this.vms_get_data_report_camera,
+      {},
+      null,
+      "get"
+    );
   }
 }
 
