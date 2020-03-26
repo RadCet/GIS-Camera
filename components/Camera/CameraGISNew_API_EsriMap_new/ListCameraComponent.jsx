@@ -21,7 +21,6 @@ class CameraComponent extends Component {
     this.clearWaitingProcess = this.clearWaitingProcess.bind(this);
     this.onLoad = this.onLoad.bind(this);
     this.onError = this.onError.bind(this);
-    this.handleLiveCameraClick = this.handleLiveCameraClick.bind(this);
 
     this.intervalValues = [];
     this.timeoutValues = [];
@@ -69,12 +68,7 @@ class CameraComponent extends Component {
   }
 
   componentDidMount() {
-    const {
-      camera,
-      cameraData,
-      filterByClusterIDHandler,
-      resolution_mode
-    } = this.props;
+    const { camera, cameraData, filterByClusterIDHandler } = this.props;
     let clusterDataID = camera.clusterDataID;
     const liveCameraData = cameraData.find(
       cam =>
@@ -87,22 +81,14 @@ class CameraComponent extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const {
-      camera,
-      cameraData,
-      filterByClusterIDHandler,
-      resolution_mode
-    } = this.props;
+    const { camera, cameraData, filterByClusterIDHandler } = this.props;
     const { vmsCamId, clusterDataID } = camera;
     const liveCameraData = cameraData.find(
       cam =>
         cam.vmsCamId === vmsCamId &&
         filterByClusterIDHandler(cam, clusterDataID)
     );
-    if (
-      vmsCamId != prevProps.camera.vmsCamId ||
-      resolution_mode.key != prevProps.resolution_mode.key
-    ) {
+    if (vmsCamId != prevProps.camera.vmsCamId) {
       this.fetchCamUrl(liveCameraData);
     }
   }
@@ -155,18 +141,14 @@ class CameraComponent extends Component {
     const {
       cameraVMSController,
       updateNow,
-      resolution_mode,
-      getLiveURLMonitorByResolutionMode
+      isMobile,
+      isMobileFunction
     } = this.props;
     const { srcLoaded } = this;
     console.log(`fetchCamData:${updateNow}`);
     const title = camera.name;
     const idCamera = camera.vmsCamId;
-    let liveCamSrc = getLiveURLMonitorByResolutionMode(
-      camera,
-      resolution_mode,
-      "min"
-    );
+    let liveCamSrc = isMobileFunction ? camera.LiveviewSmall : camera.Liveview;
     const now = new Date().getTime();
     this.srcSet = liveCamSrc;
     if (updateNow || srcLoaded == null) {
@@ -257,23 +239,6 @@ class CameraComponent extends Component {
     this.timeoutValues = [];
   }
 
-  handleLiveCameraClick() {
-    const { resolution_mode, getLiveURLMonitorByResolutionMode } = this.props;
-    let srcCamera = this.srcSet ? this.srcSet : this.state.liveCamSrc;
-    if (this.liveCameraData) {
-      srcCamera = getLiveURLMonitorByResolutionMode(
-        this.liveCameraData,
-        resolution_mode,
-        "max"
-      );
-    }
-    this.props.handleLiveCameraClick(
-      srcCamera,
-      this.state.liveCamName,
-      this.state.idLiveCamera
-    );
-  }
-
   render() {
     const { height, width } = this.props;
     const { liveCamSrc, liveCamName, fetchError, idLiveCamera } = this.state;
@@ -312,7 +277,13 @@ class CameraComponent extends Component {
           <img
             src={liveCamSrc}
             style={{ maxHeight: height - 30, maxWidth: width }}
-            onClick={this.handleLiveCameraClick}
+            onClick={() =>
+              this.props.handleLiveCameraClick(
+                srcSet ? srcSet : liveCamSrc,
+                liveCamName,
+                idLiveCamera
+              )
+            }
             onLoad={e => {
               this.onLoad(e);
             }}
@@ -339,8 +310,8 @@ class ListCameraComponent extends Component {
       handleRemoveLiveCam,
       cameraVMSController,
       filterByClusterIDHandler,
-      resolution_mode,
-      getLiveURLMonitorByResolutionMode
+      isMobile,
+      isMobileFunction
     } = this.props;
     return (
       <div
@@ -366,10 +337,8 @@ class ListCameraComponent extends Component {
               cameraVMSController={cameraVMSController}
               filterByClusterIDHandler={filterByClusterIDHandler}
               updateNow={true}
-              resolution_mode={resolution_mode}
-              getLiveURLMonitorByResolutionMode={
-                getLiveURLMonitorByResolutionMode
-              }
+              isMobileFunction={isMobileFunction}
+              isMobile={isMobile}
             />
           );
         })}

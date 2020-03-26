@@ -1,6 +1,6 @@
 import React from "react";
 import Widget from "@wso2-dashboards/widget";
-import { Button, Modal, TreeSelect, Icon, message, Select, Radio } from "antd";
+import { Button, Modal, TreeSelect, Icon, message, Select } from "antd";
 import "antd/dist/antd.css";
 
 import ListCameraComponent from "./ListCameraComponent";
@@ -42,10 +42,6 @@ import "./styles/InfoWindow.css";
 import "./styles/Modal.css";
 import "./styles/ViewMap.css";
 
-import CameraStatusGroupCounting from "./CameraStatusGroupCounting";
-import { localStoragePersistentHandler as defaultPersistentHandler } from "./controller/PersistentHelper";
-import { EncryptHelper } from "./controller/Helper";
-
 const { TreeNode } = TreeSelect;
 
 const cameraIcons = [
@@ -71,16 +67,7 @@ var listMarkerDatas = []; //name cam, lat long,....
 export default class GeoChartCamera extends Widget {
   constructor(props) {
     super(props);
-    this.default_resolution_mode = {
-      key: "auto",
-      titles: { en: "Auto", vi: "Tự động" },
-      value: { scale: 0 }
-    };
-    this.default_overview_view_mode = {
-      key: "default",
-      titles: { en: "Default", vi: "Mặc định" },
-      value: {}
-    };
+
     this.state = {
       cameraData: [],
       eventDetectData: [],
@@ -112,8 +99,6 @@ export default class GeoChartCamera extends Widget {
       timeDataUpdate: null,
       timeElapse: "00:00",
       isLoadingData: true,
-      resolution_mode: this.default_resolution_mode,
-      overview_view_mode: this.default_overview_view_mode,
 
       // report camera
       permissionReport: null,
@@ -161,13 +146,6 @@ export default class GeoChartCamera extends Widget {
     this.onImgError = this.onImgError.bind(this);
     this.onImgLoad = this.onImgLoad.bind(this);
 
-    this.handleGroupSelectFilter = this.handleGroupSelectFilter.bind(this);
-    this.onChangeResolution = this.onChangeResolution.bind(this);
-    this.onChangeOverviewViewMode = this.onChangeOverviewViewMode.bind(this);
-    this.getLiveURLMonitorByResolutionMode = this.getLiveURLMonitorByResolutionMode.bind(
-      this
-    );
-
     this.latCenter = 10.762622;
     this.lngCenter = 106.660172;
     this.zoomDefault = 11;
@@ -180,25 +158,6 @@ export default class GeoChartCamera extends Widget {
     this.defaultSearch = "";
     this.countImgLoadError = 0;
     this.mapEsriRef = React.createRef();
-
-    this.language = "vi";
-    this.resolution_options = [
-      {
-        key: "auto",
-        titles: { en: "Auto", vi: "Tự động" },
-        value: { scale: { default: 100, min: 50, max: 50, mobile: 50 } }
-      }
-    ];
-    this.overview_view_options = [
-      { key: "default", titles: { en: "Default", vi: "Mặc định" }, value: {} }
-    ];
-    this.resolution_options_auto_mode_order_switch = {
-      default: ["heigh", "medium", "low", "verylow", "snapshot"]
-    };
-    this.startTag = 1;
-    this.maxTag = 1000;
-    this.mobile_scale = 50;
-    this.encryptHelper = new EncryptHelper(defaultPersistentHandler);
   }
 
   componentDidMount() {
@@ -299,18 +258,11 @@ export default class GeoChartCamera extends Widget {
         hiddenExportInMobile,
         widget_version,
         mobile_scale,
-        camera_undone_support,
-        showSumNode,
-        startTag,
-        maxTag,
-        language,
-        resolution_options,
-        overview_view_options,
-        resolution_options_auto_mode_order_switch
+        camera_undone_support
       } = this.apiConfig;
-      this.mobile_scale = mobile_scale ? mobile_scale : this.mobile_scale;
-      this.widget_version = `15.4`; // widget_version == null ? "1.0" : widget_version;
-      this.widget_time_update = "2020-03-26T15:00:00.000+07:00";
+      this.mobile_scale = mobile_scale ? mobile_scale : 30;
+      this.widget_version = `15.2`; // widget_version == null ? "1.0" : widget_version;
+      this.widget_time_update = "2020-03-24T15:00:00.000+07:00";
       this.widget_update_content = ""; //`isMobile:${isMobileBrowser()}::isMobileFunction:::${isMobileBrowserFunction()}::::::${navigator.userAgent}`;
       this.va_support = va_support == null ? true : va_support;
       this.showSocializationInNewTab =
@@ -333,73 +285,12 @@ export default class GeoChartCamera extends Widget {
       this.showReload = showReload == null ? true : showReload;
       this.hiddenExportInMobile =
         hiddenExportInMobile == null ? true : hiddenExportInMobile;
-      this.showSumNode = showSumNode === true;
-      this.startTag = isNaN(startTag) ? this.startTag : startTag;
-      this.maxTag = isNaN(maxTag) ? this.maxTag : maxTag;
       this.va_event_view = this.apiConfig.va_event_view;
       this.va_event_type_map = this.apiConfig.va_event_type_map;
-      this.language = language ? language : this.language;
-      if (resolution_options) {
-        resolution_options.forEach(option => {
-          const save = this.resolution_options.find(
-            item => item.key === option.key
-          );
-          if (save) {
-            for (let key in option) save[key] = option[key];
-          } else {
-            this.resolution_options.push(option);
-          }
-        });
-      }
-      let save_resolution_mode = this.encryptHelper.loadFromPersistence(
-        "resolution_mode"
-      );
-      if (
-        save_resolution_mode == null ||
-        this.resolution_options.find(
-          item => item.key === save_resolution_mode.key
-        ) == null
-      ) {
-        save_resolution_mode = this.default_resolution_mode;
-      }
-      if (overview_view_options) {
-        overview_view_options.forEach(option => {
-          const save = this.overview_view_options.find(
-            item => item.key === option.key
-          );
-          if (save) {
-            for (let key in option) save[key] = option[key];
-          } else {
-            this.overview_view_options.push(option);
-          }
-        });
-      }
-      let save_overview_view_mode = this.encryptHelper.loadFromPersistence(
-        "overview_view_mode"
-      );
-      if (
-        save_overview_view_mode == null ||
-        this.overview_view_options.find(
-          item => item.key === save_overview_view_mode.key
-        ) == null
-      ) {
-        save_overview_view_mode = this.default_overview_view_mode;
-      }
-      if (resolution_options_auto_mode_order_switch) {
-        for (let key in resolution_options_auto_mode_order_switch) {
-          this.resolution_options_auto_mode_order_switch[key] =
-            resolution_options_auto_mode_order_switch[key];
-        }
-      }
-      this.setState({
-        resolution_mode: save_resolution_mode,
-        overview_view_mode: save_overview_view_mode
-      });
       this.cameraVMSController = new CameraVMSController(
         this.apiConfig,
         this.updateCameraDataHandler,
-        this.newTokenUpdateHandler,
-        defaultPersistentHandler
+        this.newTokenUpdateHandler
       );
       this.cameraVAController = new CameraVAController(
         this.apiConfig,
@@ -680,20 +571,9 @@ export default class GeoChartCamera extends Widget {
       this.monitorsFieldSearch.indexOf("values") >= 0 ||
       this.monitorsFieldSearch.indexOf("svalues") >= 0;
     let nodeHandler = (monitor, node, parentNode) => {
-      let clusterDataID = monitor.clusterDataID;
-      if (parentNode.allIDs == null) parentNode.allIDs = [];
-      if (parentNode.liveIDs == null) parentNode.liveIDs = [];
-      let allIDObjectByCluster = parentNode.allIDs.find(
-        item => item.clusterDataID == clusterDataID
-      );
-      if (!allIDObjectByCluster) {
-        allIDObjectByCluster = {
-          clusterDataID: clusterDataID,
-          monitorIDs: new Set()
-        };
-        parentNode.allIDs.push(allIDObjectByCluster);
-      }
-      allIDObjectByCluster.monitorIDs.add(monitor.Id);
+      if (parentNode.allIDs == null) parentNode.allIDs = new Set();
+      if (parentNode.liveIDs == null) parentNode.liveIDs = new Set();
+      parentNode.allIDs.add(monitor.Id);
       let level =
         monitor.Enabled == 1
           ? "Connected" === monitor.Status
@@ -703,17 +583,7 @@ export default class GeoChartCamera extends Widget {
           ? 2
           : 0; //"Connected" === monitor.Status ? monitor.Enabled == 1 ? 1 : 2 : 0;
       if (level > 0) {
-        let liveDObjectByCluster = parentNode.liveIDs.find(
-          item => item.clusterDataID == clusterDataID
-        );
-        if (!liveDObjectByCluster) {
-          liveDObjectByCluster = {
-            clusterDataID: clusterDataID,
-            monitorIDs: new Set()
-          };
-          parentNode.liveIDs.push(liveDObjectByCluster);
-        }
-        liveDObjectByCluster.monitorIDs.add(monitor.Id);
+        parentNode.liveIDs.add(monitor.Id);
       }
       if (monitor.cameraData != null) {
         let camera = monitor.cameraData;
@@ -761,6 +631,11 @@ export default class GeoChartCamera extends Widget {
       if (camera.address == null || camera.address.length === 0) {
         camera.address = camera.name;
       }
+      camera.LiveviewSmall = camera.Liveview
+        ? `${camera.Liveview}${
+            camera.Liveview.indexOf("?") > 0 ? "&" : "?"
+          }scale=${this.mobile_scale}`
+        : camera.Liveview;
 
       camera.isSocialization = camera.cameraCategory == 2;
       camera.isUnDone = camera.cameraCategory == 3;
@@ -811,8 +686,7 @@ export default class GeoChartCamera extends Widget {
       ignoreGroupInvalid,
       ignoreCameraNotInGroup,
       null,
-      this.cameraVMSController.combineDefaultGroupTarget,
-      this.cameraVMSController.combineRootByTag
+      this.cameraVMSController.combineDefaultGroupTarget
     );
     let root = CameraTreeHelper.buildUITreeData(
       tree,
@@ -870,7 +744,6 @@ export default class GeoChartCamera extends Widget {
         this.cameraVAController.loadEvents()
       ]);
     }
-    this.addMarkerToMap();
   }
 
   getZoomBySize(width, height) {
@@ -932,16 +805,15 @@ export default class GeoChartCamera extends Widget {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const prevLayer = prevState.currentLayer;
-    const prevFilter = prevState.currentFilter;
-    if (prevLayer != this.state.currentLayer) {
-      this.onChangeLayer(this.state.currentLayer);
-      this.addMarkerToMap();
-    } else if (prevFilter != this.state.currentFilter) {
+    if (
+      JSON.stringify(prevState.cameraData) !=
+        JSON.stringify(this.state.cameraData) ||
+      this.state.cameraData.length == 0
+    ) {
       this.addMarkerToMap();
     }
 
-    if (this.state.permissionReport == null && this.cameraVMSController) {
+    if (this.state.permissionReport == null) {
       if (
         this.cameraVMSController
           .getCurrentVMS()
@@ -964,7 +836,7 @@ export default class GeoChartCamera extends Widget {
         JSON.stringify(prevState.defineConditionNotGoodCamera) !=
           JSON.stringify(this.state.defineConditionNotGoodCamera) ||
         this.state.defineConditionNotGoodCamera.length == 0) &&
-      this.cameraVMSController != null
+      this.cameraVAController != null
     ) {
       this.cameraVMSController.getDefineError(2).then(result => {
         this.setState({
@@ -977,6 +849,9 @@ export default class GeoChartCamera extends Widget {
         });
       });
     }
+    const prevLayer = prevState.currentLayer;
+    if (prevLayer != this.state.currentLayer)
+      this.onChangeLayer(this.state.currentLayer);
   }
 
   componentWillUnmount() {
@@ -1192,11 +1067,9 @@ export default class GeoChartCamera extends Widget {
         this.filterByClusterIDHandler(cam, clusterDataID)
     );
     if (liveCameraData) {
-      let liveCamSrc = this.getLiveURLMonitorByResolutionMode(
-        liveCameraData,
-        this.state.resolution_mode,
-        "max"
-      );
+      let liveCamSrc = this.state.isMobileFunction
+        ? liveCameraData.LiveviewSmall
+        : liveCameraData.Liveview; // resp.data.monitor.mjpeg;
       if (liveCameraData.glevel === 6) {
         liveCamSrc = `${liveCameraData.url}${
           liveCameraData.url.indexOf("?") > 0 ? "&" : "?"
@@ -1437,38 +1310,6 @@ export default class GeoChartCamera extends Widget {
 
           objectMarker.on("mouseover", function(e) {
             this.openPopup();
-            // Thêm sự kiện khi click vào một event
-            setTimeout(() => {
-              $(".aEvent").click(function(event) {
-                var title = "";
-                if ($(event.target).data("camname"))
-                  title += $(event.target).data("camname");
-                if ($(event.target).data("type"))
-                  title += " - " + $(event.target).data("type");
-                if ($(event.target).data("time"))
-                  title += " - " + $(event.target).data("time");
-
-                const eventID = $(event.target).data("eventid");
-                const clusterdataid = $(event.target).data("clusterdataid");
-
-                let isSupportVideo = browser() !== "safari";
-                let apiUrl = isSupportVideo
-                  ? that.cameraVAController.getEventVideoLink(
-                      eventID,
-                      clusterdataid
-                    )
-                  : that.cameraVAController.getEventImageLink(
-                      eventID,
-                      clusterdataid
-                    );
-                that.setState({
-                  videoEventSrc: apiUrl,
-                  videoEventTitle: title,
-                  videoEventDataType: isSupportVideo ? "video" : "image",
-                  videoEventVisible: true
-                });
-              });
-            }, 500);
           });
           objectMarker.on("mouseout", function(e) {
             this.closePopup();
@@ -1771,83 +1612,6 @@ export default class GeoChartCamera extends Widget {
     }
   }
 
-  handleGroupSelectFilter(node) {
-    const layer = node.value;
-    this.onChangeLayer(layer);
-  }
-
-  onChangeResolution(e) {
-    let modeKey = e.target.value;
-    let mode = this.resolution_options.find(item => item.key === modeKey);
-    this.encryptHelper.saveToPersistence("resolution_mode", mode);
-    const status = this.state.status;
-    status.isNeedUpdate = true;
-    this.setState({
-      resolution_mode: mode,
-      status: status
-    });
-  }
-
-  onChangeOverviewViewMode(e) {
-    let modeKey = e.target.value;
-    let mode = this.overview_view_options.find(item => item.key === modeKey);
-    this.encryptHelper.saveToPersistence("overview_view_mode", mode);
-    const status = this.state.status;
-    status.isNeedUpdate = true;
-    this.setState({
-      overview_view_mode: mode,
-      status: status
-    });
-  }
-
-  getLiveURLMonitorByResolutionMode(
-    monitor,
-    resolution_mode,
-    screenMode = "default"
-  ) {
-    if (monitor == null) return null;
-    if (resolution_mode == null) {
-      resolution_mode = this.state.resolution_mode;
-    }
-    let key = resolution_mode.key;
-    let url = monitor.Liveview;
-    if (["auto"].indexOf(key) >= 0) {
-      let auto_resolution_mode = null;
-      let modes_order = this.resolution_options_auto_mode_order_switch.default;
-      if (
-        this.state.isMobileFunction &&
-        this.resolution_options_auto_mode_order_switch.mobile
-      ) {
-        modes_order = this.resolution_options_auto_mode_order_switch.mobile;
-      }
-      for (let index = 0; index < modes_order.length; index++) {
-        if (auto_resolution_mode != null) break;
-        auto_resolution_mode = this.resolution_options.find(
-          item => item.key == modes_order[index]
-        );
-      }
-      if (auto_resolution_mode == null) {
-        auto_resolution_mode = this.default_resolution_mode;
-      }
-      resolution_mode = auto_resolution_mode;
-    }
-    let scale =
-      typeof screenMode === "string"
-        ? resolution_mode.value.scale[screenMode]
-        : null;
-    if (scale == null) {
-      scale = this.state.isMobileFunction
-        ? resolution_mode.value.scale.mobile
-        : resolution_mode.value.scale.default;
-    }
-    if (!isNaN(scale) && scale > 0 && scale !== 100) {
-      url = url
-        ? `${url}${url.indexOf("?") > 0 ? "&" : "?"}scale=${scale}`
-        : url;
-    }
-    return url;
-  }
-
   removeAllMarker() {
     // for (let index = 0; index < listClusters.length; index++) {
     //   listClusters[index].removeLayer(listMarkerGroups[index]);
@@ -1903,8 +1667,6 @@ export default class GeoChartCamera extends Widget {
       infoTimeUpdate,
       infoContent,
       isMobileFunction,
-      resolution_mode,
-      overview_view_mode,
       permissionReport,
       showFormSubmit,
       idCurrentCameraModal,
@@ -1972,15 +1734,6 @@ export default class GeoChartCamera extends Widget {
                 style={{ marginRight: "2px", marginLeft: "2px" }}
                 onClick={this.resetMap}
               />
-              {this.showReload && (
-                <Button
-                  icon="reload"
-                  style={{ marginRight: "2px", marginLeft: "2px" }}
-                  title="Cập nhật dữ liệu"
-                  onClick={this.handleReloadData}
-                  disabled={isLoadingData}
-                />
-              )}
               <div
                 style={{
                   display: "inline-block",
@@ -2027,10 +1780,6 @@ export default class GeoChartCamera extends Widget {
                   filterByClusterIDHandler={this.filterByClusterIDHandler}
                   isMobileFunction={isMobileFunction}
                   isMobile={isMobile}
-                  resolution_mode={resolution_mode}
-                  getLiveURLMonitorByResolutionMode={
-                    this.getLiveURLMonitorByResolutionMode
-                  }
                 />
               </div>
             )}
@@ -2077,8 +1826,8 @@ export default class GeoChartCamera extends Widget {
                 }}
               >
                 {this.showElapTime
-                  ? `THÔNG TIN CAMERA (${timeElapse})`
-                  : `THÔNG TIN CAMERA`}{" "}
+                  ? `TÌNH TRẠNG CAMERA (${timeElapse})`
+                  : `TÌNH TRẠNG CAMERA`}{" "}
               </span>
               <Button
                 type="primary"
@@ -2091,7 +1840,7 @@ export default class GeoChartCamera extends Widget {
                   marginTop: "-5px"
                 }}
               />
-              {/* {this.showReload && (
+              {this.showReload && (
                 <Button
                   type={isLoadingData ? "disabled" : "primary"}
                   icon="reload"
@@ -2104,7 +1853,7 @@ export default class GeoChartCamera extends Widget {
                   onClick={this.handleReloadData}
                   disabled={isLoadingData}
                 />
-              )} */}
+              )}
               {(!this.hiddenExportInMobile || !this.state.isMobileFunction) && (
                 <Button
                   type="primary"
@@ -2126,38 +1875,23 @@ export default class GeoChartCamera extends Widget {
                   marginBottom: "10px"
                 }}
               />
-              {["status", "default"].indexOf(overview_view_mode.key) >= 0 && (
-                <CameraStatusCounting
-                  currentLayer={currentLayer}
-                  cameraDataByLayer={cameraDataByLayer}
-                  handleFilter={this.handleFilter}
-                  currentFilterValue={currentFilter}
-                  currentFilter={currentFilter}
-                  status={status}
-                  va_support={this.va_support}
-                  cameraVMSController={this.cameraVMSController}
-                  currentClusterDataID={currentClusterDataID}
-                  showVMSCountInList={this.showVMSCountInList}
-                  showVMSCountInListInTop={this.showVMSCountInListInTop}
-                  showVMSCountInListInBottom={this.showVMSCountInListInBottom}
-                  socialization_support={this.socialization_support}
-                  showVMSCountIgnoreDefault={this.showVMSCountIgnoreDefault}
-                  camera_undone_support={this.camera_undone_support}
-                />
-              )}
-              {["group"].indexOf(overview_view_mode.key) >= 0 && (
-                <CameraStatusGroupCounting
-                  currentLayer={currentLayer}
-                  cameraDataByLayer={cameraDataByLayer}
-                  tag={this.startTag}
-                  maxTag={this.maxTag}
-                  status={status}
-                  cameraVMSController={this.cameraVMSController}
-                  treeData={treeData}
-                  handleFilter={this.handleGroupSelectFilter}
-                  showSumNode={this.showSumNode}
-                />
-              )}
+              <CameraStatusCounting
+                currentLayer={currentLayer}
+                cameraDataByLayer={cameraDataByLayer}
+                handleFilter={this.handleFilter}
+                currentFilterValue={currentFilter}
+                currentFilter={currentFilter}
+                status={status}
+                va_support={this.va_support}
+                cameraVMSController={this.cameraVMSController}
+                currentClusterDataID={currentClusterDataID}
+                showVMSCountInList={this.showVMSCountInList}
+                showVMSCountInListInTop={this.showVMSCountInListInTop}
+                showVMSCountInListInBottom={this.showVMSCountInListInBottom}
+                socialization_support={this.socialization_support}
+                showVMSCountIgnoreDefault={this.showVMSCountIgnoreDefault}
+                camera_undone_support={this.camera_undone_support}
+              />
             </div>
             {this.va_support === true ? (
               <div style={{ paddingTop: 35 }}>
@@ -2199,52 +1933,25 @@ export default class GeoChartCamera extends Widget {
           <p>
             <b>{infoTitle}</b>
           </p>
-          <p>Version: {infoVersion}</p>
+          <p>Version :{infoVersion}</p>
           <p>Thời gian cập nhật: {infoTimeUpdate}</p>
           <p>{infoContent}</p>
-          <div style={{ paddingTop: 15 }}>
-            <p>
-              <b>Độ phân giải</b>
-            </p>
-            <Radio.Group
-              defaultValue={
-                resolution_mode
-                  ? resolution_mode.key
-                  : this.resolution_options.length > 0
-                  ? this.resolution_options[0].key
-                  : "auto"
-              }
-              size="small"
-              onChange={this.onChangeResolution}
+          <div>
+            <p>Chất lượng xem video</p>
+            <Select
+              defaultValue="0"
+              style={{
+                position: "absolute",
+                width: 120,
+                marginTop: "-40px",
+                marginLeft: "160px"
+              }}
+              value={null}
+              // onChange={handleChange}
             >
-              {this.resolution_options.map((item, index) => (
-                <Radio.Button value={item.key} key={index}>
-                  {item.titles[this.language]}
-                </Radio.Button>
-              ))}
-            </Radio.Group>
-          </div>
-          <div style={{ paddingTop: 15 }}>
-            <p>
-              <b>Chế độ hiển thị tổng quan</b>
-            </p>
-            <Radio.Group
-              defaultValue={
-                overview_view_mode
-                  ? overview_view_mode.key
-                  : this.overview_view_options.length > 0
-                  ? this.overview_view_options[0].key
-                  : "auto"
-              }
-              size="small"
-              onChange={this.onChangeOverviewViewMode}
-            >
-              {this.overview_view_options.map((item, index) => (
-                <Radio.Button value={item.key} key={index}>
-                  {item.titles[this.language]}
-                </Radio.Button>
-              ))}
-            </Radio.Group>
+              <Option value="0">Bình thường</Option>
+              <Option value="1">Cao</Option>
+            </Select>
           </div>
         </Modal>
         <Modal

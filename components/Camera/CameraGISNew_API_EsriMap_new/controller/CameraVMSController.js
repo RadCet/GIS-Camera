@@ -5,15 +5,9 @@
 import { VMSManager, VMSController } from "./VMS";
 import { localStoragePersistentHandler as defaultPersistentHandler } from "./PersistentHelper";
 import { EncryptHelper } from "./Helper";
-import de from "react-json-editor-ajrm/locale/de";
 
 class CameraVMSController {
-  constructor(
-    configs,
-    updateCamerasHandler,
-    newTokenUpdateHandler = null,
-    persistentHandler = defaultPersistentHandler
-  ) {
+  constructor(configs, updateCamerasHandler, newTokenUpdateHandler = null) {
     this.configs = configs;
     this.updateCamerasHandler = updateCamerasHandler;
     this.newTokenUpdateHandler = newTokenUpdateHandler;
@@ -34,8 +28,6 @@ class CameraVMSController {
       this.vms_multi_cluster_config.ignoreDefaultTargetData === true;
     this.combineDefaultGroupTarget =
       this.vms_multi_cluster_config.combineDefaultGroupTarget === true;
-    this.combineRootByTag =
-      this.vms_multi_cluster_config.combineRootByTag === true;
     this.isConnectDirectToCluster = this.vms_multi_cluster_config.isConnectDirectToCluster;
     this.isSupportGetTreeData = this.configs.vms_support_get_tree_data;
     this.applyWithoutToken = this.vms_authentication_config.authentication_without_token;
@@ -146,7 +138,7 @@ class CameraVMSController {
 
     this.state = {};
     this.timeouts = [];
-    this.encryptHelper = new EncryptHelper(persistentHandler);
+    this.encryptHelper = new EncryptHelper(defaultPersistentHandler);
     this.vmsManager = new VMSManager(null, this.configs);
 
     this.loadFromPersistence = this.loadFromPersistence.bind(this);
@@ -352,7 +344,7 @@ class CameraVMSController {
   getDefaultTarget() {
     const { current_vms } = this.state;
     let target = {};
-    target.Id = VMSManager.default_vms_id;
+    target.Id = 1;
     target.Name = current_vms.name;
     target.Protocol = this.configs.vms_protocol;
     target.Hostname = this.configs.vms_domain;
@@ -362,7 +354,6 @@ class CameraVMSController {
     target.Description = "";
     target.Username = current_vms.username;
     target.Password = current_vms.password;
-    target.root = true;
     return target;
   }
 
@@ -531,12 +522,12 @@ class CameraVMSController {
             .filter(vms => !(this.ignoreDefaultTargetData && vms.root))
             .map(vms => vms.getVMSController())
             .map(vmsControler => vmsControler.loadCameras().catch(ex => null));
-          return Promise.all(tasks).then(datas =>
-            datas.map((data, index) => {
+          return Promise.all(tasks).then(datas => {
+            return datas.map((data, index) => {
               let target = vmss[index];
               return { target, data };
-            })
-          );
+            });
+          });
         })
         .then(cameraDatas => {
           this.updateCameras(cameraDatas);
@@ -549,13 +540,15 @@ class CameraVMSController {
       let returnValue = value;
       let defaultValue = defaultDatas[index];
       if ("monitors_groups" === name) {
-        returnValue = Array.isArray(value)
-          ? value.flatMap(mg =>
-              [...new Set(mg.MonitorId)].map(m => {
-                return { GroupId: mg.GroupId, MonitorId: m };
-              })
-            )
-          : defaultValue;
+        if (!Array.isArray(value)) {
+          returnValue = defaultValue;
+        } else {
+          returnValue = value.flatMap(mg => {
+            return [...new Set(mg.MonitorId)].map(m => {
+              return { GroupId: mg.GroupId, MonitorId: m };
+            });
+          });
+        }
       }
       if (returnValue == null) {
         console.error(
@@ -575,9 +568,7 @@ class CameraVMSController {
         let cameraDatas;
         if (this.applyMultipleVMS) {
           const targetMapHandler = target => {
-            let dataItem = datas.find(item =>
-              target.same(this.vmsManager.normalVMSData(item.target))
-            );
+            let dataItem = datas.find(item => target.same(item.target));
             let data = datasName.reduce((output, _name, index) => {
               let data = dataItem == null ? null : dataItem.data;
               output[_name] = normalDataHandler(
@@ -591,7 +582,7 @@ class CameraVMSController {
             return { target, data };
           };
           let listTargets =
-            datas == null || datas.length === 0
+            datas == null || datas.length == 0
               ? []
               : datas
                   .filter(
@@ -601,8 +592,8 @@ class CameraVMSController {
                   .filter(item => item != null); //this.vmsManager.getListVMS()
           cameraDatas = listTargets.map(targetMapHandler);
         } else {
-          const dataCombineHandler = dataItem =>
-            datasName.reduce((output, _name, index) => {
+          const targetMapHandler = dataItem => {
+            return datasName.reduce((output, _name, index) => {
               let data = dataItem[_name];
               output[_name] = normalDataHandler(
                 index,
@@ -612,7 +603,8 @@ class CameraVMSController {
               );
               return output;
             }, {});
-          cameraDatas = dataCombineHandler(datas);
+          };
+          cameraDatas = targetMapHandler(datas);
         }
         this.updateCameras(cameraDatas);
       });
@@ -638,9 +630,7 @@ class CameraVMSController {
           const targetMapHandler = target => {
             let data = datas.reduce((data, dataArray, index) => {
               let _name = datasName[index];
-              let _itemData = dataArray.find(item =>
-                target.same(this.vmsManager.normalVMSData(item.target))
-              );
+              let _itemData = dataArray.find(item => target.same(item.target));
               data[_name] = normalDataHandler(
                 index,
                 _itemData == null ? null : _itemData.data,
@@ -652,7 +642,7 @@ class CameraVMSController {
             return { target, data };
           };
           let listTargets =
-            datas.length === 0
+            datas == null || datas.length == 0
               ? []
               : datas[0]
                   .filter(
@@ -662,8 +652,8 @@ class CameraVMSController {
                   .filter(item => item != null); //this.vmsManager.getListVMS()
           cameraDatas = listTargets.map(targetMapHandler);
         } else {
-          const targetMapHandler = dataArrays =>
-            dataArrays.reduce((data, dataArray, index) => {
+          const targetMapHandler = dataArrays => {
+            return dataArrays.reduce((data, dataArray, index) => {
               let _name = datasName[index];
               data[_name] = normalDataHandler(
                 index,
@@ -673,6 +663,7 @@ class CameraVMSController {
               );
               return data;
             }, {});
+          };
           cameraDatas = targetMapHandler(datas);
         }
         this.updateCameras(cameraDatas);
