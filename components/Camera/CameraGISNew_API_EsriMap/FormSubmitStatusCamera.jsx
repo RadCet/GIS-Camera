@@ -120,6 +120,9 @@ class FormSubmitStatusCamera1 extends React.Component {
         );
       }
     } else {
+      this.setState({
+        showNoteTextArea: true
+      });
       // only option cam khong co tin hieu
       listConditionCamera.push(
         <Option key={defineConditionCamera[0].Code}>
@@ -194,6 +197,8 @@ class FormSubmitStatusCamera1 extends React.Component {
               this.setState({
                 loading: false
               });
+              const { closeSubmitForm } = this.props;
+              closeSubmitForm();
             } else {
               this.showErrorMessage();
               this.setState({
@@ -458,20 +463,9 @@ class FormSubmitStatusCamera1 extends React.Component {
                 this.getHistoryReportCamera(this.state.idCamera, {});
               }}
             >
-              <Icon
-                type="left"
-                theme="outlined"
-                style={{
-                  color: "#1890ff",
-                  fontSize: "18px",
-                  position: "absolute"
-                }}
-              />
               <a
                 style={{
-                  position: "absolute",
-                  marginTop: "-1px",
-                  marginLeft: "18px"
+                  position: "absolute"
                 }}
               >
                 Lịch sử báo cáo

@@ -77,18 +77,10 @@ export default class CameraExportHelper {
     defineConditionCamera,
     defineConditionNotGoodCamera
   ) {
-    // const { currentLayer, cameraData} = this.state;
-    // treeDataCategory = treeData;
-    treeDataCategory = treeData.filter(branch => {
-      return branch.children.length > 0;
-    })[0];
+    treeDataCategory = treeData;
 
     //set level Category
-    this.setLevelCategory(treeDataCategory.children, 0);
-
-    let listNameCategory = treeDataCategory.children.map(
-      category => category.name
-    );
+    this.setLevelCategory(treeDataCategory, 0);
 
     let cameraDataByLayer = cameraData.filter(item => {
       return (
@@ -127,7 +119,7 @@ export default class CameraExportHelper {
 
     dataXLSX = [];
 
-    for (let index = 0; index < 10000; index++) {
+    for (let index = 0; index < cameraData.length; index++) {
       let object = {
         " ": "",
         "   ": "",
@@ -196,7 +188,7 @@ export default class CameraExportHelper {
     // count huyen co camera tiep dan, hanh chinh cong
     let countDistricTiepDan = 0;
     let countDistricHanhChinhCong = 0;
-    treeDataCategory.children
+    treeDataCategory
       .filter(category => {
         return (
           category.name === "Tiếp Dân" || category.name === "Hành Chính Công"
@@ -216,7 +208,7 @@ export default class CameraExportHelper {
       });
 
     // count xa co camera tiep dan, hanh chinh cong
-    treeDataCategory.children
+    treeDataCategory
       .filter(category => {
         return (
           category.name === "Tiếp Dân" || category.name === "Hành Chính Công"
@@ -239,7 +231,7 @@ export default class CameraExportHelper {
       });
 
     // count camera theo danh muc nhu du lich tiep dan...
-    treeDataCategory.children.map(categoty => {
+    treeDataCategory.map(categoty => {
       wsOverView["A" + indexRow].v = indexSTT;
       indexSTT++;
       wsOverView["B" + indexRow].v = "Tổng số camera " + categoty.name;
@@ -251,49 +243,6 @@ export default class CameraExportHelper {
     wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, wsOverView, "Báo cáo chung");
 
-    //sheet category
-    // listNameCategory.map(nameCategory => {
-    for (
-      let indexCategory = 0;
-      indexCategory < listNameCategory.length;
-      indexCategory++
-    ) {
-      var wsCategory = XLSX.utils.json_to_sheet(dataXLSX);
-      const mergeCategory = [
-        { s: { r: 0, c: 0 }, e: { r: 0, c: 3 } }
-        // { s: { r: 1, c: 0 }, e: { r: 1, c: 3 } },
-        // { s: { r: 0, c: 0 }, e: { r: 1, c: 0 } },
-        // { s: { r: 0, c: 1 }, e: { r: 1, c: 1 } },
-        // { s: { r: 0, c: 2 }, e: { r: 1, c: 2 } },
-        // { s: { r: 0, c: 3 }, e: { r: 1, c: 3 } },
-      ];
-      wsCategory["!merges"] = mergeCategory;
-
-      var wscols = [{ wch: 10 }, { wch: 30 }, { wch: 30 }, { wch: 30 }];
-
-      wsCategory["!cols"] = wscols;
-      wsCategory["A1"].v =
-        "                                           BÁO CÁO TÌNH HÌNH CAMERA " +
-        listNameCategory[indexCategory].toUpperCase();
-
-      wsCategory["A3"].v = "STT";
-      wsCategory["B3"].v = "Tên đơn vị";
-      wsCategory["C3"].v = "Sô camera hoạt động";
-      wsCategory["D3"].v = "Số camera không hoạt động";
-
-      indexSTTCategory = 1;
-      indexRowCategory = 4;
-      const cameraCategory = treeDataCategory.children.filter(
-        item => item.name === listNameCategory[indexCategory]
-      );
-
-      this.handleDataCategory(cameraCategory[0], wsCategory, 0);
-      XLSX.utils.book_append_sheet(
-        wb,
-        wsCategory,
-        listNameCategory[indexCategory]
-      );
-    }
     this.handleReportCameraData(
       cameraReportData,
       defineConditionCamera,
@@ -306,6 +255,56 @@ export default class CameraExportHelper {
       defineConditionCamera,
       defineConditionNotGoodCamera
     );
+
+    //sheet category
+
+    treeDataCategory.map(childDataCategory => {
+      // lấy các nhóm ở level 2
+      let listNameCategory = childDataCategory.children.map(
+        category => category.name
+      );
+      for (
+        let indexCategory = 0;
+        indexCategory < listNameCategory.length;
+        indexCategory++
+      ) {
+        var wsCategory = XLSX.utils.json_to_sheet(dataXLSX);
+        const mergeCategory = [
+          { s: { r: 0, c: 0 }, e: { r: 0, c: 3 } }
+          // { s: { r: 1, c: 0 }, e: { r: 1, c: 3 } },
+          // { s: { r: 0, c: 0 }, e: { r: 1, c: 0 } },
+          // { s: { r: 0, c: 1 }, e: { r: 1, c: 1 } },
+          // { s: { r: 0, c: 2 }, e: { r: 1, c: 2 } },
+          // { s: { r: 0, c: 3 }, e: { r: 1, c: 3 } },
+        ];
+        wsCategory["!merges"] = mergeCategory;
+
+        var wscols = [{ wch: 10 }, { wch: 30 }, { wch: 30 }, { wch: 30 }];
+
+        wsCategory["!cols"] = wscols;
+        wsCategory["A1"].v =
+          "                                           BÁO CÁO TÌNH HÌNH CAMERA " +
+          listNameCategory[indexCategory].toUpperCase();
+
+        wsCategory["A3"].v = "STT";
+        wsCategory["B3"].v = "Tên đơn vị";
+        wsCategory["C3"].v = "Sô camera hoạt động";
+        wsCategory["D3"].v = "Số camera không hoạt động";
+
+        indexSTTCategory = 1;
+        indexRowCategory = 4;
+        const cameraCategory = childDataCategory.children.filter(
+          item => item.name === listNameCategory[indexCategory]
+        );
+
+        this.handleDataCategory(cameraCategory[0], wsCategory, 0);
+        XLSX.utils.book_append_sheet(
+          wb,
+          wsCategory,
+          listNameCategory[indexCategory]
+        );
+      }
+    });
 
     /* generate an XLSX file */
     let fileTitle =

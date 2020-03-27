@@ -449,7 +449,7 @@ export default class GeoChartCamera extends Widget {
     map = L.map("esriMap", {
       maxZoom: 17,
       zoomControl: false
-    }).setView([this.latCenter, this.lngCenter], this.zoomDefault);
+    }).setView([17.756692, 107.170046], 6);
     esri.basemapLayer("Streets").addTo(map);
     L.control
       .zoom({
@@ -1041,28 +1041,39 @@ export default class GeoChartCamera extends Widget {
 
   handleClickCamera(camera) {
     if (camera.level === 0) {
-      if (this.state.permissionReport) {
-        Modal.confirm({
-          title: `Camera '${camera.name}' không hoạt động`,
-          // content:
-          //   "When clicked the OK button, this dialog will be closed after 1 second",
-          okText: "Báo cáo",
-          cancelText: "Thoát",
-          onOk: () => {
-            this.setState({
-              idCurrentCameraModal: camera.vmsCamId,
-              isCamdie: true
-            });
-            this.visibleFormSubmit();
-          },
-          onCancel() {}
+      this.cameraVMSController
+        .getInformationConditionCamera(camera.clusterDataID, camera.vmsCamId)
+        .then(result => {
+          if (result) {
+            let content = "";
+            if (result.PhysicalStateNote && result.PhysicalStateNote != "") {
+              content = result.PhysicalStateNote;
+            } else {
+              content = "";
+            }
+            if (this.state.permissionReport) {
+              Modal.confirm({
+                title: `Camera '${camera.name}' không hoạt động`,
+                content: content != "" ? `Nguyên nhân: ${content}` : null,
+                okText: "Báo cáo",
+                cancelText: "Thoát",
+                onOk: () => {
+                  this.setState({
+                    idCurrentCameraModal: camera.vmsCamId,
+                    isCamdie: true
+                  });
+                  this.visibleFormSubmit();
+                },
+                onCancel() {}
+              });
+            } else {
+              Modal.error({
+                title: `Camera '${camera.name}' không hoạt động`,
+                content: content != "" ? `Nguyên nhân: ${content}` : null
+              });
+            }
+          }
         });
-      } else {
-        Modal.error({
-          title: `Camera '${camera.name}' không hoạt động`
-          // content: "some messages...some messages..."
-        });
-      }
     } else if (camera.glevel === 6) {
       if (this.showSocializationInNewTab) {
         window.open(camera.url, "_blank");
@@ -1490,6 +1501,8 @@ export default class GeoChartCamera extends Widget {
         listClusters[0].addLayer(listMarkerGroups[index]);
       } else if (index == 10) {
         listClusters[2].addLayer(listMarkerGroups[index]);
+      } else {
+        listClusters[index].addLayer(listMarkerGroups[index]);
       }
     }
   }
@@ -1865,6 +1878,8 @@ export default class GeoChartCamera extends Widget {
         listClusters[0].removeLayer(listMarkerGroups[index]);
       } else if (index == 10) {
         listClusters[2].removeLayer(listMarkerGroups[index]);
+      } else {
+        listClusters[index].removeLayer(listMarkerGroups[index]);
       }
       listMarkerGroups[index]._layers = {};
     }

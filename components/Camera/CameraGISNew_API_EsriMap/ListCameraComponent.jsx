@@ -294,7 +294,11 @@ class CameraComponent extends Component {
           backgroundColor: "#081922"
         }}
       >
-        <div style={{ height: "20px" }}>
+        <div
+          style={{
+            height: "20px"
+          }}
+        >
           {liveCamName}
           <a
             title="Đóng"

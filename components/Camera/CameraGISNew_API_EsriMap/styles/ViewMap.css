@@ -59,9 +59,9 @@
   height: 28px;
   width: 28px;
   line-height: 28px;
-  margin-top: -11.5px;
-  margin-left: -13.5px;
-  z-index: 10;
+  margin-top: -7px;
+  margin-left: -10px;
+  z-index: 13;
 }
 
 .digits-2 {
@@ -71,7 +71,7 @@
   line-height: 35px;
   margin-top: -16px;
   margin-left: -17px;
-  z-index: 11;
+  z-index: 12;
 }
 
 .digits-2:before {
@@ -86,7 +86,7 @@
   border-width: 3px;
   margin-top: -21px;
   margin-left: -23.5px;
-  z-index: 12;
+  z-index: 11;
 }
 
 .digits-3:before {
@@ -99,9 +99,9 @@
   width: 58px;
   line-height: 57px;
   border-width: 4px;
-  margin-top: -21px;
+  margin-top: -17px;
   margin-left: -28px;
-  z-index: 13;
+  z-index: 10;
 }
 
 .digits-4:before {
@@ -112,6 +112,6 @@
   z-index: 1601 !important;
 }
 
-.customPopup{
-  margin-left: 16px;  /* 1/2 width icon image*/
+.customPopup {
+  margin-left: 16px; /* 1/2 width icon image*/
 }
