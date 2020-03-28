@@ -14,7 +14,7 @@ export const StatisData ={
     UNBROKEN:  { title: "Camera đang hoạt động", color: "#0abf71", icon: cameraIcon1 },
     ACTIVE: { title: "Có lưu trữ TTĐH", color: "#0abf71", icon: cameraIcon1},
     UNACTIVE: { title: "Không lưu trữ TTĐH", color: "#2dc0d2", icon: cameraIcon2 },
-    BROKEN: { title: "Camera không hoạt động", color: "#ec1c23", icon: cameraIcon0 },
+    BROKEN: { title: "Camera không hoạt động", color: "#777777", icon: cameraIcon0 },
     AI: { title: "Camera phân tích AI", color: "#0abf71", icon: cameraIcon3 },
     EVENT5P: { title: "Mới có sự kiện", color: "#ec1c23", icon: cameraIcon4 },
     EVENT24H: { title: "Có sự kiện trong ngày", color: "#ff7708", icon: cameraIcon5 },

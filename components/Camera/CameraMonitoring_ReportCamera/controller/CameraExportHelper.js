@@ -16,25 +16,23 @@ export default class CameraExportHelper {
     defineConditionNotGoodCamera
   ) {
     CameraExportHelper.convertToCSV3(
+      treeData,
       currentLayer,
       cameraData,
-      treeData,
       cameraReportData,
       defineConditionCamera,
       defineConditionNotGoodCamera
     );
   }
   static convertToCSV3(
+    treeData,
     currentLayer,
     cameraData,
-    treeData,
     cameraReportData,
     defineConditionCamera,
     defineConditionNotGoodCamera
   ) {
     treeDataCategory = treeData;
-
-    console.log(treeDataCategory);
 
     //set level Category
     this.setLevelCategory(treeDataCategory, 0);
@@ -111,9 +109,9 @@ export default class CameraExportHelper {
       { wch: 10 },
       { wch: 40 },
       { wch: 30 },
-      { wch: 30 },
-      { wch: 30 },
-      { wch: 30 }
+      { wch: 20 },
+      { wch: 20 },
+      { wch: 20 }
     ];
 
     wsOverView["!cols"] = wscols;
@@ -158,49 +156,20 @@ export default class CameraExportHelper {
     wsOverView["E9"].v = _camBroken;
     wsOverView["F9"].v = listCameraNotGood.length;
 
-    console.log(cameraReportData);
-
     // count camera theo danh muc nhu du lich tiep dan...
     treeDataCategory.map(rootCategoty => {
       rootCategoty.children.map(category => {
-        console.log(category);
         if (category.allIDs.length > 0) {
-          // nhóm có camera
-          let listIdCameraByCategory = [];
-          category.allIDs.map(dataIdsCamera => {
-            listIdCameraByCategory = listIdCameraByCategory.concat(
-              Array.from(dataIdsCamera.monitorIDs)
-            );
-          });
-          let countCameraNotGood = 0;
-          listIdCameraByCategory.map(cameraProperty => {
-            let cameraNotGood = listCameraNotGood.filter(cameranotGood => {
-              return cameranotGood.Id == cameraProperty;
-            });
-            if (cameraNotGood.length > 0) {
-              countCameraNotGood++;
-            }
-          });
-          wsOverView["A" + indexRow].v = indexSTT;
-          indexSTT++;
-          wsOverView["B" + indexRow].v = "Tổng số camera " + category.name;
-          wsOverView["C" + indexRow].v = category.numberAll;
-          wsOverView["D" + indexRow].v = category.numberLive;
-          wsOverView["E" + indexRow].v =
-            category.numberAll - category.numberLive;
-          wsOverView["F" + indexRow].v = countCameraNotGood;
-          indexRow++;
-        } else {
-          // nhóm không có camera
-          wsOverView["A" + indexRow].v = indexSTT;
-          indexSTT++;
-          wsOverView["B" + indexRow].v = "Tổng số camera " + category.name;
-          wsOverView["C" + indexRow].v = 0;
-          wsOverView["D" + indexRow].v = 0;
-          wsOverView["E" + indexRow].v = 0;
-          wsOverView["F" + indexRow].v = 0;
-          indexRow++;
+          console.log(category.allIDs[0].monitorIDs);
         }
+        wsOverView["A" + indexRow].v = indexSTT;
+        indexSTT++;
+        wsOverView["B" + indexRow].v = "Tổng số camera " + category.name;
+        wsOverView["C" + indexRow].v = category.numberAll;
+        wsOverView["D" + indexRow].v = category.numberLive;
+        wsOverView["E" + indexRow].v = category.numberAll - category.numberLive;
+        wsOverView["F" + indexRow].v = category.numberAll;
+        indexRow++;
       });
     });
 

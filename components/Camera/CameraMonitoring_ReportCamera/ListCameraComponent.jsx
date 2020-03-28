@@ -1,8 +1,9 @@
-import { Component } from "react";
-import React from "react";
-import loadingIcon from "./resources/icons/loading.gif";
-import connectingIcon from "./resources/icons/connecting.gif";
-import disconnect from "./resources/icons/disconnect.png";
+import React, { Component } from "react";
+import Grid from "@material-ui/core/Grid";
+import SelectCameraComponent from "./SelectCameraComponent";
+import disconnect from "./resources/image/disconnect.png";
+import loadingIcon from "./resources/image/loading.gif";
+import dataloading from "./resources/image/dataloading.gif";
 
 class CameraComponent extends Component {
   constructor(props) {
@@ -11,28 +12,27 @@ class CameraComponent extends Component {
     this.state = {
       liveCamSrc: "",
       liveCamName: "",
-      idLiveCamera: "",
-      fetchError: false
+      fetchError: false,
+      lastCamData: null,
+      idLiveCamera: ""
     };
 
-    this.fetchCamUrl = this.fetchCamUrl.bind(this);
-    this.handleRemoveLiveCam = this.handleRemoveLiveCam.bind(this);
-    this.clearScheduleProcess = this.clearScheduleProcess.bind(this);
-    this.clearWaitingProcess = this.clearWaitingProcess.bind(this);
-    this.onLoad = this.onLoad.bind(this);
+    this.fetchCamData = this.fetchCamData.bind(this);
+    this.handleClickClose = this.handleClickClose.bind(this);
+    this.handleFilterCameraId = this.handleFilterCameraId.bind(this);
     this.onError = this.onError.bind(this);
+    this.onLoad = this.onLoad.bind(this);
+    this.clearWaitingProcess = this.clearWaitingProcess.bind(this);
     this.handleLiveCameraClick = this.handleLiveCameraClick.bind(this);
-
+    this.clearScheduleProcess = this.clearScheduleProcess.bind(this);
     this.intervalValues = [];
     this.timeoutValues = [];
     this.intervalCount = 1;
     this.srcLoaded = null;
-
     this.coutError = 0;
 
     this.srcSet = null;
     this.titleSet = null;
-    this.idCameraSet = null;
     this.srcLoaded = null;
     this.timeStartShowLoading = -1;
 
@@ -70,40 +70,38 @@ class CameraComponent extends Component {
 
   componentDidMount() {
     const {
-      camera,
-      cameraData,
+      liveCamData,
       filterByClusterIDHandler,
-      resolution_mode
+      cameraDataByLayer
     } = this.props;
-    let clusterDataID = camera.clusterDataID;
-    const liveCameraData = cameraData.find(
-      cam =>
-        cam.vmsCamId === camera.vmsCamId &&
-        filterByClusterIDHandler(cam, clusterDataID)
+    const { clusterDataID, vmsCamId } = liveCamData;
+    const liveCameraData = cameraDataByLayer.find(
+      camera =>
+        camera.vmsCamId === vmsCamId &&
+        filterByClusterIDHandler(camera, clusterDataID)
     );
-    if (liveCameraData) {
-      this.fetchCamUrl(liveCameraData);
-    }
+    this.fetchCamData(liveCameraData);
   }
 
   componentDidUpdate(prevProps, prevState) {
     const {
-      camera,
-      cameraData,
+      liveCamData,
       filterByClusterIDHandler,
+      cameraDataByLayer,
       resolution_mode
     } = this.props;
-    const { vmsCamId, clusterDataID } = camera;
-    const liveCameraData = cameraData.find(
-      cam =>
-        cam.vmsCamId === vmsCamId &&
-        filterByClusterIDHandler(cam, clusterDataID)
-    );
     if (
-      vmsCamId != prevProps.camera.vmsCamId ||
+      liveCamData != prevProps.liveCamData ||
       resolution_mode.key != prevProps.resolution_mode.key
     ) {
-      this.fetchCamUrl(liveCameraData);
+      this.clearScheduleProcess();
+      const { clusterDataID, vmsCamId } = liveCamData;
+      const liveCameraData = cameraDataByLayer.find(
+        camera =>
+          camera.vmsCamId === vmsCamId &&
+          filterByClusterIDHandler(camera, clusterDataID)
+      );
+      this.fetchCamData(liveCameraData);
     }
   }
 
@@ -113,43 +111,7 @@ class CameraComponent extends Component {
     this.coutError = 0;
   }
 
-  fetchCamUrl2(camera) {
-    this.setState({
-      liveCamSrc: loadingIcon
-    });
-    if (camera == null) {
-      return this.setState({
-        fetchError: true
-      });
-    }
-    const { cameraVMSController } = this.props;
-    let liveCamSrc = camera.Liveview;
-    if (liveCamSrc == null || liveCamSrc.length === "") {
-      return this.setState({
-        fetchError: true
-      });
-    }
-    if (camera.level === 2 && cameraVMSController != null) {
-      // Trường hợp camera chưa bật thì dùng api bật camera
-      cameraVMSController
-        .turnOnCameraToVMS(camera.clusterDataID, camera.vmsCamId)
-        .then(resp => {})
-        .catch(error => {})
-        .then(() => {
-          setTimeout(() => {
-            this.setState({
-              liveCamSrc: liveCamSrc
-            });
-          }, 5000);
-        });
-    } else {
-      this.setState({
-        liveCamSrc: liveCamSrc
-      });
-    }
-  }
-
-  fetchCamUrl(camera) {
+  fetchCamData(camera) {
     this.liveCameraData = camera;
     if (!camera) return;
     const {
@@ -165,7 +127,7 @@ class CameraComponent extends Component {
     let liveCamSrc = getLiveURLMonitorByResolutionMode(
       camera,
       resolution_mode,
-      "min"
+      "default"
     );
     const now = new Date().getTime();
     this.srcSet = liveCamSrc;
@@ -217,9 +179,21 @@ class CameraComponent extends Component {
     this.coutError = 0;
   }
 
-  handleRemoveLiveCam() {
-    const { camera, handleRemoveLiveCam } = this.props;
-    handleRemoveLiveCam(camera.vmsCamId, camera.clusterDataID);
+  handleClickClose() {
+    const { liveCamData } = this.props;
+    const { lastCamData } = this.state;
+    if (lastCamData) {
+      this.setState({ lastCamData: null });
+    } else {
+      this.setState({ lastCamData: liveCamData });
+    }
+  }
+
+  handleFilterCameraId(camera) {
+    const { handleUpdateLiveCam, liveCamData } = this.props;
+    const { lastCamData } = this.state;
+    handleUpdateLiveCam(lastCamData, camera.vmsCamId, camera.clusterDataID);
+    this.setState({ lastCamData: null });
   }
 
   onError(e) {
@@ -233,12 +207,13 @@ class CameraComponent extends Component {
     let src = e.target.src;
     let isDoned = src != null && src !== loadingIcon && src !== disconnect;
     this.coutError = isDoned ? 0 : this.coutError;
-    this.timeStartShowLoading = isDoned
+    let newtimeStartShowLoading = isDoned
       ? -1
       : timeStartShowLoading >= 0
       ? timeStartShowLoading
       : new Date().getTime();
     this.srcLoaded = src;
+    this.timeStartShowLoading = newtimeStartShowLoading;
     this.setState({ liveCamName: titleSet, idLiveCamera: idCameraSet });
     console.log(
       `onLoad:${isDoned}:${titleSet}:${timeStartShowLoading}:${
@@ -257,7 +232,7 @@ class CameraComponent extends Component {
     this.timeoutValues = [];
   }
 
-  handleLiveCameraClick() {
+  handleLiveCameraClick(liveCamSrc, liveCamName, idCamera) {
     const { resolution_mode, getLiveURLMonitorByResolutionMode } = this.props;
     let srcCamera = this.srcSet ? this.srcSet : this.state.liveCamSrc;
     if (this.liveCameraData) {
@@ -269,107 +244,147 @@ class CameraComponent extends Component {
     }
     this.props.handleLiveCameraClick(
       srcCamera,
-      this.state.liveCamName,
+      this.titleSet ? this.titleSet : this.state.liveCamName,
       this.state.idLiveCamera
     );
+    // this.props.handleLiveCameraClick(liveCamSrc, liveCamName);
   }
 
   render() {
-    const { height, width } = this.props;
-    const { liveCamSrc, liveCamName, fetchError } = this.state;
-    const { srcSet } = this;
+    const {
+      mode,
+      liveCamData,
+      height,
+      muiTheme,
+      filterByClusterIDHandler,
+      cameraDataByLayer,
+      numberListCameraDisplay
+    } = this.props;
+    const { clusterDataID, vmsCamId } = liveCamData;
+    const { liveCamSrc, liveCamName, fetchError, lastCamData } = this.state;
+    const isClosed =
+      lastCamData != null &&
+      lastCamData.vmsCamId == vmsCamId &&
+      filterByClusterIDHandler(lastCamData, clusterDataID);
+
     return (
-      <div
-        style={{
-          height: height,
-          textAlign: "center",
-          position: "relative",
-          borderStyle: "solid",
-          borderLeftWidth: "5px",
-          borderRightWidth: "5px",
-          borderTopWidth: 0,
-          borderBottomWidth: 0,
-          color: "#ffffff",
-          borderColor: "#081922",
-          backgroundColor: "#081922"
-        }}
+      <Grid
+        item
+        xs={12 / mode}
+        style={{ height: height, position: "relative" }}
       >
         <div
           style={{
-            height: "20px"
+            position: "absolute",
+            right: "0px",
+            fontWeight: "bold",
+            fontSize: "18px",
+            backgroundColor: "white",
+            color: "black"
           }}
         >
-          {liveCamName}
+          <span>{liveCamName}</span>
           <a
             title="Đóng"
-            onClick={this.handleRemoveLiveCam}
+            onClick={this.handleClickClose}
             style={{
               float: "right",
               cursor: "pointer",
-              padding: "2px 5px 0 0"
+              marginRight: 5,
+              marginLeft: 5
             }}
           >
             X
           </a>
         </div>
-        {!fetchError ? (
-          <img
-            src={liveCamSrc}
-            style={{ maxHeight: height - 30, maxWidth: width }}
-            onClick={this.handleLiveCameraClick}
-            onLoad={e => {
-              this.onLoad(e);
-            }}
-            onError={e => {
-              this.onError(e);
-            }}
-          />
+        {!isClosed ? (
+          !fetchError ? (
+            <img
+              src={liveCamSrc}
+              style={{ width: "100%", height: "calc(100% - 5px)" }}
+              onLoad={e => {
+                this.onLoad(e);
+              }}
+              onError={e => {
+                this.onError(e);
+              }}
+              // onClick={() => this.handleLiveCameraClick(this.srcSet ? this.srcSet : liveCamSrc, this.titleSet ? this.titleSet : liveCamName)}
+              onClick={this.handleLiveCameraClick}
+            />
+          ) : (
+            <div
+              style={{
+                width: "100%",
+                height: "100%",
+                fontSize: "30px",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: "#081922",
+                color: "#ffffff"
+              }}
+            >
+              <div> Mất kết nối đến Camera</div>
+            </div>
+          )
         ) : (
-          <span>Mất kết nối đến Camera</span>
+          <div>
+            <SelectCameraComponent
+              muiTheme={muiTheme}
+              cameraDataByLayer={cameraDataByLayer}
+              height={height}
+              handleFilterCamera={this.handleFilterCameraId}
+              numberListCameraDisplay={numberListCameraDisplay}
+            />
+          </div>
         )}
-      </div>
+      </Grid>
     );
   }
 }
 
 class ListCameraComponent extends Component {
+  componentWillUnmount() {
+    window.stop();
+  }
+
   render() {
     const {
       height,
       width,
-      liveCamera,
-      cameraData,
+      liveCameraDatas,
+      getLiveCameraApi,
       handleLiveCameraClick,
-      handleRemoveLiveCam,
+      handleUpdateLiveCam,
+      mode,
+      turnOnCameraApi,
       cameraVMSController,
       filterByClusterIDHandler,
+      cameraDataByLayer,
+      updateNow,
+      numberListCameraDisplay,
+      isLoadedData,
       resolution_mode,
       getLiveURLMonitorByResolutionMode
     } = this.props;
-    return (
-      <div
-        className={"row"}
-        style={{
-          justifyContent: "center",
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-          height: "100%",
-          margin: 0
-        }}
-      >
-        {liveCamera.map(liveCam => {
+    const _height = width > height ? height : (width * width) / height + 4;
+    return liveCameraDatas.length > 0 ? (
+      <Grid container spacing={0} style={{ width: width, height: _height }}>
+        {liveCameraDatas.map(liveCamData => {
           return (
             <CameraComponent
-              width={width}
-              height={height}
-              camera={liveCam}
-              cameraData={cameraData}
+              height={_height / mode - 2}
+              mode={mode}
+              liveCamData={liveCamData}
+              cameraDataByLayer={cameraDataByLayer}
               handleLiveCameraClick={handleLiveCameraClick}
-              handleRemoveLiveCam={handleRemoveLiveCam}
+              handleUpdateLiveCam={handleUpdateLiveCam}
+              getLiveCameraApi={getLiveCameraApi}
+              turnOnCameraApi={turnOnCameraApi}
               cameraVMSController={cameraVMSController}
               filterByClusterIDHandler={filterByClusterIDHandler}
-              updateNow={true}
+              updateNow={updateNow}
+              numberListCameraDisplay={numberListCameraDisplay}
               resolution_mode={resolution_mode}
               getLiveURLMonitorByResolutionMode={
                 getLiveURLMonitorByResolutionMode
@@ -377,6 +392,39 @@ class ListCameraComponent extends Component {
             />
           );
         })}
+      </Grid>
+    ) : isLoadedData ? (
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          fontSize: "30px",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "white",
+          color: "#000000"
+        }}
+      >
+        Không có camera
+      </div>
+    ) : (
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          fontSize: "30px",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "white",
+          color: "#777777"
+        }}
+      >
+        <img
+          src={dataloading}
+          // style={{ width: '80%', height: 'calc(80% - 5px)' }}
+        />
       </div>
     );
   }

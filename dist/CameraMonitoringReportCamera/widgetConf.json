@@ -1,0 +1,78 @@
+{
+  "name": "CameraMonitoringReportCamera",
+  "id": "CameraMonitoringReportCamera",
+  "thumbnailURL": "",
+  "configs": {
+    "providerConfig": {
+      "configs": {
+        "refreshInterval": 60
+      },
+      "apiConfig":{
+        "vms_protocol": "https",
+        "vms_domain": "vmsqn.hcdt.vn",
+        "vms_port": 8443,
+        "vms_username_default": null,
+        "vms_password_default": null,
+        "vms_login_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/host/login",
+        "vms_update_token_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/host/login",
+        "vms_monitors_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/monitors?mode=compact",
+        "vms_groups_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/groups",
+        "vms_monitors_groups_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/monitors_groups",
+        "vms_users_groups_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/users_groups",
+        "vms_turn_on_camera_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/monitors/priority/{id}?Function=Monitor",
+        "vms_get_live_camera_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/monitors/{id}?type=mjpeg&scale=100&width=1920&height=1080",
+        "vms_get_tree_data_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/tree?modeTree=full&mode=compact",
+        "vms_get_define_error_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/defines?type={typeDefine}",
+        "vms_get_information_report_camera_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/monitors/{idCamera}?mode=report",
+        "vms_submit_form_report_camera_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/monitors/{idCamera}",
+        "vms_get_history_report_camera_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/logs/camerareport/{idCamera}",
+        "vms_get_data_report_camera_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/monitors?mode=report",
+        "cameraUpdateIntervalValue": 600000,
+        "cms_protocol": "https",
+        "cms_domain": "vmsqn.hcdt.vn",
+        "cms_port": 9444,
+        "cms_camera_data_api_template": "{cms_protocol}://{cms_domain}:{cms_port}/cms/api/CameraInGroup/GetTreeData",
+        "cms_profile_api_template": "{cms_protocol}://{cms_domain}:{cms_port}/cms/api/Profile/AddIfNotExist",
+        "cms_profile_id": null,
+        "vms_token_api": null,
+        "vms_support_get_tree_data": false,
+        "vms_multi_cluster_config": {
+          "isSupported": false,
+          "isConnectDirectToCluster": false,
+          "vms_login_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/host/login",
+          "vms_update_token_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/host/login",
+          "vms_monitors_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/vmsmanager/monitors?mode=compact",
+          "vms_groups_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/vmsmanager/groups",
+          "vms_monitors_groups_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/vmsmanager/monitors_groups",
+          "vms_users_groups_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/vmsmanager/users_groups",
+          "vms_turn_on_camera_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/monitors/priority/{id}?Function=Monitor",
+          "vms_get_live_camera_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/monitors/{id}?type=mjpeg&scale=100&width=1920&height=1080",
+          "vms_get_targets_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/vmsmanager/infor",
+          "vms_get_tree_data_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/vmsmanager/tree?modeTree=full&mode=compact"
+        },
+        "vms_authentication_config": {
+          "authentication_without_token": false
+        },
+	"monitorsFieldSearch" : [
+          "name",
+          "displayName",
+          "group",
+          "address",
+          "description",
+          "svalues"
+        ],
+        "numberListCameraDisplay": -1,
+        "widget_version": 10
+      },
+      "viewConfig": {
+        "treeConfig": {
+          "alwaysShowRootNode": false,
+          "ignoreGroupOnlyHaveOneChild": false,
+          "ignoreCameraNotInGroup": false,
+          "ignoreGroupInvalid": false,
+          "addCameraChildInTree": false
+        }
+      }
+    }
+  }
+}
