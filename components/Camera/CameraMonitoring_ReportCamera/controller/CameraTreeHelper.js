@@ -177,35 +177,26 @@ class CameraTreeHelper {
 
     static buildUITreeData(tree, root = null, isAddCameraChild = false, handlerCameras = null, disabledIfEmpty = false) {
         const {childCameras, childGroups} = tree;
-        let rootNode = root == null ?
-            {   name: "", title: "", value: "", svalue:"", key: "", children: [] , numberLive: 0, numberAll: 0, allIDs : [], liveIDs : [],
-                update: function() {
-                    this.numberLive =  this.liveIDs.reduce((value, item, index) => (value + item.monitorIDs.size), 0);
-                    this.numberAll =  this.allIDs.reduce((value, item, index) => (value + item.monitorIDs.size), 0);
-                    this.title = `${this.name}(${this.numberLive}/${this.numberAll})`;
-                    this.disabled = (disabledIfEmpty && this.numberLive === 0);
-                    this.children = this.children.sort((node1, node2) => {
-                        if (node1 != null && node1.title != null && node2 != null && node2.title != null) {
-                            return node1.title.localeCompare(node2.title);
-                        }
-                        return -1;
-                    });
-                },
-                parent: null
-            } : root;
+        let rootNode = root == null ? {
+            name: "",
+            title: "",
+            value: "",
+            svalue:"",
+            key: "",
+            parent: null,
+            children: [] ,
+            numberLive: 0, numberAll: 0, allIDs : [], liveIDs : [],
+        } : root;
         if (handlerCameras != null || isAddCameraChild) {
             childCameras.forEach(camera => {
-                const node = {
-                    name : `${camera.Name}`,
+                let node = {
+                    name  : `${camera.Name}`,
                     title : `${camera.Name}`,
                     value : `${rootNode.value}/${camera.Id}.c`,
                     svalue: `${rootNode.svalue}/${camera.Name}`,
                     key   : `${camera.Id}.c`,
                     children: [],
-                    parent: rootNode,
-                    update: function() {
-                        rootNode.update();
-                    }
+                    parent: rootNode
                 };
                 if (handlerCameras != null) {
                     handlerCameras(camera, node, rootNode);
@@ -216,7 +207,7 @@ class CameraTreeHelper {
             });
         }
         childGroups.forEach(group => {
-            const node = {
+            let node = {
                 name : `${group.Name}`,
                 title : `${group.Name}`,
                 value : `${rootNode.value}/${group.clusterDataID ? group.clusterDataID : ""}_${group.Id}.g`,
@@ -227,43 +218,28 @@ class CameraTreeHelper {
                 numberAll: 0,
                 allIDs : [],
                 liveIDs : [],
-                parent: rootNode,
-                update: function() {
-                    this.numberLive =  this.liveIDs.reduce((value, item, index) => (value + item.monitorIDs.size), 0);
-                    this.numberAll =  this.allIDs.reduce((value, item, index) => (value + item.monitorIDs.size), 0);
-                    this.title = `${this.name}(${this.numberLive}/${this.numberAll})`;
-                    this.disabled = (disabledIfEmpty && this.numberLive === 0);
-                    this.children = this.children.sort((node1, node2) => {
-                        if (node1 != null && node1.title != null && node2 != null && node2.title != null) {
-                            return node1.title.localeCompare(node2.title);
-                        }
-                        return -1;
-                    });
-                }
+                parent: rootNode
             };
-            rootNode.children.push(node);
-            CameraTreeHelper.buildUITreeData(group, node, isAddCameraChild, handlerCameras, disabledIfEmpty);
+            node = CameraTreeHelper.buildUITreeData(group, node, isAddCameraChild, handlerCameras, disabledIfEmpty);
             node.liveIDs.forEach(item => {
-                const {clusterDataID, monitorIDs} = item;
-                let clusterDataObject = rootNode.liveIDs.find(item => item.clusterDataID == clusterDataID);
+                let {clusterDataID, monitorIDs} = item;
+                let clusterDataObject = rootNode.liveIDs.find(citem => citem.clusterDataID == clusterDataID);
                 if (!clusterDataObject) {
-                    rootNode.liveIDs.push(item);
-                } else {
-                    monitorIDs.forEach(id => clusterDataObject.monitorIDs.add(id));
+                    clusterDataObject = {clusterDataID: clusterDataID, monitorIDs: new Set()};
+                    rootNode.liveIDs.push(clusterDataObject);
                 }
+                monitorIDs.forEach(id => clusterDataObject.monitorIDs.add(id));
             });
             node.allIDs.forEach(item => {
-                const {clusterDataID, monitorIDs} = item;
-                let clusterDataObject = rootNode.allIDs.find(item => item.clusterDataID == clusterDataID);
+                let {clusterDataID, monitorIDs} = item;
+                let clusterDataObject = rootNode.allIDs.find(citem => citem.clusterDataID == clusterDataID);
                 if (!clusterDataObject) {
-                    rootNode.allIDs.push(item);
-                } else {
-                    monitorIDs.forEach(id => clusterDataObject.monitorIDs.add(id));
+                    clusterDataObject = {clusterDataID: clusterDataID, monitorIDs: new Set()};
+                    rootNode.allIDs.push(clusterDataObject);
                 }
+                monitorIDs.forEach(id => clusterDataObject.monitorIDs.add(id));
             });
-            rootNode.numberLive =  rootNode.liveIDs.reduce((value, item, index) => (value + item.monitorIDs.size), 0);
-            rootNode.numberAll =  rootNode.allIDs.reduce((value, item, index) => (value + item.monitorIDs.size), 0);
-            rootNode.disabled = (disabledIfEmpty && rootNode.numberLive === 0);
+            rootNode.children.push(node);
         });
         rootNode.numberLive =  rootNode.liveIDs.reduce((value, item, index) => (value + item.monitorIDs.size), 0);
         rootNode.numberAll =  rootNode.allIDs.reduce((value, item, index) => (value + item.monitorIDs.size), 0);
@@ -275,7 +251,6 @@ class CameraTreeHelper {
             return -1;
         });
         rootNode.disabled = (disabledIfEmpty && rootNode.numberLive === 0);
-        // TODO distinct cam
         return rootNode;
     }
 

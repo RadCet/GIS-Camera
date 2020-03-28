@@ -34,8 +34,6 @@ export default class CameraExportHelper {
   ) {
     treeDataCategory = treeData;
 
-    console.log(treeDataCategory);
-
     //set level Category
     this.setLevelCategory(treeDataCategory, 0);
 
@@ -158,12 +156,9 @@ export default class CameraExportHelper {
     wsOverView["E9"].v = _camBroken;
     wsOverView["F9"].v = listCameraNotGood.length;
 
-    console.log(cameraReportData);
-
     // count camera theo danh muc nhu du lich tiep dan...
     treeDataCategory.map(rootCategoty => {
       rootCategoty.children.map(category => {
-        console.log(category);
         if (category.allIDs.length > 0) {
           // nhóm có camera
           let listIdCameraByCategory = [];

@@ -343,13 +343,16 @@ class FormSubmitStatusCamera1 extends React.Component {
           if (result) {
             let dataRes = result.data;
             dataRes.map(report => {
-              let condition = this.props.defineConditionCamera.filter(
-                define => {
-                  return define.Code === report.PhysicalState;
-                }
-              )[0];
-
-              report.PhysicalState = condition.Content_vi;
+              if (report.PhysicalState != null) {
+                let condition = this.props.defineConditionCamera.filter(
+                  define => {
+                    return define.Code === report.PhysicalState;
+                  }
+                )[0];
+                report.PhysicalState = condition.Content_vi;
+              } else {
+                report.PhysicalState = null;
+              }
 
               if (
                 report.PhysicalStateNoteCode &&
