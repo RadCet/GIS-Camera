@@ -157,12 +157,55 @@ export default class CameraExportHelper {
     wsOverView["F9"].v = listCameraNotGood.length;
 
     // count camera theo danh muc nhu du lich tiep dan...
-    treeDataCategory.map(rootCategoty => {
-      rootCategoty.children.map(category => {
-        if (category.allIDs.length > 0) {
+    // nếu có 2 nhóm root trở lên thì mỗi nhóm root là 1 sheet còn nếu chỉ có 1 root thì mỗi con của nhóm root đó là 1 sheet
+    if (treeDataCategory.length < 2) {
+      treeDataCategory.map(rootCategoty => {
+        rootCategoty.children.map(category => {
+          if (category.allIDs.length > 0) {
+            // nhóm có camera
+            let listIdCameraByCategory = [];
+            category.allIDs.map(dataIdsCamera => {
+              listIdCameraByCategory = listIdCameraByCategory.concat(
+                Array.from(dataIdsCamera.monitorIDs)
+              );
+            });
+            let countCameraNotGood = 0;
+            listIdCameraByCategory.map(cameraProperty => {
+              let cameraNotGood = listCameraNotGood.filter(cameranotGood => {
+                return cameranotGood.Id == cameraProperty;
+              });
+              if (cameraNotGood.length > 0) {
+                countCameraNotGood++;
+              }
+            });
+            wsOverView["A" + indexRow].v = indexSTT;
+            indexSTT++;
+            wsOverView["B" + indexRow].v = "Tổng số camera " + category.name;
+            wsOverView["C" + indexRow].v = category.numberAll;
+            wsOverView["D" + indexRow].v = category.numberLive;
+            wsOverView["E" + indexRow].v =
+              category.numberAll - category.numberLive;
+            wsOverView["F" + indexRow].v = countCameraNotGood;
+            indexRow++;
+          } else {
+            // nhóm không có camera
+            wsOverView["A" + indexRow].v = indexSTT;
+            indexSTT++;
+            wsOverView["B" + indexRow].v = "Tổng số camera " + category.name;
+            wsOverView["C" + indexRow].v = 0;
+            wsOverView["D" + indexRow].v = 0;
+            wsOverView["E" + indexRow].v = 0;
+            wsOverView["F" + indexRow].v = 0;
+            indexRow++;
+          }
+        });
+      });
+    } else {
+      treeDataCategory.map(rootCategoty => {
+        if (rootCategoty.allIDs.length > 0) {
           // nhóm có camera
           let listIdCameraByCategory = [];
-          category.allIDs.map(dataIdsCamera => {
+          rootCategoty.allIDs.map(dataIdsCamera => {
             listIdCameraByCategory = listIdCameraByCategory.concat(
               Array.from(dataIdsCamera.monitorIDs)
             );
@@ -178,18 +221,18 @@ export default class CameraExportHelper {
           });
           wsOverView["A" + indexRow].v = indexSTT;
           indexSTT++;
-          wsOverView["B" + indexRow].v = "Tổng số camera " + category.name;
-          wsOverView["C" + indexRow].v = category.numberAll;
-          wsOverView["D" + indexRow].v = category.numberLive;
+          wsOverView["B" + indexRow].v = "Tổng số camera " + rootCategoty.name;
+          wsOverView["C" + indexRow].v = rootCategoty.numberAll;
+          wsOverView["D" + indexRow].v = rootCategoty.numberLive;
           wsOverView["E" + indexRow].v =
-            category.numberAll - category.numberLive;
+            rootCategoty.numberAll - rootCategoty.numberLive;
           wsOverView["F" + indexRow].v = countCameraNotGood;
           indexRow++;
         } else {
           // nhóm không có camera
           wsOverView["A" + indexRow].v = indexSTT;
           indexSTT++;
-          wsOverView["B" + indexRow].v = "Tổng số camera " + category.name;
+          wsOverView["B" + indexRow].v = "Tổng số camera " + rootCategoty.name;
           wsOverView["C" + indexRow].v = 0;
           wsOverView["D" + indexRow].v = 0;
           wsOverView["E" + indexRow].v = 0;
@@ -197,8 +240,7 @@ export default class CameraExportHelper {
           indexRow++;
         }
       });
-    });
-
+    }
     /* add to workbook */
     wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, wsOverView, "Báo cáo chung");
@@ -217,14 +259,41 @@ export default class CameraExportHelper {
     );
 
     //sheet category
-    let listCategory = [];
 
-    treeDataCategory.map(childDataCategory => {
-      childDataCategory.children.map(category => {
-        listCategory.push(category);
+    // nếu có 2 nhóm root trở lên thì mỗi nhóm root là 1 sheet còn nếu chỉ có 1 root thì mỗi con của nhóm root đó là 1 sheet
+    if (treeDataCategory.length < 2) {
+      treeDataCategory.map(childDataCategory => {
+        // lấy các nhóm ở level 2
+        childDataCategory.children.map(category => {
+          var wsCategory = XLSX.utils.json_to_sheet(dataXLSX);
+          const mergeCategory = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 3 } }];
+          wsCategory["!merges"] = mergeCategory;
+
+          var wscols = [{ wch: 10 }, { wch: 30 }, { wch: 30 }, { wch: 30 }];
+
+          wsCategory["!cols"] = wscols;
+          wsCategory["A1"].v =
+            "                                           BÁO CÁO TÌNH HÌNH CAMERA " +
+            category.name.toUpperCase();
+
+          wsCategory["A3"].v = "STT";
+          wsCategory["B3"].v = "Tên đơn vị";
+          wsCategory["C3"].v = "Sô camera hoạt động";
+          wsCategory["D3"].v = "Số camera không hoạt động";
+
+          indexSTTCategory = 1;
+          indexRowCategory = 4;
+          const cameraCategory = childDataCategory.children.filter(
+            item => item.value === category.value
+          );
+
+          // console.log(nameSheet);
+          this.handleDataCategory(cameraCategory[0], wsCategory, 0);
+          XLSX.utils.book_append_sheet(wb, wsCategory, category.name);
+        });
       });
-      // lấy các nhóm ở level 2
-      childDataCategory.children.map(category => {
+    } else {
+      treeDataCategory.map(childCategory => {
         var wsCategory = XLSX.utils.json_to_sheet(dataXLSX);
         const mergeCategory = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 3 } }];
         wsCategory["!merges"] = mergeCategory;
@@ -234,7 +303,7 @@ export default class CameraExportHelper {
         wsCategory["!cols"] = wscols;
         wsCategory["A1"].v =
           "                                           BÁO CÁO TÌNH HÌNH CAMERA " +
-          category.name.toUpperCase();
+          childCategory.name.toUpperCase();
 
         wsCategory["A3"].v = "STT";
         wsCategory["B3"].v = "Tên đơn vị";
@@ -243,31 +312,11 @@ export default class CameraExportHelper {
 
         indexSTTCategory = 1;
         indexRowCategory = 4;
-        const cameraCategory = childDataCategory.children.filter(
-          item => item.value === category.value
-        );
 
-        //set name sheet
-        let tagName = "";
-        let valueNameCategory = category.svalue.split("/");
-        valueNameCategory = valueNameCategory[valueNameCategory.length - 2];
-        valueNameCategory = valueNameCategory.split(" ")
-        valueNameCategory.map(name => {
-          tagName += name[0];
-        });
-        let nameSheet = tagName + " " + category.name;
-
-        if (nameSheet.length > 31) {
-          nameSheet = category.name;
-        }
-
-        // console.log(nameSheet);
-        this.handleDataCategory(cameraCategory[0], wsCategory, 0);
-        XLSX.utils.book_append_sheet(wb, wsCategory, nameSheet);
+        this.handleDataCategory(childCategory, wsCategory, 0);
+        XLSX.utils.book_append_sheet(wb, wsCategory, childCategory.name);
       });
-    });
-
-    // console.log(listCategory);
+    }
 
     /* generate an XLSX file */
     let fileTitle =
@@ -285,7 +334,7 @@ export default class CameraExportHelper {
   }
 
   static handleDataCategory(category, wsCategory) {
-    if (category.children.length == 0 && category.levelCategory == 1) {
+    if (category.children.length == 0) {
       wsCategory["A" + indexRowCategory].v = indexSTTCategory;
       indexSTTCategory++;
       wsCategory["B" + indexRowCategory].v = category.name;
