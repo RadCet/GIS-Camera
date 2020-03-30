@@ -154,8 +154,8 @@ class CameraMonitoring extends Widget {
         camera_undone_support == null ? true : camera_undone_support;
       this.monitorsFieldSearch =
         monitorsFieldSearch == null ? ["name"] : monitorsFieldSearch;
-      this.widget_version = `15.5`;
-      this.widget_time_update = "2020-03-30T09:00:00.000+07:00";
+      this.widget_version = `15.6`;
+      this.widget_time_update = "2020-03-30T21:55:00.000+07:00";
       this.widget_update_content = "";
       this.socialization_support =
         socialization_support == null ? false : socialization_support;
