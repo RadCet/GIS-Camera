@@ -13,8 +13,8 @@
         "vms_port": 8443,
         "vms_username_default": null,
         "vms_password_default": null,
-        "vms_login_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/host/login",
-        "vms_update_token_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/host/login",
+        "vms_login_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/host/login?mode=permissions",
+        "vms_update_token_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/host/login?mode=permissions",
         "vms_monitors_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/monitors?mode=compact",
         "vms_groups_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/groups",
         "vms_monitors_groups_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/monitors_groups",
@@ -39,8 +39,8 @@
         "vms_multi_cluster_config": {
           "isSupported": false,
           "isConnectDirectToCluster": false,
-          "vms_login_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/host/login",
-          "vms_update_token_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/host/login",
+          "vms_login_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/host/login?mode=permissions",
+          "vms_update_token_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/host/login?mode=permissions",
           "vms_monitors_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/vmsmanager/monitors?mode=compact",
           "vms_groups_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/vmsmanager/groups",
           "vms_monitors_groups_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/vmsmanager/monitors_groups",
@@ -48,7 +48,10 @@
           "vms_turn_on_camera_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/monitors/priority/{id}?Function=Monitor",
           "vms_get_live_camera_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/monitors/{id}?type=mjpeg&scale=100&width=1920&height=1080",
           "vms_get_targets_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/vmsmanager/infor",
-          "vms_get_tree_data_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/vmsmanager/tree?modeTree=full&mode=compact"
+          "vms_get_tree_data_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/vmsmanager/tree?modeTree=full&mode=compact",
+          "ignoreDefaultTargetData": false,
+          "combineDefaultGroupTarget": true,
+          "combineRootByTag": true
         },
         "vms_authentication_config": {
           "authentication_without_token": false
@@ -62,7 +65,22 @@
           "svalues"
         ],
         "numberListCameraDisplay": -1,
-        "widget_version": 10
+        "widget_version": 10,
+        "mobile_scale": 50,
+        "camera_undone_support": true,
+
+        "language": "vi",
+        "resolution_options": [
+          {"key": "auto", "titles": {"en":"Auto", "vi":"Tự động"}, "value":{"scale":{"default": 100, "min": 70, "max": 100, "mobile": 80}}},
+          {"key": "verylow", "titles": {"en":"Very Low", "vi":"Rất Thấp"}, "value":{"scale":{"default": 30, "min": 20, "max": 50, "mobile": 30}}},
+          {"key": "low", "titles": {"en":"Low", "vi":"Thấp"}, "value":{"scale":{"default": 50, "min": 30, "max": 70, "mobile": 50}}},
+          {"key": "medium", "titles": {"en":"Medium", "vi":"Trung bình"}, "value":{"scale":{"default": 70, "min": 50, "max": 80, "mobile": 70}}},
+          {"key": "heigh", "titles": {"en":"Heigh", "vi":"Cao"}, "value":{"scale":{"default": 100, "min": 70, "max": 100, "mobile": 80}}}
+        ],
+        "resolution_options_auto_mode_order_switch": {
+          "default": ["heigh", "medium", "low", "verylow", "snapshot"],
+          "mobile": ["medium", "low", "height", "verylow", "snapshot"]
+        }
       },
       "viewConfig": {
         "treeConfig": {

@@ -309,8 +309,8 @@ export default class GeoChartCamera extends Widget {
         resolution_options_auto_mode_order_switch
       } = this.apiConfig;
       this.mobile_scale = mobile_scale ? mobile_scale : this.mobile_scale;
-      this.widget_version = `15.4`; // widget_version == null ? "1.0" : widget_version;
-      this.widget_time_update = "2020-03-26T15:00:00.000+07:00";
+      this.widget_version = `15.5`; // widget_version == null ? "1.0" : widget_version;
+      this.widget_time_update = "2020-03-30T11:55:00.000+07:00";
       this.widget_update_content = ""; //`isMobile:${isMobileBrowser()}::isMobileFunction:::${isMobileBrowserFunction()}::::::${navigator.userAgent}`;
       this.va_support = va_support == null ? true : va_support;
       this.showSocializationInNewTab =

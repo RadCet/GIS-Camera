@@ -1,7 +1,7 @@
 import React from "react";
 import Widget from "@wso2-dashboards/widget";
 import ListCameraComponent from "./ListCameraComponent";
-import { TreeSelect, Button, Icon, Modal, Radio, message } from "antd";
+import { TreeSelect, Button, Icon, Modal, Radio } from "antd";
 import "antd/dist/antd.css";
 import "./styles/Modal.css";
 
@@ -15,7 +15,6 @@ import { TextHelper } from "./controller/TextHelper";
 import { isMobileBrowserFunction } from "./MobileCheck";
 import { localStoragePersistentHandler as defaultPersistentHandler } from "./controller/PersistentHelper";
 import { EncryptHelper } from "./controller/Helper";
-import FormSubmitStatusCamera from "./FormSubmitStatusCamera";
 
 class CameraMonitoring extends Widget {
   constructor(props) {
@@ -48,16 +47,7 @@ class CameraMonitoring extends Widget {
       isPlaying: false,
       updateNow: true,
       isLoadedData: false,
-      resolution_mode: this.default_resolution_mode,
-
-      // report camera
-      currentClusterDataID: null,
-      permissionReport: null,
-      showFormSubmit: false,
-      idCurrentCameraModal: "",
-      isCamdie: false,
-      defineConditionCamera: [],
-      defineConditionNotGoodCamera: []
+      resolution_mode: this.default_resolution_mode
     };
     this.handleResize = this.handleResize.bind(this);
     this.handleLiveCameraClick = this.handleLiveCameraClick.bind(this);
@@ -72,8 +62,6 @@ class CameraMonitoring extends Widget {
     this.getCameraDataByLayer = this.getCameraDataByLayer.bind(this);
     this.showInfo = this.showInfo.bind(this);
     this.closeInfoPopup = this.closeInfoPopup.bind(this);
-    this.visibleFormSubmit = this.visibleFormSubmit.bind(this);
-    this.invisibleFormSubmit = this.invisibleFormSubmit.bind(this);
 
     this.onImgLoad = this.onImgLoad.bind(this);
     this.onImgError = this.onImgError.bind(this);
@@ -154,8 +142,8 @@ class CameraMonitoring extends Widget {
         camera_undone_support == null ? true : camera_undone_support;
       this.monitorsFieldSearch =
         monitorsFieldSearch == null ? ["name"] : monitorsFieldSearch;
-      this.widget_version = `15.5`;
-      this.widget_time_update = "2020-03-30T09:00:00.000+07:00";
+      this.widget_version = `14.9.2`;
+      this.widget_time_update = "2020-03-24T11:30:00.000+07:00";
       this.widget_update_content = "";
       this.socialization_support =
         socialization_support == null ? false : socialization_support;
@@ -235,15 +223,6 @@ class CameraMonitoring extends Widget {
   }
 
   filterByClusterIDHandler(item, clusterDataID = null) {
-    if (clusterDataID) {
-      this.setState({
-        currentClusterDataID: clusterDataID
-      });
-    } else {
-      this.setState({
-        currentClusterDataID: null
-      });
-    }
     if (this.cameraVMSController.applyMultipleVMS) {
       return clusterDataID == null ? true : item.clusterDataID == clusterDataID;
     }
@@ -423,43 +402,6 @@ class CameraMonitoring extends Widget {
         clearInterval(this.playingInterval);
       }
     }
-
-    if (this.state.permissionReport == null && this.cameraVMSController) {
-      if (
-        this.cameraVMSController
-          .getCurrentVMS()
-          .auth.permission.includes("Report")
-      ) {
-        this.setState({
-          permissionReport: true
-        });
-      } else {
-        this.setState({
-          permissionReport: false
-        });
-      }
-    }
-
-    if (
-      (JSON.stringify(prevState.defineConditionCamera) !=
-        JSON.stringify(this.state.defineConditionCamera) ||
-        this.state.defineConditionCamera.length == 0 ||
-        JSON.stringify(prevState.defineConditionNotGoodCamera) !=
-          JSON.stringify(this.state.defineConditionNotGoodCamera) ||
-        this.state.defineConditionNotGoodCamera.length == 0) &&
-      this.cameraVMSController != null
-    ) {
-      this.cameraVMSController.getDefineError(2).then(result => {
-        this.setState({
-          defineConditionCamera: result
-        });
-      });
-      this.cameraVMSController.getDefineError(1).then(result => {
-        this.setState({
-          defineConditionNotGoodCamera: result
-        });
-      });
-    }
   }
 
   componentWillUnmount() {
@@ -611,7 +553,7 @@ class CameraMonitoring extends Widget {
     }
   }
 
-  handleLiveCameraClick(videoEventSrc, title, idCamera) {
+  handleLiveCameraClick(videoEventSrc, title) {
     if (this.videoEventSrc !== videoEventSrc) {
       this.setState({
         videoEventSrc: loadingIconLarge,
@@ -621,10 +563,6 @@ class CameraMonitoring extends Widget {
       });
       setTimeout(() => this.setState({ videoEventSrc: videoEventSrc }), 1000);
     }
-    this.setState({
-      idCurrentCameraModal: idCamera,
-      isCamdie: false
-    });
   }
 
   handleUpdateLiveCam(lastData, newVmsCamId, clusterDataID = null) {
@@ -762,14 +700,6 @@ class CameraMonitoring extends Widget {
     return url;
   }
 
-  visibleFormSubmit() {
-    this.setState({ showFormSubmit: true });
-  }
-
-  invisibleFormSubmit() {
-    this.setState({ showFormSubmit: false });
-  }
-
   render() {
     const {
       width,
@@ -792,14 +722,7 @@ class CameraMonitoring extends Widget {
       isMobileFunction,
       isMobile,
       isLoadedData,
-      resolution_mode,
-      currentClusterDataID,
-      permissionReport,
-      showFormSubmit,
-      idCurrentCameraModal,
-      isCamdie,
-      defineConditionCamera,
-      defineConditionNotGoodCamera
+      resolution_mode
     } = this.state;
     let cameraDataByLayer = this.state.cameraDataByLayer;
     if (!cameraDataByLayer) {
@@ -938,22 +861,6 @@ class CameraMonitoring extends Widget {
           bodyStyle={{ padding: "5px" }}
           onCancel={this.closeVideoPopup}
         >
-          <Icon
-            type="flag"
-            theme="filled"
-            style={
-              permissionReport
-                ? {
-                    color: "#000000",
-                    fontSize: "24px",
-                    float: "right",
-                    marginRight: "20px",
-                    marginLeft: "20px"
-                  }
-                : { display: "none" }
-            }
-            onClick={this.visibleFormSubmit}
-          />
           {videoEventDataType == "image" ? (
             <img
               src={videoEventSrc}
@@ -983,17 +890,6 @@ class CameraMonitoring extends Widget {
             </div>
           )}
         </Modal>
-        <FormSubmitStatusCamera
-          zIndex={1501}
-          showSubmitForm={showFormSubmit}
-          closeSubmitForm={this.invisibleFormSubmit}
-          vmsID={currentClusterDataID}
-          idCamera={idCurrentCameraModal}
-          isCamdie={isCamdie}
-          defineConditionCamera={defineConditionCamera}
-          defineConditionNotGoodCamera={defineConditionNotGoodCamera}
-          cameraVMSController={this.cameraVMSController}
-        />
       </div>
     );
   }

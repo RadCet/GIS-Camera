@@ -217,17 +217,14 @@ export default class CameraExportHelper {
     );
 
     //sheet category
+    let listCategory = [];
 
     treeDataCategory.map(childDataCategory => {
+      childDataCategory.children.map(category => {
+        listCategory.push(category);
+      });
       // lấy các nhóm ở level 2
-      let listNameCategory = childDataCategory.children.map(
-        category => category.name
-      );
-      for (
-        let indexCategory = 0;
-        indexCategory < listNameCategory.length;
-        indexCategory++
-      ) {
+      childDataCategory.children.map(category => {
         var wsCategory = XLSX.utils.json_to_sheet(dataXLSX);
         const mergeCategory = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 3 } }];
         wsCategory["!merges"] = mergeCategory;
@@ -237,7 +234,7 @@ export default class CameraExportHelper {
         wsCategory["!cols"] = wscols;
         wsCategory["A1"].v =
           "                                           BÁO CÁO TÌNH HÌNH CAMERA " +
-          listNameCategory[indexCategory].toUpperCase();
+          category.name.toUpperCase();
 
         wsCategory["A3"].v = "STT";
         wsCategory["B3"].v = "Tên đơn vị";
@@ -247,17 +244,30 @@ export default class CameraExportHelper {
         indexSTTCategory = 1;
         indexRowCategory = 4;
         const cameraCategory = childDataCategory.children.filter(
-          item => item.name === listNameCategory[indexCategory]
+          item => item.value === category.value
         );
 
+        //set name sheet
+        let tagName = "";
+        let valueNameCategory = category.svalue.split("/");
+        valueNameCategory = valueNameCategory[valueNameCategory.length - 2];
+        valueNameCategory = valueNameCategory.split(" ")
+        valueNameCategory.map(name => {
+          tagName += name[0];
+        });
+        let nameSheet = tagName + " " + category.name;
+
+        if (nameSheet.length > 31) {
+          nameSheet = category.name;
+        }
+
+        // console.log(nameSheet);
         this.handleDataCategory(cameraCategory[0], wsCategory, 0);
-        XLSX.utils.book_append_sheet(
-          wb,
-          wsCategory,
-          listNameCategory[indexCategory]
-        );
-      }
+        XLSX.utils.book_append_sheet(wb, wsCategory, nameSheet);
+      });
     });
+
+    // console.log(listCategory);
 
     /* generate an XLSX file */
     let fileTitle =
@@ -499,6 +509,8 @@ export default class CameraExportHelper {
       XLSX.utils.book_append_sheet(wb, wsConditionCamera, condition.Content_vi);
     });
   }
+
+  static checkDuplicateNameSheet(currentNameSheet, listNameSheet) {}
 }
 
 // exports.CameraExportHelper = CameraExportHelper;
