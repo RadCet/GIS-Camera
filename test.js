@@ -1,7 +1,6 @@
-let a = "Hành Chính Công";
-let a = a.split(" ");
-let name = "";
-a.map(name1=>{
-    name += name1[0];
-})
-console.log(name);
+
+a = [{c: '123'}, {d:'213'}]
+
+b = [{c: '123', k:a}, {d:'213'}]
+
+console.log(JSON.stringify(a) == JSON.stringify(b))

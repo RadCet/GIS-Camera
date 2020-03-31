@@ -309,8 +309,8 @@ export default class GeoChartCamera extends Widget {
         resolution_options_auto_mode_order_switch
       } = this.apiConfig;
       this.mobile_scale = mobile_scale ? mobile_scale : this.mobile_scale;
-      this.widget_version = `15.6`; // widget_version == null ? "1.0" : widget_version;
-      this.widget_time_update = "2020-03-30T21:55:00.000+07:00";
+      this.widget_version = `15.7`; // widget_version == null ? "1.0" : widget_version;
+      this.widget_time_update = "2020-03-31T09:55:00.000+07:00";
       this.widget_update_content = ""; //`isMobile:${isMobileBrowser()}::isMobileFunction:::${isMobileBrowserFunction()}::::::${navigator.userAgent}`;
       this.va_support = va_support == null ? true : va_support;
       this.showSocializationInNewTab =
@@ -565,6 +565,7 @@ export default class GeoChartCamera extends Widget {
     });
     status.isNeedUpdate = true;
     this.setState({ cameraData: cameraData, status: status });
+    this.addMarkerToMap();
   }
 
   updateAIEventHandler(aievents, clusterDataID = null) {
@@ -662,6 +663,7 @@ export default class GeoChartCamera extends Widget {
       eventDetectData: eventDetectData,
       cameraData: cameraData
     });
+    this.addMarkerToMap();
   }
 
   newTokenUpdateHandler(new_token) {
@@ -941,6 +943,7 @@ export default class GeoChartCamera extends Widget {
       this.addMarkerToMap();
     }
 
+   
     if (this.state.permissionReport == null && this.cameraVMSController) {
       if (
         this.cameraVMSController
@@ -1040,7 +1043,7 @@ export default class GeoChartCamera extends Widget {
   }
 
   handleClickCamera(camera) {
-    if (camera.level === 0) {
+    if (camera.level === 0 || camera.glevel === 7) {
       this.cameraVMSController
         .getInformationConditionCamera(camera.clusterDataID, camera.vmsCamId)
         .then(result => {
@@ -1086,32 +1089,32 @@ export default class GeoChartCamera extends Widget {
       //     camera.description ? camera.description : ""
       //   }`
       // );
-      if (this.state.permissionReport) {
-        Modal.confirm({
-          title: `Camera '${camera.name}' chưa lấy được. ${
-            camera.description ? camera.description : ""
-          }`,
-          // content:
-          //   "When clicked the OK button, this dialog will be closed after 1 second",
-          okText: "Báo cáo",
-          cancelText: "Hủy",
-          onOk: () => {
-            this.setState({
-              idCurrentCameraModal: camera.vmsCamId,
-              isCamdie: true
-            });
-            this.visibleFormSubmit();
-          },
-          onCancel() {}
-        });
-      } else {
-        Modal.warning({
-          title: `Camera '${camera.name}' chưa lấy được. ${
-            camera.description ? camera.description : ""
-          }`
-          // content: 'some messages...some messages...',
-        });
-      }
+      // if (this.state.permissionReport) {
+      //   Modal.confirm({
+      //     title: `Camera '${camera.name}' chưa lấy được. ${
+      //       camera.description ? camera.description : ""
+      //     }`,
+      //     // content:
+      //     //   "When clicked the OK button, this dialog will be closed after 1 second",
+      //     okText: "Báo cáo",
+      //     cancelText: "Hủy",
+      //     onOk: () => {
+      //       this.setState({
+      //         idCurrentCameraModal: camera.vmsCamId,
+      //         isCamdie: true
+      //       });
+      //       this.visibleFormSubmit();
+      //     },
+      //     onCancel() {}
+      //   });
+      // } else {
+      //   Modal.warning({
+      //     title: `Camera '${camera.name}' chưa lấy được. ${
+      //       camera.description ? camera.description : ""
+      //     }`
+      //     // content: 'some messages...some messages...',
+      //   });
+      // }
     } else if (this.state.isMobile || this.state.showPopupLiveCam) {
       this.showLiveCamOnMobile(camera.vmsCamId, camera.clusterDataID);
     } else {
@@ -1416,21 +1419,29 @@ export default class GeoChartCamera extends Widget {
             icon: listIcons[index],
             idCamera: camera.id,
             nameCamera: camera.name,
-            addressCamera: camera.address
+            addressCamera: camera.address,
+            descriptionCamera: camera.description
           }).addTo(listMarkerGroups[index]);
 
           //set action for marker
           objectMarker.bindPopup(
             function(camera) {
-              // console.log(camera);
-              return (
-                '<div style="font-size: 18px; font-weight: bold;">' +
-                camera.options.nameCamera +
-                "</div>" +
-                "<p>" +
-                camera.options.addressCamera +
-                "</p"
-              );
+              if (!camera.options.descriptionCamera) {
+                return (
+                  '<div style="font-size: 18px; font-weight: bold;">' +
+                  camera.options.nameCamera +
+                  "</div>"
+                );
+              } else {
+                return (
+                  '<div style="font-size: 18px; font-weight: bold;">' +
+                  camera.options.nameCamera +
+                  "</div>" +
+                  "<textarea style='width: 100%; height: 50px; border: none'>" +
+                  camera.options.descriptionCamera +
+                  "</textarea>"
+                );
+              }
             },
             {
               maxWidth: 1000,
@@ -1482,7 +1493,7 @@ export default class GeoChartCamera extends Widget {
             }, 500);
           });
           objectMarker.on("mouseout", function(e) {
-            this.closePopup();
+            // this.closePopup();
           });
         } else {
           // console.log(camera);

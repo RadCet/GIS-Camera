@@ -25,6 +25,7 @@ class CameraMonitoring extends Widget {
       titles: { en: "Auto", vi: "Tự động" },
       value: { scale: 0 }
     };
+    this.default_monitoring_playing_mode = "manual"; //"manual|auto"
     this.state = {
       mode: 2,
       cameraData: [],
@@ -45,7 +46,7 @@ class CameraMonitoring extends Widget {
       liveCameraDatas: [],
       currentLayer: undefined,
       treeData: [],
-      isPlaying: false,
+      isPlaying: this.default_monitoring_playing_mode === "auto",
       updateNow: true,
       isLoadedData: false,
       resolution_mode: this.default_resolution_mode,
@@ -104,6 +105,9 @@ class CameraMonitoring extends Widget {
     };
     this.mobile_scale = 50;
     this.encryptHelper = new EncryptHelper(defaultPersistentHandler);
+    this.monitoring_options = {
+      playing_mode: this.default_monitoring_playing_mode
+    };
   }
 
   componentWillMount() {
@@ -147,15 +151,16 @@ class CameraMonitoring extends Widget {
         camera_undone_support,
         language,
         resolution_options,
-        resolution_options_auto_mode_order_switch
+        resolution_options_auto_mode_order_switch,
+        persistentProfile
       } = this.apiConfig;
       this.mobile_scale = mobile_scale ? mobile_scale : this.mobile_scale;
       this.camera_undone_support =
         camera_undone_support == null ? true : camera_undone_support;
       this.monitorsFieldSearch =
         monitorsFieldSearch == null ? ["name"] : monitorsFieldSearch;
-      this.widget_version = `15.6`;
-      this.widget_time_update = "2020-03-30T21:55:00.000+07:00";
+      this.widget_version = `15.7`;
+      this.widget_time_update = "2020-03-31T15:55:00.000+07:00";
       this.widget_update_content = "";
       this.socialization_support =
         socialization_support == null ? false : socialization_support;
@@ -192,9 +197,19 @@ class CameraMonitoring extends Widget {
             resolution_options_auto_mode_order_switch[key];
         }
       }
+      let save_monitoring_options = this.encryptHelper.loadFromPersistence(
+        "monitoring_options"
+      );
+      if (save_monitoring_options) {
+        for (let key in save_monitoring_options) {
+          this.monitoring_options[key] = save_monitoring_options[key];
+        }
+      }
+      let isPlaying = this.monitoring_options.playing_mode === "auto";
 
       this.setState({
-        resolution_mode: save_resolution_mode
+        resolution_mode: save_resolution_mode,
+        isPlaying: isPlaying
       });
 
       this.cameraVMSController = new CameraVMSController(
@@ -666,8 +681,15 @@ class CameraMonitoring extends Widget {
 
   playMonitoring() {
     const { isPlaying } = this.state;
+    let newPlaying = !isPlaying;
+    let playing_mode = newPlaying === true ? "auto" : "manual";
+    this.monitoring_options.playing_mode = playing_mode;
+    this.encryptHelper.saveToPersistence(
+      "monitoring_options",
+      this.monitoring_options
+    );
     this.setState({
-      isPlaying: !isPlaying
+      isPlaying: newPlaying
     });
   }
 
@@ -709,8 +731,7 @@ class CameraMonitoring extends Widget {
     let mode = this.resolution_options.find(item => item.key === modeKey);
     this.encryptHelper.saveToPersistence("resolution_mode", mode);
     this.setState({
-      resolution_mode: mode,
-      status: status
+      resolution_mode: mode
     });
   }
 

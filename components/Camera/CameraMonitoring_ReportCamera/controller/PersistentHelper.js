@@ -39,11 +39,14 @@ export const cookiePersistentHandler = {
         return Cookies.get(key);
     },
     set : function(key, value, time = null) {
-        let option = time == null ? {} : {expires: time};
+        let option = { secure: true }
+        if (time != null) {
+            option.expires = time;
+        }
         return Cookies.set(key, value, option);
     },
     clear: function(key = null) {
-        if (key == null) {
+        if (key != null) {
             Cookies.remove(key);
         } else {
             Object.keys(Cookies.get()).forEach(function(cookieName) {
@@ -52,6 +55,18 @@ export const cookiePersistentHandler = {
         }
     }
 };
+
+export function getPersistentHandler(persistentProfile = null) {
+    let persistentHandler = localStoragePersistentHandler;
+    if (persistentProfile === "cookie") {
+        persistentHandler = cookiePersistentHandler;
+    } else if (persistentProfile === "localstorage") {
+        persistentHandler = localStoragePersistentHandler;
+    } else if (persistentProfile === "default") {
+        persistentHandler = defaultPersistentHandler;
+    }
+    return persistentHandler;
+}
 
 // exports.defaultPersistentHandler = defaultPersistentHandler;
 // exports.localStoragePersistentHandler = localStoragePersistentHandler;
