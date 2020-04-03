@@ -118,6 +118,7 @@ export default class GeoChartCamera extends Widget {
       // report camera
       permissionReport: null,
       showFormSubmit: false,
+      idVMSForCurrentCamera: "",
       idCurrentCameraModal: "",
       isCamdie: false,
       defineConditionCamera: [],
@@ -309,8 +310,8 @@ export default class GeoChartCamera extends Widget {
         resolution_options_auto_mode_order_switch
       } = this.apiConfig;
       this.mobile_scale = mobile_scale ? mobile_scale : this.mobile_scale;
-      this.widget_version = `15.7`; // widget_version == null ? "1.0" : widget_version;
-      this.widget_time_update = "2020-03-31T09:55:00.000+07:00";
+      this.widget_version = `15.9`; // widget_version == null ? "1.0" : widget_version;
+      this.widget_time_update = "2020-04-03T17:00:00.000+07:00";
       this.widget_update_content = ""; //`isMobile:${isMobileBrowser()}::isMobileFunction:::${isMobileBrowserFunction()}::::::${navigator.userAgent}`;
       this.va_support = va_support == null ? true : va_support;
       this.showSocializationInNewTab =
@@ -451,6 +452,7 @@ export default class GeoChartCamera extends Widget {
       zoomControl: false
     }).setView([17.756692, 107.170046], 6);
     esri.basemapLayer("Streets").addTo(map);
+
     L.control
       .zoom({
         position: "bottomright"
@@ -943,7 +945,8 @@ export default class GeoChartCamera extends Widget {
       this.addMarkerToMap();
     }
 
-   
+    // this.addMarkerToMap();
+
     if (this.state.permissionReport == null && this.cameraVMSController) {
       if (
         this.cameraVMSController
@@ -971,18 +974,19 @@ export default class GeoChartCamera extends Widget {
     ) {
       this.cameraVMSController.getDefineError(2).then(result => {
         this.setState({
-          defineConditionCamera: result
+          defineConditionCamera: result[0].data
         });
       });
       this.cameraVMSController.getDefineError(1).then(result => {
         this.setState({
-          defineConditionNotGoodCamera: result
+          defineConditionNotGoodCamera: result[0].data
         });
       });
     }
   }
 
   componentWillUnmount() {
+    this.removeAllMarker();
     this.cameraVAController.stop();
     this.cameraVMSController.stop();
     clearInterval(this.timeElapseInterval);
@@ -1044,10 +1048,12 @@ export default class GeoChartCamera extends Widget {
 
   handleClickCamera(camera) {
     if (camera.level === 0 || camera.glevel === 7) {
+      message.loading("Đang lấy dữ liệu camera..", 10000);
       this.cameraVMSController
         .getInformationConditionCamera(camera.clusterDataID, camera.vmsCamId)
         .then(result => {
           if (result) {
+            message.destroy();
             let content = "";
             if (result.PhysicalStateNote && result.PhysicalStateNote != "") {
               content = result.PhysicalStateNote;
@@ -1062,6 +1068,7 @@ export default class GeoChartCamera extends Widget {
                 cancelText: "Thoát",
                 onOk: () => {
                   this.setState({
+                    idVMSForCurrentCamera: camera.clusterDataID,
                     idCurrentCameraModal: camera.vmsCamId,
                     isCamdie: true
                   });
@@ -1260,6 +1267,7 @@ export default class GeoChartCamera extends Widget {
     }
 
     this.setState({
+      idVMSForCurrentCamera: liveCameraData.clusterDataID,
       idCurrentCameraModal: vmsCamId,
       isCamdie: false
     });
@@ -1549,7 +1557,7 @@ export default class GeoChartCamera extends Widget {
     });
   }
 
-  handleLiveCameraClick(videoEventSrc, title, idCamera) {
+  handleLiveCameraClick(videoEventSrc, title, idVMS, idCamera) {
     if (this.videoEventSrc != videoEventSrc) {
       console.log(`handleLiveCameraClick:${videoEventSrc}`);
       this.setState({
@@ -1561,6 +1569,7 @@ export default class GeoChartCamera extends Widget {
       setTimeout(() => this.setState({ videoEventSrc: videoEventSrc }), 100);
     }
     this.setState({
+      idVMSForCurrentCamera: idVMS,
       idCurrentCameraModal: idCamera,
       isCamdie: false
     });
@@ -1933,6 +1942,7 @@ export default class GeoChartCamera extends Widget {
       overview_view_mode,
       permissionReport,
       showFormSubmit,
+      idVMSForCurrentCamera,
       idCurrentCameraModal,
       isCamdie,
       defineConditionCamera,
@@ -2276,8 +2286,8 @@ export default class GeoChartCamera extends Widget {
         <Modal
           title={videoEventTitle}
           width={
-            ((height + 60) * 1280) / 720 < width
-              ? ((height + 60) * 1280) / 720
+            ((height + 30) * 1280) / 720 < width
+              ? ((height + 30) * 1280) / 720
               : width
           }
           visible={videoEventVisible}
@@ -2285,7 +2295,7 @@ export default class GeoChartCamera extends Widget {
           destroyOnClose={true}
           style={{ top: "0px" }}
           zIndex={1500}
-          bodyStyle={{ padding: "5px" }}
+          bodyStyle={{ padding: "0px" }}
           onCancel={this.closeVideoPopup}
         >
           <Icon
@@ -2297,8 +2307,8 @@ export default class GeoChartCamera extends Widget {
                     color: "#000000",
                     fontSize: "24px",
                     float: "right",
-                    marginRight: "20px",
-                    marginLeft: "20px"
+                    marginTop: "-25px",
+                    marginRight: "15px"
                   }
                 : { display: "none" }
             }
@@ -2341,7 +2351,7 @@ export default class GeoChartCamera extends Widget {
           zIndex={1501}
           showSubmitForm={showFormSubmit}
           closeSubmitForm={this.invisibleFormSubmit}
-          vmsID={currentClusterDataID}
+          vmsID={idVMSForCurrentCamera}
           idCamera={idCurrentCameraModal}
           isCamdie={isCamdie}
           defineConditionCamera={defineConditionCamera}

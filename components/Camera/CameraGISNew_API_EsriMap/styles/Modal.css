@@ -8,16 +8,17 @@
 
 .ant-modal-title {
   font-weight: bold;
-  font-size: 25px;
+  font-size: 20px;
+  color: #000;
   margin-left: 10px;
-  max-width: calc(100% - 60px);
+  /* max-width: calc(100% - 60px); */
 }
 
 .ant-modal-header {
-  position: absolute;
-  padding: 3px 24px;
+  /* position: absolute; */
+  padding: 0px 24px;
   text-overflow: ellipsis;
-  max-width: calc(100% - 60px);
+  /* max-width: calc(100% - 60px); */
   overflow: hidden;
   white-space: nowrap;
 }
@@ -31,4 +32,5 @@
   width: 36px;
   height: 30px;
   line-height: 32px;
+  margin-top: -3px;
 }

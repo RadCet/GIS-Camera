@@ -191,8 +191,7 @@ class FormSubmitStatusCamera1 extends React.Component {
             paramData
           )
           .then(result => {
-            // console.log(result);
-            if (result) {
+            if (result.code == 200) {
               this.showSuccessMessage();
               this.setState({
                 loading: false

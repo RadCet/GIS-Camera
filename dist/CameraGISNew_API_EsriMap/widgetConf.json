@@ -17,15 +17,34 @@
           "defaultSearch": "",
           "zoomMin": 2,
           "zoomMax": 19,
-          "zoomScaleValues": [0.0018, 0.002, 0.004, 0.008, 0.016, 0.032, 0.064, 0.112, 0.224, 0.9, 2.0, 3.584, 5,	9.8,	20,	30,	60,	120, 150],
-          "zoomScaleWidthValues":[],
-          "zoomScaleHeightValues":[],
-          "autoZoomForSelectedGroup" : true
+          "zoomScaleValues": [
+            0.0018,
+            0.002,
+            0.004,
+            0.008,
+            0.016,
+            0.032,
+            0.064,
+            0.112,
+            0.224,
+            0.9,
+            2.0,
+            3.584,
+            5,
+            9.8,
+            20,
+            30,
+            60,
+            120,
+            150
+          ],
+          "zoomScaleWidthValues": [],
+          "zoomScaleHeightValues": [],
+          "autoZoomForSelectedGroup": true
         }
       },
-      "eventConfig": {
-      },
-      "apiConfig":{
+      "eventConfig": {},
+      "apiConfig": {
         "vms_protocol": "https",
         "vms_domain": "vmsqn.hcdt.vn",
         "vms_port": 9444,
@@ -109,9 +128,9 @@
           "reception": 14,
           "administration": 15
         },
-        "vms_support_get_tree_data": false,
+        "vms_support_get_tree_data": true,
         "vms_multi_cluster_config": {
-          "isSupported": false,
+          "isSupported": true,
           "isConnectDirectToCluster": false,
           "vms_login_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/host/login?mode=permissions",
           "vms_update_token_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/host/login?mode=permissions",
@@ -123,6 +142,10 @@
           "vms_get_live_camera_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/monitors/{id}?type=mjpeg&scale=100&width=1920&height=1080",
           "vms_get_targets_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/vmsmanager/infor",
           "vms_get_tree_data_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/vmsmanager/tree?modeTree=full&mode=compact",
+          "vms_get_information_report_camera_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/monitors/{idCamera}?mode=report",
+          "vms_submit_form_report_camera_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/monitors/{idCamera}",
+          "vms_get_history_report_camera_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/logs/camerareport/{idCamera}",
+          "vms_get_data_report_camera_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/monitors?mode=report",
           "ignoreDefaultTargetData": false,
           "combineDefaultGroupTarget": true,
           "combineRootByTag": true
@@ -136,7 +159,7 @@
         "showVMSCountInListInBottom": false,
         "showVMSCountIgnoreDefault": false,
         "socialization_support": true,
-        "monitorsFieldSearch" : [
+        "monitorsFieldSearch": [
           "name",
           "displayName",
           "group",
@@ -144,7 +167,7 @@
           "description",
           "svalues"
         ],
-        "showElapTime" : false,
+        "showElapTime": false,
         "showReload": true,
         "hiddenExportInMobile": true,
         "widget_version": 10,
@@ -155,20 +178,123 @@
         "maxTag": 2,
         "language": "vi",
         "resolution_options": [
-          {"key": "auto", "titles": {"en":"Auto", "vi":"Tự động"}, "value":{"scale":{"default": 100, "min": 70, "max": 100, "mobile": 80}}},
-          {"key": "verylow", "titles": {"en":"Very Low", "vi":"Rất Thấp"}, "value":{"scale":{"default": 30, "min": 20, "max": 50, "mobile": 30}}},
-          {"key": "low", "titles": {"en":"Low", "vi":"Thấp"}, "value":{"scale":{"default": 50, "min": 30, "max": 70, "mobile": 50}}},
-          {"key": "medium", "titles": {"en":"Medium", "vi":"Trung bình"}, "value":{"scale":{"default": 70, "min": 50, "max": 80, "mobile": 70}}},
-          {"key": "heigh", "titles": {"en":"Heigh", "vi":"Cao"}, "value":{"scale":{"default": 100, "min": 70, "max": 100, "mobile": 80}}}
+          {
+            "key": "auto",
+            "titles": {
+              "en": "Auto",
+              "vi": "Tự động"
+            },
+            "value": {
+              "scale": {
+                "default": 100,
+                "min": 70,
+                "max": 100,
+                "mobile": 80
+              }
+            }
+          },
+          {
+            "key": "verylow",
+            "titles": {
+              "en": "Very Low",
+              "vi": "Rất Thấp"
+            },
+            "value": {
+              "scale": {
+                "default": 30,
+                "min": 20,
+                "max": 50,
+                "mobile": 30
+              }
+            }
+          },
+          {
+            "key": "low",
+            "titles": {
+              "en": "Low",
+              "vi": "Thấp"
+            },
+            "value": {
+              "scale": {
+                "default": 50,
+                "min": 30,
+                "max": 70,
+                "mobile": 50
+              }
+            }
+          },
+          {
+            "key": "medium",
+            "titles": {
+              "en": "Medium",
+              "vi": "Trung bình"
+            },
+            "value": {
+              "scale": {
+                "default": 70,
+                "min": 50,
+                "max": 80,
+                "mobile": 70
+              }
+            }
+          },
+          {
+            "key": "heigh",
+            "titles": {
+              "en": "Heigh",
+              "vi": "Cao"
+            },
+            "value": {
+              "scale": {
+                "default": 100,
+                "min": 70,
+                "max": 100,
+                "mobile": 80
+              }
+            }
+          }
         ],
         "overview_view_options": [
-          {"key": "default", "titles": {"en":"Default", "vi":"Mặc định"}, "value":{}},
-          {"key": "status", "titles": {"en":"Status", "vi":"Trạng thái"}, "value":{}},
-          {"key": "group", "titles": {"en":"Group", "vi":"Nhóm"}, "value":{}}
+          {
+            "key": "default",
+            "titles": {
+              "en": "Default",
+              "vi": "Mặc định"
+            },
+            "value": {}
+          },
+          {
+            "key": "status",
+            "titles": {
+              "en": "Status",
+              "vi": "Trạng thái"
+            },
+            "value": {}
+          },
+          {
+            "key": "group",
+            "titles": {
+              "en": "Group",
+              "vi": "Nhóm"
+            },
+            "value": {}
+          }
         ],
         "resolution_options_auto_mode_order_switch": {
-          "default": ["heigh", "medium", "low", "verylow", "snapshot"],
-          "mobile": ["medium", "low", "height", "verylow", "snapshot"]
+          "default": [
+            "heigh",
+            "medium",
+            "low",
+            "verylow",
+            "snapshot"
+          ],
+          "mobile": [
+            "medium",
+            "low",
+            "height",
+            "verylow",
+            "snapshot"
+          ]
         }
       },
       "viewConfig": {

@@ -461,9 +461,11 @@ export default class CameraExportHelper {
           wsOverViewConditionCamera["B" + indexRowCategory].v =
             "         " + conditionNotGood.Content_vi;
           let countCamera = cameraReportData.filter(camera => {
-            return camera.PhysicalStateNoteCode.includes(
-              conditionNotGood.Code.toString()
-            );
+            if (camera.PhysicalStateNoteCode) {
+              return camera.PhysicalStateNoteCode.includes(
+                conditionNotGood.Code.toString()
+              );
+            }
           }).length;
           wsOverViewConditionCamera["C" + indexRowCategory].v = countCamera;
           indexSTTCategory++;

@@ -11,6 +11,7 @@ class CameraComponent extends Component {
     this.state = {
       liveCamSrc: "",
       liveCamName: "",
+      idVMS: "",
       idLiveCamera: "",
       fetchError: false
     };
@@ -32,6 +33,7 @@ class CameraComponent extends Component {
 
     this.srcSet = null;
     this.titleSet = null;
+    this.idVMSSet = null;
     this.idCameraSet = null;
     this.srcLoaded = null;
     this.timeStartShowLoading = -1;
@@ -171,10 +173,12 @@ class CameraComponent extends Component {
     this.srcSet = liveCamSrc;
     if (updateNow || srcLoaded == null) {
       this.titleSet = title;
+      this.idVMSSet = camera.clusterDataID;
       this.idCameraSet = idCamera;
       this.setState({
         liveCamSrc: loadingIcon,
         liveCamName: this.titleSet,
+        idVMS: this.idVMSSet,
         idLiveCamera: this.idCameraSet
       });
     }
@@ -229,7 +233,13 @@ class CameraComponent extends Component {
   }
 
   onLoad(e) {
-    const { titleSet, srcSet, timeStartShowLoading, idCameraSet } = this; //.state;
+    const {
+      titleSet,
+      srcSet,
+      timeStartShowLoading,
+      idCameraSet,
+      idVMSSet
+    } = this; //.state;
     let src = e.target.src;
     let isDoned = src != null && src !== loadingIcon && src !== disconnect;
     this.coutError = isDoned ? 0 : this.coutError;
@@ -239,7 +249,11 @@ class CameraComponent extends Component {
       ? timeStartShowLoading
       : new Date().getTime();
     this.srcLoaded = src;
-    this.setState({ liveCamName: titleSet, idLiveCamera: idCameraSet });
+    this.setState({
+      liveCamName: titleSet,
+      idVMS: idVMSSet,
+      idLiveCamera: idCameraSet
+    });
     console.log(
       `onLoad:${isDoned}:${titleSet}:${timeStartShowLoading}:${
         srcSet == null ? null : srcSet.length
@@ -270,6 +284,7 @@ class CameraComponent extends Component {
     this.props.handleLiveCameraClick(
       srcCamera,
       this.state.liveCamName,
+      this.state.idVMS,
       this.state.idLiveCamera
     );
   }

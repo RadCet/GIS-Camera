@@ -55,6 +55,7 @@ class CameraMonitoring extends Widget {
       currentClusterDataID: null,
       permissionReport: null,
       showFormSubmit: false,
+      idVMSForCurrentCamera: "",
       idCurrentCameraModal: "",
       isCamdie: false,
       defineConditionCamera: [],
@@ -159,8 +160,8 @@ class CameraMonitoring extends Widget {
         camera_undone_support == null ? true : camera_undone_support;
       this.monitorsFieldSearch =
         monitorsFieldSearch == null ? ["name"] : monitorsFieldSearch;
-      this.widget_version = `15.7`;
-      this.widget_time_update = "2020-03-31T15:55:00.000+07:00";
+      this.widget_version = `15.8`;
+      this.widget_time_update = "2020-04-03T17:00:00.000+07:00";
       this.widget_update_content = "";
       this.socialization_support =
         socialization_support == null ? false : socialization_support;
@@ -626,7 +627,7 @@ class CameraMonitoring extends Widget {
     }
   }
 
-  handleLiveCameraClick(videoEventSrc, title, idCamera) {
+  handleLiveCameraClick(videoEventSrc, title, idVMS, idCamera) {
     if (this.videoEventSrc !== videoEventSrc) {
       this.setState({
         videoEventSrc: loadingIconLarge,
@@ -637,6 +638,7 @@ class CameraMonitoring extends Widget {
       setTimeout(() => this.setState({ videoEventSrc: videoEventSrc }), 1000);
     }
     this.setState({
+      idVMSForCurrentCamera: idVMS,
       idCurrentCameraModal: idCamera,
       isCamdie: false
     });
@@ -817,6 +819,7 @@ class CameraMonitoring extends Widget {
       currentClusterDataID,
       permissionReport,
       showFormSubmit,
+      idVMSForCurrentCamera,
       idCurrentCameraModal,
       isCamdie,
       defineConditionCamera,
@@ -947,8 +950,8 @@ class CameraMonitoring extends Widget {
         <Modal
           title={videoEventTitle}
           width={
-            ((height + 60) * 1280) / 720 < width
-              ? ((height + 60) * 1280) / 720
+            ((height + 30) * 1280) / 720 < width
+              ? ((height + 30) * 1280) / 720
               : width
           }
           visible={videoEventVisible}
@@ -956,7 +959,7 @@ class CameraMonitoring extends Widget {
           destroyOnClose={true}
           style={{ top: "0px" }}
           zIndex={1500}
-          bodyStyle={{ padding: "5px" }}
+          bodyStyle={{ padding: "0px" }}
           onCancel={this.closeVideoPopup}
         >
           <Icon
@@ -968,10 +971,12 @@ class CameraMonitoring extends Widget {
                     color: "#000000",
                     fontSize: "24px",
                     float: "right",
-                    marginRight: "20px",
-                    marginLeft: "20px"
+                    marginTop: "-25px",
+                    marginRight: "15px"
                   }
-                : { display: "none" }
+                : {
+                    display: "none"
+                  }
             }
             onClick={this.visibleFormSubmit}
           />
@@ -1008,7 +1013,7 @@ class CameraMonitoring extends Widget {
           zIndex={1501}
           showSubmitForm={showFormSubmit}
           closeSubmitForm={this.invisibleFormSubmit}
-          vmsID={currentClusterDataID}
+          vmsID={idVMSForCurrentCamera}
           idCamera={idCurrentCameraModal}
           isCamdie={isCamdie}
           defineConditionCamera={defineConditionCamera}
