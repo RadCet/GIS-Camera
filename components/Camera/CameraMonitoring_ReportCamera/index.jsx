@@ -160,8 +160,8 @@ class CameraMonitoring extends Widget {
         camera_undone_support == null ? true : camera_undone_support;
       this.monitorsFieldSearch =
         monitorsFieldSearch == null ? ["name"] : monitorsFieldSearch;
-      this.widget_version = `15.8`;
-      this.widget_time_update = "2020-04-03T17:00:00.000+07:00";
+      this.widget_version = `15.10`;
+      this.widget_time_update = "2020-04-04T09:00:00.000+07:00";
       this.widget_update_content = "";
       this.socialization_support =
         socialization_support == null ? false : socialization_support;
@@ -466,14 +466,26 @@ class CameraMonitoring extends Widget {
       this.cameraVMSController != null
     ) {
       this.cameraVMSController.getDefineError(2).then(result => {
-        this.setState({
-          defineConditionCamera: result
-        });
+        if (result[0].target) {
+          this.setState({
+            defineConditionCamera: result[0].data
+          });
+        } else {
+          this.setState({
+            defineConditionCamera: result
+          });
+        }
       });
       this.cameraVMSController.getDefineError(1).then(result => {
-        this.setState({
-          defineConditionNotGoodCamera: result
-        });
+        if (result[0].target) {
+          this.setState({
+            defineConditionNotGoodCamera: result[0].data
+          });
+        } else {
+          this.setState({
+            defineConditionNotGoodCamera: result
+          });
+        }
       });
     }
   }
@@ -969,9 +981,9 @@ class CameraMonitoring extends Widget {
               permissionReport
                 ? {
                     color: "#000000",
-                    fontSize: "24px",
+                    fontSize: "22px",
                     float: "right",
-                    marginTop: "-25px",
+                    marginTop: "-23px",
                     marginRight: "15px"
                   }
                 : {

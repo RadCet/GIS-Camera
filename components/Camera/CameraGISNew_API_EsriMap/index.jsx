@@ -310,8 +310,8 @@ export default class GeoChartCamera extends Widget {
         resolution_options_auto_mode_order_switch
       } = this.apiConfig;
       this.mobile_scale = mobile_scale ? mobile_scale : this.mobile_scale;
-      this.widget_version = `15.9`; // widget_version == null ? "1.0" : widget_version;
-      this.widget_time_update = "2020-04-03T17:00:00.000+07:00";
+      this.widget_version = `15.10`; // widget_version == null ? "1.0" : widget_version;
+      this.widget_time_update = "2020-04-04T09:00:00.000+07:00";
       this.widget_update_content = ""; //`isMobile:${isMobileBrowser()}::isMobileFunction:::${isMobileBrowserFunction()}::::::${navigator.userAgent}`;
       this.va_support = va_support == null ? true : va_support;
       this.showSocializationInNewTab =
@@ -973,14 +973,26 @@ export default class GeoChartCamera extends Widget {
       this.cameraVMSController != null
     ) {
       this.cameraVMSController.getDefineError(2).then(result => {
-        this.setState({
-          defineConditionCamera: result[0].data
-        });
+        if (result[0].target) {
+          this.setState({
+            defineConditionCamera: result[0].data
+          });
+        } else {
+          this.setState({
+            defineConditionCamera: result
+          });
+        }
       });
       this.cameraVMSController.getDefineError(1).then(result => {
-        this.setState({
-          defineConditionNotGoodCamera: result[0].data
-        });
+        if (result[0].target) {
+          this.setState({
+            defineConditionNotGoodCamera: result[0].data
+          });
+        } else {
+          this.setState({
+            defineConditionNotGoodCamera: result
+          });
+        }
       });
     }
   }
@@ -2305,9 +2317,9 @@ export default class GeoChartCamera extends Widget {
               permissionReport
                 ? {
                     color: "#000000",
-                    fontSize: "24px",
+                    fontSize: "22px",
                     float: "right",
-                    marginTop: "-25px",
+                    marginTop: "-23px",
                     marginRight: "15px"
                   }
                 : { display: "none" }
