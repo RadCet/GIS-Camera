@@ -295,7 +295,8 @@
             "verylow",
             "snapshot"
           ]
-        }
+        },
+        "persistentProfile": "localstorage"
       },
       "viewConfig": {
         "treeConfig": {

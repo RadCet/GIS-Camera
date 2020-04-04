@@ -43,7 +43,10 @@ import "./styles/Modal.css";
 import "./styles/ViewMap.css";
 
 import CameraStatusGroupCounting from "./CameraStatusGroupCounting";
-import { localStoragePersistentHandler as defaultPersistentHandler } from "./controller/PersistentHelper";
+import {
+  localStoragePersistentHandler as defaultPersistentHandler,
+  getPersistentHandler
+} from "./controller/PersistentHelper";
 import { EncryptHelper } from "./controller/Helper";
 
 const { TreeNode } = TreeSelect;
@@ -307,7 +310,8 @@ export default class GeoChartCamera extends Widget {
         language,
         resolution_options,
         overview_view_options,
-        resolution_options_auto_mode_order_switch
+        resolution_options_auto_mode_order_switch,
+        persistentProfile
       } = this.apiConfig;
       this.mobile_scale = mobile_scale ? mobile_scale : this.mobile_scale;
       this.widget_version = `15.10`; // widget_version == null ? "1.0" : widget_version;
@@ -339,6 +343,11 @@ export default class GeoChartCamera extends Widget {
       this.maxTag = isNaN(maxTag) ? this.maxTag : maxTag;
       this.va_event_view = this.apiConfig.va_event_view;
       this.va_event_type_map = this.apiConfig.va_event_type_map;
+
+      this.encryptHelper = new EncryptHelper(
+        getPersistentHandler(persistentProfile)
+      );
+
       this.language = language ? language : this.language;
       if (resolution_options) {
         resolution_options.forEach(option => {
@@ -400,7 +409,7 @@ export default class GeoChartCamera extends Widget {
         this.apiConfig,
         this.updateCameraDataHandler,
         this.newTokenUpdateHandler,
-        defaultPersistentHandler
+        getPersistentHandler(persistentProfile)
       );
       this.cameraVAController = new CameraVAController(
         this.apiConfig,
@@ -1060,6 +1069,25 @@ export default class GeoChartCamera extends Widget {
 
   handleClickCamera(camera) {
     if (camera.level === 0 || camera.glevel === 7) {
+      // let content = "AAAAASDSADAS";
+      // Modal.confirm({
+      //   title: `Camera '${camera.name}' không hoạt động`,
+      //   content: content != "" ? `Nguyên nhân: ${content}` : null,
+      //   okText: "Báo cáo",
+      //   cancelText: "Thoát",
+      //   onOk: () => {
+      //     this.setState({
+      //       idVMSForCurrentCamera: camera.clusterDataID,
+      //       idCurrentCameraModal: camera.vmsCamId,
+      //       isCamdie: true
+      //     });
+      //     this.visibleFormSubmit();
+      //   },
+      //   onCancel() {}
+      // });
+
+      // setTim
+
       message.loading("Đang lấy dữ liệu camera..", 10000);
       this.cameraVMSController
         .getInformationConditionCamera(camera.clusterDataID, camera.vmsCamId)

@@ -13,7 +13,10 @@ import CameraTreeHelper from "./controller/CameraTreeHelper";
 import { isMobileBrowser } from "./MobileCheck";
 import { TextHelper } from "./controller/TextHelper";
 import { isMobileBrowserFunction } from "./MobileCheck";
-import { localStoragePersistentHandler as defaultPersistentHandler } from "./controller/PersistentHelper";
+import {
+  localStoragePersistentHandler as defaultPersistentHandler,
+  getPersistentHandler
+} from "./controller/PersistentHelper";
 import { EncryptHelper } from "./controller/Helper";
 import FormSubmitStatusCamera from "./FormSubmitStatusCamera";
 
@@ -168,6 +171,10 @@ class CameraMonitoring extends Widget {
       this.numberListCameraDisplay =
         numberListCameraDisplay == null ? -1 : numberListCameraDisplay;
 
+      this.encryptHelper = new EncryptHelper(
+        getPersistentHandler(persistentProfile)
+      );
+
       this.language = language ? language : this.language;
       if (resolution_options) {
         resolution_options.forEach(option => {
@@ -217,7 +224,7 @@ class CameraMonitoring extends Widget {
         this.apiConfig,
         this.updateCameraDataHandler,
         this.newTokenUpdateHandler,
-        defaultPersistentHandler
+        getPersistentHandler(persistentProfile)
       );
       this.cameraVMSController.start();
       console.log(

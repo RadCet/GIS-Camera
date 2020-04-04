@@ -7,7 +7,7 @@
       "configs": {
         "refreshInterval": 60
       },
-      "apiConfig":{
+      "apiConfig": {
         "vms_protocol": "https",
         "vms_domain": "vmsqn.hcdt.vn",
         "vms_port": 9444,
@@ -56,7 +56,7 @@
         "vms_authentication_config": {
           "authentication_without_token": false
         },
-	"monitorsFieldSearch" : [
+        "monitorsFieldSearch": [
           "name",
           "displayName",
           "group",
@@ -68,19 +68,101 @@
         "widget_version": 10,
         "mobile_scale": 50,
         "camera_undone_support": true,
-
         "language": "vi",
         "resolution_options": [
-          {"key": "auto", "titles": {"en":"Auto", "vi":"Tự động"}, "value":{"scale":{"default": 100, "min": 70, "max": 100, "mobile": 80}}},
-          {"key": "verylow", "titles": {"en":"Very Low", "vi":"Rất Thấp"}, "value":{"scale":{"default": 30, "min": 20, "max": 50, "mobile": 30}}},
-          {"key": "low", "titles": {"en":"Low", "vi":"Thấp"}, "value":{"scale":{"default": 50, "min": 30, "max": 70, "mobile": 50}}},
-          {"key": "medium", "titles": {"en":"Medium", "vi":"Trung bình"}, "value":{"scale":{"default": 70, "min": 50, "max": 80, "mobile": 70}}},
-          {"key": "heigh", "titles": {"en":"Heigh", "vi":"Cao"}, "value":{"scale":{"default": 100, "min": 70, "max": 100, "mobile": 80}}}
+          {
+            "key": "auto",
+            "titles": {
+              "en": "Auto",
+              "vi": "Tự động"
+            },
+            "value": {
+              "scale": {
+                "default": 100,
+                "min": 70,
+                "max": 100,
+                "mobile": 80
+              }
+            }
+          },
+          {
+            "key": "verylow",
+            "titles": {
+              "en": "Very Low",
+              "vi": "Rất Thấp"
+            },
+            "value": {
+              "scale": {
+                "default": 30,
+                "min": 20,
+                "max": 50,
+                "mobile": 30
+              }
+            }
+          },
+          {
+            "key": "low",
+            "titles": {
+              "en": "Low",
+              "vi": "Thấp"
+            },
+            "value": {
+              "scale": {
+                "default": 50,
+                "min": 30,
+                "max": 70,
+                "mobile": 50
+              }
+            }
+          },
+          {
+            "key": "medium",
+            "titles": {
+              "en": "Medium",
+              "vi": "Trung bình"
+            },
+            "value": {
+              "scale": {
+                "default": 70,
+                "min": 50,
+                "max": 80,
+                "mobile": 70
+              }
+            }
+          },
+          {
+            "key": "heigh",
+            "titles": {
+              "en": "Heigh",
+              "vi": "Cao"
+            },
+            "value": {
+              "scale": {
+                "default": 100,
+                "min": 70,
+                "max": 100,
+                "mobile": 80
+              }
+            }
+          }
         ],
         "resolution_options_auto_mode_order_switch": {
-          "default": ["heigh", "medium", "low", "verylow", "snapshot"],
-          "mobile": ["medium", "low", "height", "verylow", "snapshot"]
-        }
+          "default": [
+            "heigh",
+            "medium",
+            "low",
+            "verylow",
+            "snapshot"
+          ],
+          "mobile": [
+            "medium",
+            "low",
+            "height",
+            "verylow",
+            "snapshot"
+          ]
+        },
+        "persistentProfile": "localstorage"
       },
       "viewConfig": {
         "treeConfig": {
