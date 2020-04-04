@@ -35,9 +35,9 @@
         "cms_profile_api_template": "{cms_protocol}://{cms_domain}:{cms_port}/cms/api/Profile/AddIfNotExist",
         "cms_profile_id": null,
         "vms_token_api": null,
-        "vms_support_get_tree_data": true,
+        "vms_support_get_tree_data": false,
         "vms_multi_cluster_config": {
-          "isSupported": true,
+          "isSupported": false,
           "isConnectDirectToCluster": false,
           "vms_login_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/host/login?mode=permissions",
           "vms_update_token_api_template": "{vms_protocol}://{vms_domain}:{vms_port}/vms/api/host/login?mode=permissions",
